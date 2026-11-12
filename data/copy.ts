@@ -48,8 +48,50 @@ export const COPY = {
   },
 
   student: {
-    placeholderHome: "Ordering opens in the next phase.",
     logout: "Log out",
+    staffBadge: "Staff",
+    walletLabel: "Wallet balance",
+    tabs: {
+      home: "Home",
+      discover: "Discover",
+      orders: "Orders",
+      updates: "Updates",
+      account: "Account",
+    },
+    /** Header title for each tab. Home shows the greeting instead. */
+    titles: {
+      discover: "Discover",
+      orders: "Orders",
+      updates: "Updates",
+      account: "Account",
+    },
+    accountSections: {
+      wallet: "Wallet",
+      profile: "My Profile",
+      preferences: "Preferences",
+      notifications: "Notifications",
+      history: "Order History",
+      refunds: "Refund Status",
+      terms: "Terms and Conditions",
+      feedback: "Feedback",
+      support: "Support",
+    },
+    scan: {
+      label: "Scan a bag",
+      title: "Scan a bag",
+      body: "Runner buddies will scan the bag slip here. Scanning opens in a later release.",
+      close: "Close",
+    },
+    /** One line for each page that is not built yet. */
+    stubs: {
+      home: "Ordering opens in the next phase.",
+      discover: "Help, FAQ and feedback will live here.",
+      orders: "Your orders will show up here.",
+      updates: "Nothing yet. Your order updates show up here.",
+      account: "Wallet, profile and history will live here.",
+      section: "This part of Account opens in a later release.",
+      goHome: "Go to Home",
+    },
   },
 
   cafe: {

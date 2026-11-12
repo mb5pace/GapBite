@@ -57,7 +57,7 @@ export function Input({
         {trailing ? <div className="absolute inset-y-0 right-1.5 flex items-center">{trailing}</div> : null}
       </div>
       {hint && !error ? (
-        <p id={hintId} className="px-2 text-secondary text-taupe">
+        <p id={hintId} className="px-2 text-secondary text-mocha">
           {hint}
         </p>
       ) : null}

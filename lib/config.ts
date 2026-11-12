@@ -156,6 +156,8 @@ export const POLL_MS = {
 export const UI_TICK_MS = 1000;
 /** "Copied" stays on a copy button this long. */
 export const COPIED_MS = 1500;
+/** Dragging a bottom sheet down by this many pixels closes it. */
+export const SHEET_DISMISS_DRAG_PX = 80;
 /** Greeting changes at these IST hours: before noon morning, then afternoon, then evening. */
 export const GREETING_HOURS = { afternoonFrom: 12, eveningFrom: 17 } as const;
 

@@ -15,7 +15,8 @@ function isPublic(path: string): boolean {
 
 function portalFor(path: string): Portal {
   if (path === "/cafe" || path.startsWith("/cafe/") || path.startsWith("/api/cafe/")) return "cafe";
-  if (path === "/admin" || path.startsWith("/admin/") || path.startsWith("/api/admin/")) return "admin";
+  // /kit is the UI component gallery: admin only.
+  if (path === "/admin" || path.startsWith("/admin/") || path.startsWith("/api/admin/") || path === "/kit") return "admin";
   return "student";
 }
 

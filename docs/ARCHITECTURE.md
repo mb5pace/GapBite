@@ -109,8 +109,10 @@ lib/
 data/
   menu.ts  locations.ts  breaks.ts  copy.ts (shared UI strings)
 components/
-  ui/             Button, PillButton, IconButton, Chip, Card, ArchCard, ItemTile, Stepper, Sheet, Toggle, Input, CodeBoxes, Banner, Badge, EmptyState, Countdown, Money
-  student/        Header, BottomBar, WalletChip, SourceTile, CartBar, OrderStrip
+  ui/             PillButton (+ PillLink), IconButton, Chip, Card, ArchCard, ItemTile, SourceGlyph, Stepper, Sheet, Input, CodeBoxes, Banner, Badge, EmptyState, Countdown, Money, LogoutButton
+                  (Toggle waits for Phase 9, where Notifications uses it)
+  kit/            KitGallery, the admin-only /kit page
+  student/        Header, BottomBar, WalletChip, SessionChip (Phase 2); SourceTile, CartBar, OrderStrip (later)
   runner/         ScanButton, RunnerSheet (scan, preview, accept, handover)
   cafe/           QueueColumn, OrderCard, BagSlip, AlertCard
   admin/          CodeTable, ...

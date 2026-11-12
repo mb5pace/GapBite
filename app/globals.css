@@ -56,6 +56,27 @@
   --text-caption: 0.75rem;
   --text-caption--line-height: 1.5;
 
+  /* Motion is short and functional: sheets slide up in 200 ms, the scrim fades in in 150 ms. */
+  --animate-*: initial;
+  --animate-sheet-in: sheet-in 200ms ease-out;
+  --animate-scrim-in: scrim-in 150ms ease-out;
+  @keyframes sheet-in {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+  @keyframes scrim-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
   /* Letter-spacing is only for access codes and the 4-digit codes. */
   --tracking-*: initial;
   --tracking-normal: 0em;

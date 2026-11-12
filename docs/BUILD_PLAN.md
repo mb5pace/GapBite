@@ -23,9 +23,9 @@ Build in this order. One phase per session or per sitting. At the end of each ph
 - [x] Team answers applied: 30 wrong tries per IP, masked gate input with eye button, first names with spaces, apostrophes and hyphens, Phosphor icon in a sand circle instead of illustrations
 
 ## Phase 2 — UI kit and student shell
-- [ ] Components from bible §4: buttons, icon button, chips, card, arch card, item tile, sheet, stepper, code boxes, banner, money, empty state
-- [ ] Student layout: header (greeting, Scan, wallet chip), floating bottom bar
-- [ ] A `/kit` page (admin-only) showing every component for visual review
+- [x] Components from bible §4: buttons, icon button, chips, card, arch card, item tile, sheet, stepper, code boxes, banner, money, empty state
+- [x] Student layout: header (greeting, Scan, wallet chip), floating bottom bar
+- [x] A `/kit` page (admin-only) showing every component for visual review
 
 ## Phase 3 — Browse and cart
 - [ ] Home (sources, search, popular, next break strip)
@@ -80,6 +80,18 @@ Waiting on the team:
 - Real walk times (estimates in `data/locations.ts`).
 - Real vending snack names loaded in the UC machine.
 - Open Peeps illustration files, to be added later into `public/illustrations/` (check the licence page first). Not blocking: until then the gate and empty states use a Phosphor icon in a sand circle.
+
+Raised in Phase 2 (simplest behaviour chosen, change if wrong):
+- The five tabs and the wallet chip point at pages that arrive later, so Discover, Orders, Updates, Account and `/account/[section]` are stub pages with an empty state. Log out moved from the Home stub to the Account stub, where it will stay.
+- The wallet chip reads the balance from Redis, so it shows ₹0 until the wallet exists (Phase 4). An amber dot means under ₹50.
+- The Scan button opens a placeholder sheet until the runner sheet (Phase 7).
+- The unread dot on Updates and the active-order dot on Orders exist and are shown in `/kit`, but stay off in the live shell until Phase 5 has data for them.
+- `Toggle` is listed in ARCHITECTURE.md but not in the Phase 2 list or bible §4, so it waits for Phase 9 (Notifications).
+- Tall-capsule chip: the bible only says the capsule "can" be used for slots. The selected capsule is filled maroon.
+- `/kit` lives at `/kit` (mapped to the admin portal in `proxy.ts`, and checked again on the page). It is not linked from the Admin header.
+- The header title comes from the path (tab names and Account sections). Later pages that need their own title or a back button (source menu, cart, checkout, order detail) extend `titleFor` in `components/student/Header.tsx`.
+- `taupe` fails WCAG AA as text (4.3:1 on cream). Hints and secondary text now use `mocha`. Placeholders (taupe, as the bible says) are about 3.6:1 on sand. Say if you want placeholders darker.
+- Item tiles try `public/food/<item-id>.jpg` and fall back to initials, so until photos exist the browser shows harmless 404s for them. If that noise matters, Phase 3 can list the photos on the server instead.
 
 ## Decisions (answered, or accepted by the team as written)
 

@@ -66,7 +66,7 @@ export function CodeTable({
                 </td>
                 <td className="py-3 pr-4 text-body text-espresso">
                   {row.usedBy ?? (row.status === "active" || (row.status === "burned" && row.usedAt) ? (
-                    <span className="text-taupe">Not identified yet</span>
+                    <span className="text-mocha">Not identified yet</span>
                   ) : null)}
                 </td>
                 <td className="py-3 pr-4 text-body tabular-nums text-espresso">

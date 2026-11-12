@@ -26,7 +26,9 @@ Status colours, muted to sit in the same family (use for text, borders and small
 | `amber` | `#B7791F` | Due now, unclaimed, low balance |
 | `brick` | `#A3261C` | Failed late, rejected, money out, errors |
 
-Text on `cream`/`parchment` is `espresso` or `maroon`. Text on `maroon` is `cream`. Check WCAG AA contrast for any new pairing; `taupe` is only for text 14 px and larger.
+Text on `cream`/`parchment` is `espresso` or `maroon`. Text on `maroon` is `cream`. Check WCAG AA contrast for any new pairing.
+
+`taupe` does not reach AA as text (4.3:1 on `cream`, 3.9:1 on `parchment`, 3.6:1 on `sand`). Use it only for placeholder text, disabled controls (which WCAG exempts), borders and handles. Hints, captions and any other secondary or tertiary text use `mocha` (7:1 or better). Checked ratios: espresso on cream 16.2, maroon on cream 13.1, maroon on sun 9.0, mocha on cream 8.2, brick on cream 7.1, olive on cream 5.6; amber on parchment 3.1 is fine for icons and dots only, never for text.
 
 ## 2. Typography
 
@@ -51,7 +53,7 @@ Text on `cream`/`parchment` is `espresso` or `maroon`. Text on `maroon` is `crea
 2. **Secondary pill:** `sand` fill, `espresso` text; or outline variant with the 1.5 px border.
 3. **Icon button:** 44 px circle, `maroon` fill + `cream` icon (primary, e.g. Scan, notifications) or `sand` fill + `espresso` icon.
 4. **Bottom bar:** floating 12 px above the bottom safe area, 20 px side margins, `parchment`, fully rounded, five 48 px circles. Active = `maroon` circle, `cream` Bold icon. Inactive = `sand` circle, `espresso` Regular icon. Labels hidden; use `aria-label`.
-5. **Chips:** pill, `sand` default, `blush` + `maroon` text when selected. Day/slot chips can use the reference's tall capsule style for the selected slot.
+5. **Chips:** pill, `sand` default, `blush` + `maroon` text when selected. Day/slot chips use the tall capsule (min 64 px high); the selected capsule is filled `maroon` with `cream` text so it stands out in a row, and a slot that is too late is disabled.
 6. **Stepper (order tracker):** vertical, a thick `maroon` rail with round icon nodes like the reference delivery screen; done = filled `maroon`, current = filled with a `sun` ring, upcoming = `sand`. Time on the right.
 7. **Code boxes:** four separate rounded boxes, Grandstander 32, outline 1.5 px.
 8. **Sheet:** bottom sheet on `parchment`, drag handle, 28 radius. Used for the runner popup, top-up, confirmations. No centred modals on mobile.

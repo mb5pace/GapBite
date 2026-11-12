@@ -21,12 +21,14 @@ export function SessionChip({ msLeft }: { msLeft: number }) {
   if (remaining > TEMP_COUNTDOWN_CHIP_MIN * 60_000) return null;
 
   return (
-    <span
-      role="timer"
-      className="inline-flex h-9 items-center gap-2 rounded-pill bg-sand px-3 text-secondary font-medium text-espresso tabular-nums"
-    >
-      <span className="size-2 rounded-pill bg-amber" aria-hidden="true" />
-      {formatMsLeft(remaining)} left
-    </span>
+    <div className="mt-2 flex justify-end">
+      <span
+        role="timer"
+        className="inline-flex h-9 items-center gap-2 rounded-pill bg-sand px-3 text-secondary font-medium text-espresso tabular-nums"
+      >
+        <span className="size-2 rounded-pill bg-amber" aria-hidden="true" />
+        {formatMsLeft(remaining)} left
+      </span>
+    </div>
   );
 }
