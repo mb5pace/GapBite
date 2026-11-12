@@ -1,0 +1,104 @@
+# SCREENS
+
+Build only these screens. Each line describes what is on screen, top to bottom. Visual rules come from UI_UX_BIBLE.md.
+
+---
+
+## Shared
+
+**Gate `/`** — QuickX wordmark on the yellow brand panel (the only screen that uses the yellow full-bleed), one line "Food from UC, in your break.", code input with large letter-spaced characters, "Enter" pill button. Error text under the input.
+
+**Identify `/identify`** — "Who's ordering?" AU number field, first-name field (first time only), "Continue". Link "I'm QuickX staff". Footer prototype note.
+
+---
+
+## Student portal (mobile, 390 px)
+
+Persistent **header** on every tab: left, greeting ("Good morning, Riya") or page title; right, the **Scan** button (maroon circle, scan icon) and the wallet chip (`₹240`, tap → Wallet). Temp-session countdown chip when under 3 minutes.
+
+Persistent **bottom bar**, floating, rounded: Home, Discover, Orders, Updates, Account. Active tab is a filled maroon circle with a cream icon; others are outline icons on parchment. Unread dot on Updates. Active-order dot on Orders.
+
+### Home
+1. Greeting + name, wallet chip, Scan button (header).
+2. Low-balance banner if ₹50–99, blocking banner if under ₹50 ("Top up to order").
+3. **Active order strip** (only if the user has one): source, status word, mini stepper, promised time, tap → Order Detail.
+4. Search field "Search poha, cold coffee, Paper Boat…" (searches all sources, results grouped by source).
+5. **Order from** — five source tiles in a 2-column layout (vending spans full width at the bottom): name, one-line tagline, "Open" state (always open in the prototype), small line illustration.
+6. **Next break** strip: "Next break 11:50 · order by 11:38 for GICT" based on breaks and the user's default building.
+7. **Popular at UC** — horizontal row of arch-topped item cards (bestseller tag), each with price and a round "+" button.
+
+### Source (menu) `/s/[sourceId]`
+Back button, source name, tagline. Category chips if useful (e.g. Coffee, Sandwiches, Sweet). Item list: name, one-line description, price, prep "~5 min", "+" / stepper. Morning items after 11:30 show "Morning only". Unavailable items show "Not today". Sticky cart bar at the bottom when cart is not empty: "3 items · ₹210 · View cart".
+
+### Vending `/s/vending`
+Looks like the machine: a parchment panel with a 3-row grid (A, B, C), each cell showing slot code, item name, price, stock ("4 left" / "Sold out"). Tap to add. Same sticky cart bar. A line at the top: "Pay here, then enter your code at the machine, or get it delivered."
+
+### Cart `/cart`
+Items with steppers and remove, source name, "Add more items" pill, subtotal. "Checkout" button.
+
+### Checkout `/checkout`
+Mode toggle (Pick up at UC / Deliver to my building). Building list (6 rows: short name, drop point, walk time, fee). When: "As soon as possible" or slot chips (disabled if too late). Bill: subtotal, delivery fee, total. Wallet: balance now and after. Promised time estimate. Big pill button "Pay ₹235 from wallet". Disabled reasons shown in plain words.
+
+### Order Detail `/o/[orderId]`
+Order ID, source, status headline ("Out for delivery to GICT"). **Vertical stepper** (Placed, Accepted, Preparing, Ready, Picked up, Delivered, or the pickup variant) with times. Large code box (4 digits) with the instruction line. Holder line ("Runner buddy: Aarav" / "QuickX staff"). Promised time with countdown; amber when due, red when failed. Items and bill. Cancel button only while `PLACED`.
+
+### Discover
+List of five rows, each opening a simple content page: **Introduction** (what QuickX is, 3 short paragraphs with one illustration), **Help** (how to order, how pickup works, how delivery works), **Smart Vending** (how paying for the vending machine works, with a button "Open vending" → `/s/vending`), **Feedback** (textarea + 1–5 face rating, saved to Redis, thank-you state), **FAQ** (accordion: fees, wallet minimum, what happens if late, how runners earn, refunds).
+
+### Orders
+Two tabs: **Active** and **Past**. Active has two groups when relevant: "My orders" and "My runs". Run cards show building, drop point, buyer first name, countdown, "Enter code" button. Past shows terminal orders with status badge (Delivered, Collected, Cancelled, Rejected, Failed late) and amount.
+
+### Updates
+Reverse-chronological feed grouped by Today / Earlier. Each row: small icon by kind, title, body, time. Unread rows have a maroon dot. Tapping opens the order if linked. Empty state with illustration: "Nothing yet. Your order updates show up here."
+
+### Account
+Profile card at top (name, AU or staff ID, Staff badge if staff, wallet balance). Then rows: **Wallet**, **My Profile**, **Preferences**, **Notifications**, **Order History**, **Refund Status**, **Terms and Conditions**, **Feedback**, **Support**, **Logout**.
+1. **Wallet:** balance, Top up (mock UPI sheet: amount chips, "Pay with UPI" → 1.5 s processing → success), ledger list with type, amount (+/−), order link, time.
+2. **My Profile:** name (editable), ID (read-only), role.
+3. **Preferences:** default building, default mode (pickup/delivery), default "when" (ASAP). Saved to Redis.
+4. **Notifications:** toggles (order updates, wallet updates, sounds). Only "sounds" has an effect; others are cosmetic and say so.
+5. **Order History:** same list as Orders › Past, plus runs, with filters All / Orders / Runs.
+6. **Refund Status:** every refund with reason (cancelled, rejected, failed late) and "Refunded to wallet" state.
+7. **Terms and Conditions:** short static text including the prototype disclaimer.
+8. **Feedback:** same as Discover › Feedback.
+9. **Support:** UC help desk text, team contact placeholder, FAQ link.
+10. **Logout:** confirm sheet.
+
+### Runner popup (global component, bottom sheet)
+States: **Scanning** (camera view + "Type order ID instead" link) → **Preview** (order summary, destination, earning, Accept) → **Accepted** (confirmation with deliver-by time) or an **Error** line. Handover mode: 4 large digit boxes, "Confirm delivery", result state.
+
+---
+
+## Cafe portal (laptop, 1280 px) `/cafe`
+
+Header: "QuickX · UC Cafe Desk", source filter tabs (All, Truly Indian, Global Bistro, Cafe Delice, Greens and Grains, Vending), sound toggle, clock, Logout.
+
+### Queue (default)
+Four columns: **New**, **Preparing**, **Ready**, **Out for delivery**. Cards show order ID, source, items with quantities, mode badge (Pickup / building short name), "when", promised time with live countdown, age. Card buttons by column: New → Accept / Reject (reason picker); Preparing → Mark ready; Ready (delivery) → Show bag slip, Send with staff; Ready (pickup) → Collect (4-digit input); Out for delivery → holder name and kind, countdown. Amber border when due or unclaimed for 3 min. Red alert cards pinned above the columns for failed orders with "Seen".
+
+### Bag slip (modal)
+Printable layout: big QR, order ID, source, items, building + drop point or PICKUP, promised time. "Print" uses the browser print dialog with a print stylesheet.
+
+### Vending
+Two parts: **Stock** table (slot, item, stock, +/− buttons, "Refill all") and **Kiosk** button that opens `/cafe/kiosk`.
+
+### Kiosk `/cafe/kiosk`
+Full-screen machine face for the laptop beside the vending machine: "Enter your QuickX code" with a numeric keypad, then a dispensing state that highlights each slot being released, then "Collect below". Wrong code: "Code not found or already used."
+
+### Menu availability
+List of all items for the selected source with an "Available today" switch.
+
+### Today
+Totals: orders, delivered, collected, failed, revenue by source, fees kept, refunds. Plain table, no charts needed.
+
+---
+
+## Admin portal (laptop) `/admin`
+
+Header: "QuickX Admin", Logout.
+
+1. **Codes:** permanent codes (masked, reveal, copy). Temporary pool table: code, status (unused / active with time left / burned / revoked), used by, used at. Buttons: Copy, Revoke (unused), End session (active), Generate now (refill). A large "show code" mode to display one unused code in big type for someone to type in.
+2. **Staff:** list and "Add staff" (name → next `QX-STF-NN`).
+3. **Users and wallets:** search by AU/staff ID, see balance and ledger, "Adjust" (+/− amount with a required note).
+4. **Live orders:** read-only list of all active orders with status and holder (useful during the demo).
+5. **Demo tools:** "Seed demo data" (creates users AU2340101 Riya ₹300, AU2340102 Aarav ₹120, AU2340103 Meera ₹300, staff QX-STF-01 Ramesh, and 2 past delivered orders), "Create late-test order" (picks a buyer and a runner, creates a delivery order already `PICKED_UP` by that runner with the promised time 1 minute from now, so the grace runs out about 6 minutes later on stage), "Reset all data" (orders, wallets, users, updates, stock; keeps codes and staff unless ticked) with typed confirmation `RESET`.
