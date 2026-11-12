@@ -88,18 +88,23 @@ app/
     admin/users/route.ts
     admin/wallet/route.ts       POST adjust
     admin/demo/route.ts         POST seed|reset
-middleware.ts
+proxy.ts          (Next.js 16 name for middleware.ts)
 lib/
-  config.ts       every number from BUSINESS_RULES.md
+  config.ts       every number from BUSINESS_RULES.md (and ACCESS.md, FLOWS.md)
+  env.ts          reads env text, forgiving stray spaces and quotes
   redis.ts        single client (reads KV_REST_API_* or UPSTASH_REDIS_REST_*)
-  session.ts      sign, verify, require(portal)
+  api.ts          { ok, data } / { ok: false, error } replies, AppError, zod body parsing
+  http.ts         browser-side fetch helpers (401 sends the person back to the gate)
+  session.ts      sign, verify the cookie (no Redis, so proxy.ts can use it)
+  auth.ts         server checks for pages and API routes (also checks temp codes in Redis)
+  gate.ts         what a typed code opens, rate limit
   codes.ts        pool fill, burn, revoke
-  users.ts
+  users.ts        user records, Identify, staff accounts
   wallet.ts       credit, debit, ledger (atomic)
   orders.ts       create, transitions, guards
   late.ts         sweepLate
   updates.ts
-  ids.ts          order ids, 4-digit codes, staff ids
+  ids.ts          staff ids now; order ids and 4-digit codes with ordering
   time.ts         IST formatting, promised time math
 data/
   menu.ts  locations.ts  breaks.ts  copy.ts (shared UI strings)

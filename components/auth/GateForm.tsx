@@ -1,5 +1,6 @@
 "use client";
 
+import { Eye, EyeSlash } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { COPY } from "@/data/copy";
@@ -14,6 +15,8 @@ export function GateForm({ notice }: { notice?: string }) {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  // What is typed is hidden by default, so a password never shows on a projector.
+  const [visible, setVisible] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -37,6 +40,7 @@ export function GateForm({ notice }: { notice?: string }) {
     <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
       <Input
         variant="code"
+        type={visible ? "text" : "password"}
         label={COPY.gate.label}
         placeholder={COPY.gate.placeholder}
         value={code}
@@ -53,6 +57,24 @@ export function GateForm({ notice }: { notice?: string }) {
         enterKeyHint="go"
         // The code is typed without the dash and in any case. Cafe and admin passwords go in the same box.
         name="access-code"
+        // Keep password managers from offering to save or fill this field.
+        data-1p-ignore
+        data-lpignore="true"
+        trailing={
+          <button
+            type="button"
+            onClick={() => setVisible((v) => !v)}
+            aria-label={visible ? COPY.gate.hideCode : COPY.gate.showCode}
+            aria-pressed={visible}
+            className="flex size-11 items-center justify-center rounded-pill text-mocha focus-visible:outline-2 focus-visible:outline-maroon"
+          >
+            {visible ? (
+              <EyeSlash weight="regular" size={22} aria-hidden="true" />
+            ) : (
+              <Eye weight="regular" size={22} aria-hidden="true" />
+            )}
+          </button>
+        }
       />
       {notice && !error ? (
         <p role="status" className="px-2 text-secondary text-mocha">

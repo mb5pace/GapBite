@@ -6,7 +6,7 @@ Build only these screens. Each line describes what is on screen, top to bottom. 
 
 ## Shared
 
-**Gate `/`** — QuickX wordmark on the yellow brand panel (the only screen that uses the yellow full-bleed), one line "Food from UC, in your break.", code input with large letter-spaced characters, "Enter" pill button. Error text under the input.
+**Gate `/`** — QuickX wordmark on the yellow brand panel (the only screen that uses the yellow full-bleed) with a simple Phosphor icon in a sand circle above it (until the Open Peeps illustration is added), one line "Food from UC, in your break.", code input with large letter-spaced characters, masked by default with a show/hide eye button inside the field, "Enter" pill button. Error text under the input.
 
 **Identify `/identify`** — "Who's ordering?" AU number field, first-name field (first time only), "Continue". Link "I'm QuickX staff". Footer prototype note.
 
@@ -95,10 +95,10 @@ Totals: orders, delivered, collected, failed, revenue by source, fees kept, refu
 
 ## Admin portal (laptop) `/admin`
 
-Header: "QuickX Admin", Logout.
+Header: "QuickX Admin", links **Codes** and **Staff** (the open page uses the selected chip colours), Logout.
 
 1. **Codes:** permanent codes (masked, reveal, copy). Temporary pool table: code, status (unused / active with time left / burned / revoked), used by, used at. Buttons: Copy, Revoke (unused), End session (active), Generate now (refill). A large "show code" mode to display one unused code in big type for someone to type in.
-2. **Staff:** list and "Add staff" (name → next `QX-STF-NN`).
+2. **Staff** (`/admin/staff`): "Add staff" takes a first name and creates the next ID (`QX-STF-01`, `QX-STF-02`, …), shown clearly with a Copy button and a line saying how they sign in. Below it, the list of staff (ID, name, Copy). Empty state: Phosphor icon in a sand circle, "No staff yet. Add the first person above."
 3. **Users and wallets:** search by AU/staff ID, see balance and ledger, "Adjust" (+/− amount with a required note).
 4. **Live orders:** read-only list of all active orders with status and holder (useful during the demo).
 5. **Demo tools:** "Seed demo data" (creates users AU2340101 Riya ₹300, AU2340102 Aarav ₹120, AU2340103 Meera ₹300, staff QX-STF-01 Ramesh, and 2 past delivered orders), "Create late-test order" (picks a buyer and a runner, creates a delivery order already `PICKED_UP` by that runner with the promised time 1 minute from now, so the grace runs out about 6 minutes later on stage), "Reset all data" (orders, wallets, users, updates, stock; keeps codes and staff unless ticked) with typed confirmation `RESET`.

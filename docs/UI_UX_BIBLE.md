@@ -65,6 +65,7 @@ Text on `cream`/`parchment` is `espresso` or `maroon`. Text on `maroon` is `crea
 1. Thin line drawings in `espresso`/`maroon` stroke on cream, like the walking person with a coffee in the references.
 2. Source: **Open Peeps** by Pablo Stanley (CC0, openpeeps.com) for people, recoloured to `espresso`. Download the SVGs into `public/illustrations/` and credit them on the Terms page. Check the licence page before using.
 3. Use illustrations only on: gate, empty states, the runner "accepted" and "delivered" states, Discover › Introduction, and source tiles (small).
+   **Until the Open Peeps files are added** (the team will add them later), those places use one Phosphor icon, Regular weight, 40–44 px in `maroon`, inside a 96 px `sand` circle. No illustration, no other decoration. The `EmptyState` component and the gate already work this way, so swapping in a drawing later changes one component.
 4. **No AI-generated images or illustrations of any kind**, no stock 3D renders, no blob shapes, no abstract mesh backgrounds.
 5. Food photos only if the team takes them; otherwise item tiles.
 

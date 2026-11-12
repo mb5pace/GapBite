@@ -8,6 +8,7 @@
  */
 import { jwtVerify, SignJWT } from "jose";
 import { SESSION_COOKIE, SESSION_SECRET_MIN_LENGTH } from "./config";
+import { envText } from "./env";
 
 export type Portal = "student" | "cafe" | "admin";
 export type CodeType = "permanent" | "temp" | "cafe" | "admin";
@@ -33,7 +34,7 @@ export class SessionSecretError extends Error {
 }
 
 function secretKey(): Uint8Array {
-  const secret = process.env.QX_SESSION_SECRET;
+  const secret = envText("QX_SESSION_SECRET");
   if (!secret || secret.length < SESSION_SECRET_MIN_LENGTH) throw new SessionSecretError();
   return new TextEncoder().encode(secret);
 }

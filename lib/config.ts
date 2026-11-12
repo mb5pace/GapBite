@@ -99,8 +99,11 @@ export const SESSION_MIN = {
   admin: 2 * 60,
 } as const;
 
-/** 10 wrong gate tries per IP per 10 minutes. */
-export const RATE_LIMIT = { maxWrongTries: 10, windowSec: 10 * 60 } as const;
+/**
+ * 30 wrong gate tries per IP per 10 minutes. Phones on the campus Wi-Fi share one
+ * public IP, so the limit is generous. A correct code is never counted as a wrong try.
+ */
+export const RATE_LIMIT = { maxWrongTries: 30, windowSec: 10 * 60 } as const;
 
 /** Header chip "2:41 left" shows only for temp sessions in their last N minutes. */
 export const TEMP_COUNTDOWN_CHIP_MIN = 3;
@@ -130,6 +133,8 @@ export const FIRST_NAME_MAX = 20;
 export const STAFF_ID_PATTERN = new RegExp(
   `^${STAFF_ID_PREFIX}\\d{${STAFF_ID_DIGITS}}$`,
 );
+/** Highest staff number the ID format can hold (QX-STF-99). */
+export const STAFF_MAX = 10 ** STAFF_ID_DIGITS - 1;
 
 // ---------------------------------------------------------------------------
 // Live sync (polling, not websockets)

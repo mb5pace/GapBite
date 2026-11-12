@@ -4,7 +4,7 @@ Nobody reaches any page except the gate without a valid session. There are no ac
 
 ## The gate (`/`)
 
-One input: "Enter your QuickX access code". The server decides which portal it opens:
+One input: "Enter your QuickX access code". What is typed is **masked by default**, with a show/hide eye button inside the field, so a password never shows on a projector. The server decides which portal it opens:
 
 | What was typed | Matches | Opens | Session length |
 |---|---|---|---|
@@ -14,7 +14,7 @@ One input: "Enter your QuickX access code". The server decides which portal it o
 | The admin password | env `QX_ADMIN_PASSWORD` | Admin portal | 2 hours |
 | Anything else | – | "That code doesn't work. Ask the QuickX team for a fresh one." | – |
 
-Rate limit: 10 wrong tries per IP per 10 minutes (Redis counter), then "Too many tries, wait a few minutes."
+Rate limit: 30 wrong tries per IP per 10 minutes (`RATE_LIMIT` in `lib/config.ts`, a Redis counter), then "Too many tries, wait a few minutes." Phones on the campus Wi-Fi share one public IP, which is why the limit is generous. A correct code is never counted as a wrong try. While an IP is over the limit, every try is refused, correct or not.
 
 ## Permanent codes (5)
 
@@ -41,7 +41,7 @@ Burn must be atomic (Lua or `HSETNX` on a `codes:used:<code>` key) so two device
 ## Identify (`/identify`)
 
 After a student-type code, ask "Who's ordering?":
-1. **Student:** AU number, format `AU` + 7 digits (`/^AU\d{7}$/`, uppercase the input). First time only, also ask for first name (2–20 letters). Stored in Redis as the user record.
+1. **Student:** AU number, format `AU` + 7 digits (`/^AU\d{7}$/`, uppercase the input). First time only, also ask for first name: 2 to 20 characters, using letters, spaces, apostrophes and hyphens ("Mary Ann", "D'Souza", "Jean-Luc"). It is tidied to a capital letter after each space, apostrophe or hyphen. Stored in Redis as the user record.
 2. **Staff:** a link "I'm QuickX staff" switches the field to staff ID, format `QX-STF-` + 2 digits. Staff IDs must already exist (created in the Admin portal); unknown staff IDs are refused.
 
 There is no password on the AU number. This is a prototype; the access code is the security. Show a one-line note in the footer of the identify screen: "Prototype: anyone with a code can enter any AU number."
@@ -62,15 +62,17 @@ Logout (Account › Logout, and a button in Cafe and Admin headers) clears the c
 
 ## Staff accounts
 
-Created only in Admin › Staff: name + auto ID (`QX-STF-01`, `-02`, …). Staff log in with any student-type access code, then "I'm QuickX staff" + their ID. Their profile shows a "Staff" badge everywhere their name appears.
+Created only in Admin › Staff (`/admin/staff`): name + auto ID (`QX-STF-01`, `-02`, … up to `-99`) from the atomic Redis counter `qx:staff:seq`. The new ID is shown clearly with a Copy button. Staff cannot be deleted in the prototype. Staff log in with any student-type access code, then "I'm QuickX staff" + their ID. Their profile shows a "Staff" badge everywhere their name appears.
 
 ## Environment variables
 
 ```
-QX_PERMANENT_CODES      5 comma-separated codes
+QX_PERMANENT_CODES      5 codes, separated by commas (spaces and new lines also work)
 QX_CAFE_PASSWORD        cafe portal password
 QX_ADMIN_PASSWORD       admin portal password
 QX_SESSION_SECRET       32+ random characters
 KV_REST_API_URL         set automatically by the Upstash integration (name may be UPSTASH_REDIS_REST_URL; support both)
 KV_REST_API_TOKEN       set automatically (or UPSTASH_REDIS_REST_TOKEN)
 ```
+
+The server ignores stray spaces, a trailing new line and quotes around any of these values, because they are easy to paste in by accident. Never print or log them.

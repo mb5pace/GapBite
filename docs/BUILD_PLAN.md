@@ -19,6 +19,8 @@ Build in this order. One phase per session or per sitting. At the end of each ph
 - [x] Identify screen (AU / staff), user records
 - [x] Logout; temp-session countdown chip
 - [x] Minimal Admin › Codes page so the team can get temp codes
+- [x] Admin › Staff accounts (pulled forward from Phase 6): `/admin/staff`, Add staff creates the next `QX-STF-NN` from `qx:staff:seq`, Admin header links, Identify › "I'm QuickX staff" works and the role is `staff`
+- [x] Team answers applied: 30 wrong tries per IP, masked gate input with eye button, first names with spaces, apostrophes and hyphens, Phosphor icon in a sand circle instead of illustrations
 
 ## Phase 2 — UI kit and student shell
 - [ ] Components from bible §4: buttons, icon button, chips, card, arch card, item tile, sheet, stepper, code boxes, banner, money, empty state
@@ -46,7 +48,7 @@ Build in this order. One phase per session or per sitting. At the end of each ph
 - [ ] Queue columns with polling and sweepLate
 - [ ] Accept/reject/start/ready, bag slip with QR + print
 - [ ] Pickup collect by code
-- [ ] Send with staff; staff accounts in Admin
+- [ ] Send with staff (staff accounts already exist, see Phase 1)
 - [ ] Vending stock, kiosk, menu availability, Today
 
 ## Phase 7 — Runner
@@ -65,7 +67,7 @@ Build in this order. One phase per session or per sitting. At the end of each ph
 - [ ] Discover pages and FAQ
 
 ## Phase 10 — Demo polish
-- [ ] Admin demo tools (seed, reset), live orders view
+- [ ] Admin demo tools (seed, reset), live orders view. Seed still creates `QX-STF-01 Ramesh`, but through the same `qx:staff:seq` counter and only if that ID does not exist yet, because staff can now be added by hand
 - [ ] Every screen checked against bible §9 and §10
 - [ ] Test on two real phones + laptop at the same time over the deployed URL
 - [ ] Walk through DEMO_SCRIPT.md twice end to end
@@ -77,32 +79,33 @@ Waiting on the team:
 - Real break times for the semester (placeholder list in `data/breaks.ts`).
 - Real walk times (estimates in `data/locations.ts`).
 - Real vending snack names loaded in the UC machine.
+- Open Peeps illustration files, to be added later into `public/illustrations/` (check the licence page first). Not blocking: until then the gate and empty states use a Phosphor icon in a sand circle.
 
-Raised in Phase 0 (simplest behaviour chosen, change if wrong):
-- Slot cutoff: BUSINESS_RULES says a slot is selectable if `now + prep + walk + 5` is before it, with an unnamed 5. Added as `SLOT_LEAD_BUFFER_MIN = 5` in `lib/config.ts`. Is it meant to be BUFFER_MIN (2) instead?
-- Uncollected pickups are "shown after 30 minutes" with no constant name. Added as `PICKUP_STALE_MIN = 30`.
-- Home "Next break" strip: the example "next break 11:50, order by 11:38 for GICT" is 12 minutes before the break, with no formula given. Phase 3 will use `prep + walk + SLOT_LEAD_BUFFER_MIN` with the slowest prep of the user's last source, or 5 minutes if none.
-- Redis keys: ACCESS.md writes `codes:temp`, ARCHITECTURE.md writes `qx:codes:temp`. Using the `qx:` prefix everywhere so Reset can scan safely.
-- Next.js 16 renamed `middleware.ts` to `proxy.ts` (same behaviour). ARCHITECTURE.md says `middleware.ts`. Phase 1 will use `proxy.ts`.
-- create-next-app 16 turned on `cacheComponents` and `partialPrefetching`. Switched off: QuickX has no cacheable pages, and the flag forces Suspense around every cookie read. Revisit only if Next makes it mandatory.
-- Item names in MENU.md that carry a detail in brackets or after a comma are split into `name` and `description` in `data/menu.ts` (for example "Too Yumm Karare" + "Masala", which also matches DEMO_SCRIPT.md). Prices, prep, tags, slots and stock are exactly as in MENU.md.
-- `/api/health` is public (no secrets or user data in it). Phase 1 proxy must leave it open, or move it behind the admin session once setup is done.
-- Staff IDs must already exist to log in (ACCESS.md), but Admin › Staff is only built in Phase 6. Until then the Identify staff link will refuse every ID. Phase 10 seed data adds QX-STF-01.
-- Slot orders for pickup: BUSINESS_RULES gives the slot rule for delivery. For pickup, Phase 5 will use walk 0 and promise the slot time.
-- Late sweep and `PLACED`: `promisedAt` is only an estimate before the cafe accepts, and FLOWS says only ACCEPTED, PREPARING, READY and PICKED_UP can fail. Phase 8 will skip `PLACED` (the buyer can cancel, or the cafe can reject).
-- Vending orders chosen for delivery: FLOWS describes one-tap "Accept and ready" for vending. Phase 6 will give delivery vending orders the same one-tap path and still print a bag slip.
-- Open Peeps illustrations (UI_UX_BIBLE §5) need to be downloaded into `public/illustrations/` and the licence checked. Needs a person at a browser; raise before Phase 2 if the team wants them in the kit.
+## Decisions (answered, or accepted by the team as written)
 
-Raised in Phase 1 (simplest behaviour chosen, change if wrong):
-- Rate limit is per IP, and phones on the campus Wi-Fi share one public IP, so a few people mistyping can lock the whole room out for 10 minutes. While blocked, even a correct code is refused. Built as written in ACCESS.md. Easy to loosen in `RATE_LIMIT` in `lib/config.ts`.
-- The gate input shows what is typed, as ACCESS.md describes. The cafe and admin passwords are therefore visible on a projector when typed. Say if you want them masked.
-- Permanent codes reach the Admin page masked (`K7••••`). The full code is fetched only when an admin taps Reveal or Copy, and only with an admin session. This keeps CLAUDE.md rule 5 and still gives the "reveal" and "copy" in SCREENS.md.
-- Temp code lifecycle: used code becomes `active` for 15 minutes; Logout or Admin › End session makes it `burned`; a code whose 15 minutes ran out is shown as burned. `usedBy` is filled in when Identify finishes, because the AU number is not known at the gate.
+Numbers and rules
+- `SLOT_LEAD_BUFFER_MIN = 5` and `PICKUP_STALE_MIN = 30` are correct and stay in `lib/config.ts`.
+- Rate limit is 30 wrong tries per IP per 10 minutes, because phones on the campus Wi-Fi share one IP. A correct code is never counted as a wrong try. While an IP is over the limit, every try is refused.
+- Home "Next break" strip (Phase 3): order-by time is the break time minus `prep + walk + SLOT_LEAD_BUFFER_MIN`, using the slowest prep of the user's last source, or 5 minutes if there is none.
+- Slot orders for pickup (Phase 5): walk is 0 and the promise is the slot time.
+- Late sweep (Phase 8) skips `PLACED` orders; the buyer can cancel or the cafe can reject.
+- Vending orders chosen for delivery (Phase 6): same one-tap "Accept and ready" path, and a bag slip is still printed.
+
+Access and identity
+- The gate input is masked by default, with a show/hide eye button.
+- Permanent codes reach the Admin page masked (`K7••••`). The full code is fetched only when an admin taps Reveal or Copy, and only with an admin session.
+- Temp code lifecycle: a used code is `active` for 15 minutes; Logout or Admin › End session makes it `burned`; one whose 15 minutes ran out shows as burned. `usedBy` is filled in when Identify finishes.
 - Any redirect from a protected page to the gate shows "Your session has ended. Ask for a new code.", including for someone who never logged in.
-- Identify: a new AU number first answers "needs a name", then the first-name field appears. First names are letters only (2 to 20), so "Mary Ann" or "D'Souza" is refused. The name is capitalised ("riya" becomes "Riya").
-- Staff can only sign in with an ID that exists. Admin › Staff is Phase 6, so until then every staff ID is refused (tested with a hand-made staff record).
-- The student shell and `/cafe` are stubs so every login has somewhere to land. Phase 2 replaces the student top bar with the real header and bottom bar; Phase 6 builds the queue. `PillButton`, `Input`, `Badge`, `Countdown` and `LogoutButton` are the first UI-kit pieces; Phase 2 finishes the rest.
-- The countdown chip reads the session cookie's expiry (same moment as the Redis session end). `/api/me` is deferred until there is a wallet to return (Phase 4).
-- The gate has no illustration yet (Open Peeps files are not in `public/illustrations/`).
-- Added a 72 px display size and a `tracking-code` letter-spacing token to the bible, for the gate wordmark and Admin's "show code" mode.
-- Preview deployments: the four `QX_*` variables exist for Production only. Login on a preview URL fails until they are added for Preview too.
+- Identify asks for a first name only the first time. First names: letters, spaces, apostrophes and hyphens, 2 to 20 characters, tidied to a capital after each space, apostrophe or hyphen.
+- Staff accounts are created in Admin › Staff (Phase 1). Staff IDs run `QX-STF-01` to `QX-STF-99` and staff cannot be deleted.
+- The server ignores stray spaces, new lines and quotes around env values (`lib/env.ts`), and accepts `QX_PERMANENT_CODES` separated by commas, spaces or new lines.
+
+Build and stack
+- Redis keys all start with `qx:`.
+- Next.js 16 calls `middleware.ts` `proxy.ts`; the project uses `proxy.ts`. `cacheComponents` is off.
+- `/api/health` is public (no secrets or user data in it).
+- Item names in MENU.md that carry a detail in brackets or after a comma are split into `name` and `description` in `data/menu.ts`. Prices, prep, tags, slots and stock are exactly as in MENU.md.
+- The student shell and `/cafe` are stubs until Phase 2 and Phase 6. `PillButton`, `Input`, `Badge`, `Countdown`, `EmptyState` and `LogoutButton` are the first UI-kit pieces.
+- The countdown chip reads the session cookie's expiry. `/api/me` waits until there is a wallet to return (Phase 4).
+- A 72 px display size and a `tracking-code` letter-spacing token were added to the bible, for the gate wordmark and Admin's "show code" mode.
+- The four `QX_*` variables exist for Production only. Login on a preview URL needs them added for Preview too.

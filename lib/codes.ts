@@ -20,6 +20,7 @@ import {
   SESSION_MIN,
   TEMP_POOL_SIZE,
 } from "./config";
+import { envText } from "./env";
 import { getRedis, key } from "./redis";
 
 export type CodeStatus = "unused" | "active" | "burned" | "revoked";
@@ -78,11 +79,14 @@ export function formatCode(code: string): string {
 // Permanent codes (env only)
 // ---------------------------------------------------------------------------
 
-/** The codes exactly as written in env, trimmed. */
+/**
+ * The codes from env QX_PERMANENT_CODES. Commas are the documented separator;
+ * spaces, newlines and semicolons are tolerated too, and so are quotes around each code.
+ */
 export function permanentCodes(): string[] {
-  return (process.env.QX_PERMANENT_CODES ?? "")
-    .split(",")
-    .map((c) => c.trim())
+  return (envText("QX_PERMANENT_CODES") ?? "")
+    .split(/[\s,;]+/)
+    .map((c) => c.replace(/^["']+|["']+$/g, ""))
     .filter((c) => c.length > 0);
 }
 

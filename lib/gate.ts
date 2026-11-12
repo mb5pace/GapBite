@@ -6,6 +6,7 @@ import { COPY } from "@/data/copy";
 import { RATE_LIMIT, SESSION_MIN } from "./config";
 import { AppError } from "./api";
 import { burnTempCode, matchesPermanent, safeEqual } from "./codes";
+import { envText } from "./env";
 import { getRedis, key } from "./redis";
 import type { SessionClaims } from "./session";
 
@@ -47,7 +48,7 @@ async function recordWrongTry(ip: string): Promise<void> {
 }
 
 function cafeOrAdmin(typed: string, envName: "QX_CAFE_PASSWORD" | "QX_ADMIN_PASSWORD"): boolean {
-  const expected = process.env[envName];
+  const expected = envText(envName);
   return !!expected && safeEqual(typed, expected);
 }
 

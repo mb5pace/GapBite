@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, type ComponentProps } from "react";
+import { useId, type ComponentProps, type ReactNode } from "react";
 
 interface InputProps extends ComponentProps<"input"> {
   label: string;
@@ -8,6 +8,8 @@ interface InputProps extends ComponentProps<"input"> {
   error?: string;
   /** "code" is the large letter-spaced field used for access codes. */
   variant?: "default" | "code";
+  /** A small control inside the right end of the field, for example a show/hide button. */
+  trailing?: ReactNode;
 }
 
 /** Pill input on `sand` with a visible label, a hint and an error line. No borders. */
@@ -16,6 +18,7 @@ export function Input({
   hint,
   error,
   variant = "default",
+  trailing,
   id,
   className = "",
   ...rest
@@ -36,18 +39,23 @@ export function Input({
       <label htmlFor={inputId} className="px-2 text-secondary font-medium text-mocha">
         {label}
       </label>
-      <input
-        id={inputId}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy}
-        className={[
-          "w-full rounded-pill bg-sand px-5 text-espresso placeholder:text-taupe",
-          "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon",
-          field,
-          className,
-        ].join(" ")}
-        {...rest}
-      />
+      <div className="relative">
+        <input
+          id={inputId}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy}
+          className={[
+            "w-full rounded-pill bg-sand text-espresso placeholder:text-taupe",
+            "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon",
+            // With a trailing control, pad both sides equally so centred text stays centred.
+            trailing ? "px-14" : "px-5",
+            field,
+            className,
+          ].join(" ")}
+          {...rest}
+        />
+        {trailing ? <div className="absolute inset-y-0 right-1.5 flex items-center">{trailing}</div> : null}
+      </div>
       {hint && !error ? (
         <p id={hintId} className="px-2 text-secondary text-taupe">
           {hint}

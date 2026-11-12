@@ -48,8 +48,8 @@ RUNNER_EARN = { near: 5, far: 8 }
 ## Promised time and grace
 
 1. **As soon as possible:** promised time = time the cafe accepts + prep time + walk time to the building + `BUFFER_MIN` (2). Before acceptance, show the estimate from placement time.
-2. **For a break slot:** promised time = the slot time. A slot can be chosen only if `now + prep + walk + 5` is before the slot; otherwise it is greyed out.
-3. **Pickup:** promised time = accept + prep. Pickup orders never fail automatically; uncollected pickups are shown to the cafe after 30 minutes and can be closed manually.
+2. **For a break slot:** promised time = the slot time. A slot can be chosen only if `now + prep + walk + SLOT_LEAD_BUFFER_MIN` (5) is before the slot; otherwise it is greyed out.
+3. **Pickup:** promised time = accept + prep. Pickup orders never fail automatically; uncollected pickups are shown to the cafe after `PICKUP_STALE_MIN` (30) minutes and can be closed manually.
 4. `GRACE_MIN = 5`. At the promised time, the order turns amber ("Due now") in both buyer and cafe views. At promised time + 5 minutes, if not `DELIVERED`, it fails.
 
 ## Late delivery penalty (when grace ends)
