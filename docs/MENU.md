@@ -117,4 +117,4 @@ Cafe staff can mark any item "Unavailable today" from the Cafe portal. That flag
 
 ## Images
 
-No AI-generated food images. Until the team adds real photos to `public/food/<item-id>.jpg`, every item shows the initial tile described in UI_UX_BIBLE.md. The code must check for a photo and fall back to the tile.
+No AI-generated food images. Until the team adds real photos to `public/food/<item-id>.jpg`, every item shows the initial tile described in UI_UX_BIBLE.md. `next.config.ts` lists the `.jpg` files in `public/food/` at build time (env `NEXT_PUBLIC_FOOD_PHOTOS`, read through `lib/photos.ts`), and `ItemTile` only asks for a photo that is on that list, so there are no 404s for missing photos. Add photos, push, and the next build picks them up. If a listed photo fails to load, the tile stays.

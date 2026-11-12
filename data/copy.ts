@@ -1,3 +1,5 @@
+import { MAX_UNITS_PER_ORDER, MORNING_CUTOFF } from "@/lib/config";
+
 /**
  * Shared UI strings. Plain, short, specific to campus (UI_UX_BIBLE.md section 8).
  * Strings that appear on more than one screen, or that the server sends back,
@@ -60,6 +62,9 @@ export const COPY = {
     },
     /** Header title for each tab. Home shows the greeting instead. */
     titles: {
+      cart: "Cart",
+      checkout: "Checkout",
+      order: "Order",
       discover: "Discover",
       orders: "Orders",
       updates: "Updates",
@@ -82,6 +87,38 @@ export const COPY = {
       body: "Runner buddies will scan the bag slip here. Scanning opens in a later release.",
       close: "Close",
     },
+    home: {
+      searchLabel: "Search the menu",
+      searchPlaceholder: "Search poha, cold coffee, Paper Boat…",
+      searchClear: "Clear search",
+      orderFrom: "Order from",
+      popular: "Popular at UC",
+      bestseller: "Bestseller",
+      open: "Open",
+      noResults: "Nothing matches that. Try poha, cold coffee or Paper Boat.",
+      noMoreBreaks: "No more breaks today. You can still order as soon as possible.",
+    },
+    menu: {
+      morningOnly: "Morning only",
+      notToday: "Not today",
+      soldOut: "Sold out",
+      readyNow: "Ready now",
+      vendingLine: "Pay here, then enter your code at the machine, or get it delivered.",
+    },
+    cart: {
+      title: "Cart",
+      empty: "Your cart is empty. Pick something from UC.",
+      browse: "Browse the menu",
+      addMore: "Add more items",
+      subtotal: "Subtotal",
+      checkout: "Checkout",
+      remove: "Remove",
+      viewCart: "View cart",
+      keepCart: "Keep my cart",
+      startNew: "Start new cart",
+      fixFirst: "Fix the items marked below to continue.",
+      overStock: "Not enough left",
+    },
     /** One line for each page that is not built yet. */
     stubs: {
       home: "Ordering opens in the next phase.",
@@ -89,6 +126,8 @@ export const COPY = {
       orders: "Your orders will show up here.",
       updates: "Nothing yet. Your order updates show up here.",
       account: "Wallet, profile and history will live here.",
+      checkout: "Checkout opens in the next phase.",
+      backToCart: "Back to cart",
       section: "This part of Account opens in a later release.",
       goHome: "Go to Home",
     },
@@ -120,3 +159,23 @@ export const COPY = {
     },
   },
 } as const;
+
+/** Why an item could not be added to the cart, in one plain sentence. */
+export function refusalMessage(
+  reason: "limit" | "stock" | "unavailable" | "morning-closed" | "sold-out",
+  itemName: string,
+  left = 0,
+): string {
+  switch (reason) {
+    case "limit":
+      return `You can order up to ${MAX_UNITS_PER_ORDER} items at a time.`;
+    case "stock":
+      return `Only ${left} ${itemName} left.`;
+    case "unavailable":
+      return `${itemName} is not available today.`;
+    case "morning-closed":
+      return `${itemName} is a morning item. Morning items stop at ${MORNING_CUTOFF.hour}:${String(MORNING_CUTOFF.minute).padStart(2, "0")}.`;
+    case "sold-out":
+      return `${itemName} is sold out.`;
+  }
+}

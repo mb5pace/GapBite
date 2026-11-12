@@ -105,6 +105,14 @@ lib/
   late.ts         sweepLate
   updates.ts
   ids.ts          staff ids now; order ids and 4-digit codes with ordering
+  format.ts       rupees (₹1,25,000), initials
+  photos.ts       which item photos exist (list made at build time in next.config.ts)
+  menu-rules.ts   morning cutoff, item status, max quantity, next break (pure)
+  menu.ts         unavailable switches + vending stock read from Redis
+  stock.ts        vending stock, created from startStock on first read
+  cart.ts         cart rules on plain data: one source, 10 units, stock (pure)
+  cart-store.ts   browser cart store: memory + sessionStorage per user
+  search.ts       menu search across all five sources (pure)
   time.ts         IST formatting, promised time math
 data/
   menu.ts  locations.ts  breaks.ts  copy.ts (shared UI strings)

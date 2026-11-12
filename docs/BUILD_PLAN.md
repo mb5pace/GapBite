@@ -28,9 +28,9 @@ Build in this order. One phase per session or per sitting. At the end of each ph
 - [x] A `/kit` page (admin-only) showing every component for visual review
 
 ## Phase 3 — Browse and cart
-- [ ] Home (sources, search, popular, next break strip)
-- [ ] Source menu pages, vending grid with stock
-- [ ] Cart (one source rule), cart bar, local cart state (in memory + sessionStorage wrapped in try/catch)
+- [x] Home (sources, search, popular, next break strip)
+- [x] Source menu pages, vending grid with stock
+- [x] Cart (one source rule), cart bar, local cart state (in memory + sessionStorage wrapped in try/catch)
 
 ## Phase 4 — Wallet
 - [ ] Wallet page, mock UPI top-up sheet, ledger
@@ -81,17 +81,15 @@ Waiting on the team:
 - Real vending snack names loaded in the UC machine.
 - Open Peeps illustration files, to be added later into `public/illustrations/` (check the licence page first). Not blocking: until then the gate and empty states use a Phosphor icon in a sand circle.
 
-Raised in Phase 2 (simplest behaviour chosen, change if wrong):
-- The five tabs and the wallet chip point at pages that arrive later, so Discover, Orders, Updates, Account and `/account/[section]` are stub pages with an empty state. Log out moved from the Home stub to the Account stub, where it will stay.
-- The wallet chip reads the balance from Redis, so it shows ₹0 until the wallet exists (Phase 4). An amber dot means under ₹50.
-- The Scan button opens a placeholder sheet until the runner sheet (Phase 7).
-- The unread dot on Updates and the active-order dot on Orders exist and are shown in `/kit`, but stay off in the live shell until Phase 5 has data for them.
-- `Toggle` is listed in ARCHITECTURE.md but not in the Phase 2 list or bible §4, so it waits for Phase 9 (Notifications).
-- Tall-capsule chip: the bible only says the capsule "can" be used for slots. The selected capsule is filled maroon.
-- `/kit` lives at `/kit` (mapped to the admin portal in `proxy.ts`, and checked again on the page). It is not linked from the Admin header.
-- The header title comes from the path (tab names and Account sections). Later pages that need their own title or a back button (source menu, cart, checkout, order detail) extend `titleFor` in `components/student/Header.tsx`.
-- `taupe` fails WCAG AA as text (4.3:1 on cream). Hints and secondary text now use `mocha`. Placeholders (taupe, as the bible says) are about 3.6:1 on sand. Say if you want placeholders darker.
-- Item tiles try `public/food/<item-id>.jpg` and fall back to initials, so until photos exist the browser shows harmless 404s for them. If that noise matters, Phase 3 can list the photos on the server instead.
+Raised in Phase 3 (simplest behaviour chosen, change if wrong):
+- Next break strip: prep comes from the slowest item of the source in the cart, or 5 minutes (`DEFAULT_PREP_MIN`) with an empty cart, because there is no order history until Phase 5. The building is GICT (`DEFAULT_BUILDING`) until Preferences exist in Phase 9. If the nearest break can no longer be made, the strip shows the next one that can; after the last one it says "No more breaks today."
+- Category chips on the source menu are skipped: menu items have no category field in MENU.md, and none was invented.
+- Vending cells add one unit per tap. Removing and changing quantity happen in the cart, because a stepper does not fit a 44 px tap target in a three-column grid.
+- The morning rule runs from 11:30 IST to midnight (so 00:00 to 11:29 morning items can be ordered). Server time decides; the phone only counts forward from the last server reading.
+- A cart item that stops being orderable (switched off, morning cutoff, stock below the quantity) stays in the cart, is flagged in red, and Checkout is disabled until it is removed.
+- `/checkout` is a placeholder until Phase 5. The header gets a Back button and a title on sub-pages; long titles wrap to two lines.
+- Vending stock is created in Redis (`qx:stock`) from `startStock` the first time anyone reads it, so Phase 5's atomic decrement always finds a number.
+- Cafe "Unavailable today" switches are read from `qx:unavailable` now; the Cafe portal that writes them is Phase 6.
 
 ## Decisions (answered, or accepted by the team as written)
 
@@ -121,3 +119,11 @@ Build and stack
 - The countdown chip reads the session cookie's expiry. `/api/me` waits until there is a wallet to return (Phase 4).
 - A 72 px display size and a `tracking-code` letter-spacing token were added to the bible, for the gate wordmark and Admin's "show code" mode.
 - The four `QX_*` variables exist for Production only. Login on a preview URL needs them added for Preview too.
+
+Phase 2 (UI kit and shell), accepted by the team
+- Hints and secondary text use `mocha`; `taupe` stays for placeholders, disabled controls, borders and handles (see the bible for the contrast numbers).
+- Food photos: `next.config.ts` lists `public/food/*.jpg` at build time and `ItemTile` only requests photos on that list, so missing photos cause no 404s. Add photos, push, and the next build picks them up.
+- The five tabs, the wallet chip and `/account/[section]` pointed at stub pages until their phases. Log out lives on the Account page.
+- The Scan button opens a placeholder sheet until the runner sheet (Phase 7). The unread and active-order dots stay off until Phase 5 has data.
+- `Toggle` waits for Phase 9 (Notifications). The selected tall-capsule chip is filled maroon.
+- `/kit` is served at `/kit`, admin only, and is not linked from the Admin header.

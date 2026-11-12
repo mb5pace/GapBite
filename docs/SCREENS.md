@@ -31,7 +31,7 @@ Persistent **bottom bar**, floating, rounded: Home, Discover, Orders, Updates, A
 Back button, source name, tagline. Category chips if useful (e.g. Coffee, Sandwiches, Sweet). Item list: name, one-line description, price, prep "~5 min", "+" / stepper. Morning items after 11:30 show "Morning only". Unavailable items show "Not today". Sticky cart bar at the bottom when cart is not empty: "3 items · ₹210 · View cart".
 
 ### Vending `/s/vending`
-Looks like the machine: a parchment panel with a 3-row grid (A, B, C), each cell showing slot code, item name, price, stock ("4 left" / "Sold out"). Tap to add. Same sticky cart bar. A line at the top: "Pay here, then enter your code at the machine, or get it delivered."
+Looks like the machine: a parchment panel with three shelves (A, B, C), three cells to a row, each cell showing slot code, item name, price, stock ("4 left" / "Sold out"), refreshed every few seconds. Tap to add one; a count badge shows how many are in the cart, and quantities are changed in the cart. Same sticky cart bar. A line at the top: "Pay here, then enter your code at the machine, or get it delivered."
 
 ### Cart `/cart`
 Items with steppers and remove, source name, "Add more items" pill, subtotal. "Checkout" button.

@@ -1,8 +1,6 @@
-import { ForkKnife } from "@phosphor-icons/react/ssr";
-import { COPY } from "@/data/copy";
-import { EmptyState } from "@/components/ui/EmptyState";
+import { HomeView } from "@/components/student/HomeView";
 
-/** Placeholder Home. The real Home (sources, search, popular) is Phase 3. */
+/** Home: search, the five sources, the next break, popular at UC. The banners and the active-order strip arrive in Phase 4 and 5. */
 export default function Home() {
-  return <EmptyState icon={<ForkKnife weight="regular" size={40} />}>{COPY.student.stubs.home}</EmptyState>;
+  return <HomeView />;
 }

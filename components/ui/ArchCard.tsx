@@ -16,6 +16,8 @@ export function ArchCard({
   tag,
   price,
   onAdd,
+  status,
+  inCart = 0,
 }: {
   media: ReactNode;
   title: string;
@@ -25,6 +27,10 @@ export function ArchCard({
   price: number;
   /** Shows the round "+" button when given. */
   onAdd?: () => void;
+  /** When the item cannot be ordered right now ("Not today", "Morning only", "Sold out"), shown instead of the "+". */
+  status?: string;
+  /** Units of this item already in the cart. */
+  inCart?: number;
 }) {
   return (
     <article className="flex w-40 shrink-0 flex-col rounded-t-[80px] rounded-b-card bg-parchment pb-3">
@@ -35,8 +41,13 @@ export function ArchCard({
         ) : null}
         <h3 className="line-clamp-2 min-h-10 text-secondary font-bold text-espresso">{title}</h3>
         <div className="mt-auto flex items-center justify-between">
-          <Money amount={price} className="font-display text-section font-bold text-maroon" />
-          {onAdd ? (
+          <span className="flex flex-col">
+            <Money amount={price} className="font-display text-section font-bold text-maroon" />
+            {inCart > 0 ? <span className="text-caption text-mocha">{inCart} in cart</span> : null}
+          </span>
+          {status ? (
+            <span className="rounded-pill bg-sand px-3 py-1 text-caption font-bold text-mocha">{status}</span>
+          ) : onAdd ? (
             <IconButton label={`Add ${title}`} onClick={onAdd}>
               <Plus weight="bold" size={20} aria-hidden="true" />
             </IconButton>

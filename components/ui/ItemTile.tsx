@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import type { SourceId } from "@/data/menu";
 import { initialsOf } from "@/lib/format";
+import { hasPhoto } from "@/lib/photos";
 import { SourceGlyph } from "./SourceGlyph";
 
 type Size = "sm" | "md" | "lg";
@@ -17,8 +18,9 @@ const SIZE: Record<Size, { box: string; text: string; glyph: number; corner: str
 /**
  * Item picture. Until the team adds real photos, every item shows its initials
  * ("CC" for Cold Coffee) on a `sand` square with a tiny source glyph in the
- * corner. If `public/food/<itemId>.jpg` exists it covers the tile; if it does
- * not, the tile stays. No AI-generated images (CLAUDE.md rule 10).
+ * corner. If `public/food/<itemId>.jpg` existed at build time (lib/photos.ts) it
+ * covers the tile; otherwise nothing is requested and the tile stays. No
+ * AI-generated images (CLAUDE.md rule 10).
  *
  * `fill` makes the tile take the size and shape of its parent, for the arch card.
  */
@@ -35,7 +37,8 @@ export function ItemTile({
   size?: Size;
   fill?: boolean;
 }) {
-  const [photo, setPhoto] = useState<"pending" | "loaded" | "missing">(itemId ? "pending" : "missing");
+  const listed = itemId !== undefined && hasPhoto(itemId);
+  const [photo, setPhoto] = useState<"pending" | "loaded" | "missing">(listed ? "pending" : "missing");
   const dims = fill ? "h-full w-full" : `${SIZE[size].box} rounded-tile`;
 
   return (
@@ -53,7 +56,7 @@ export function ItemTile({
           className={`absolute text-mocha ${fill ? SIZE.lg.corner : SIZE[size].corner}`}
         />
       ) : null}
-      {itemId && photo !== "missing" ? (
+      {listed && photo !== "missing" ? (
         <Image
           src={`/food/${itemId}.jpg`}
           alt={name}

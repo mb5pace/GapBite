@@ -1,8 +1,11 @@
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { BottomBar } from "@/components/student/BottomBar";
+import { CartBar, CartBarSpacer } from "@/components/student/CartBar";
+import { StudentProviders } from "@/components/student/CartProvider";
 import { Header } from "@/components/student/Header";
 import { requirePageSession } from "@/lib/auth";
+import { getMenuStateNow } from "@/lib/menu";
 import { msUntilExpiry } from "@/lib/session";
 import { greetingNow } from "@/lib/time";
 import { getUser } from "@/lib/users";
@@ -17,22 +20,28 @@ import { getBalance } from "@/lib/wallet";
 export default async function StudentLayout({ children }: { children: ReactNode }) {
   const session = await requirePageSession("student", { user: true });
   const userId = session.userId as string;
-  const [user, balance] = await Promise.all([getUser(userId), getBalance(userId)]);
+  const [user, balance, menu] = await Promise.all([getUser(userId), getBalance(userId), getMenuStateNow()]);
   if (!user) redirect("/identify");
 
   const tempMsLeft = session.codeType === "temp" ? msUntilExpiry(session) : null;
 
   return (
-    <div className="mx-auto min-h-dvh w-full max-w-[430px]">
-      <Header
-        greeting={greetingNow()}
-        name={user.name}
-        isStaff={user.role === "staff"}
-        balance={balance}
-        tempMsLeft={tempMsLeft}
-      />
-      <main className="px-5 pb-[calc(7rem+env(safe-area-inset-bottom))] pt-2">{children}</main>
-      <BottomBar unread={false} activeOrder={false} />
-    </div>
+    <StudentProviders userId={userId} initialMenu={menu}>
+      <div className="mx-auto min-h-dvh w-full max-w-[430px]">
+        <Header
+          greeting={greetingNow()}
+          name={user.name}
+          isStaff={user.role === "staff"}
+          balance={balance}
+          tempMsLeft={tempMsLeft}
+        />
+        <main className="px-5 pb-[calc(7rem+env(safe-area-inset-bottom))] pt-2">
+          {children}
+          <CartBarSpacer />
+        </main>
+        <CartBar />
+        <BottomBar unread={false} activeOrder={false} />
+      </div>
+    </StudentProviders>
   );
 }

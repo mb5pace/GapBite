@@ -158,6 +158,14 @@ export const UI_TICK_MS = 1000;
 export const COPIED_MS = 1500;
 /** Dragging a bottom sheet down by this many pixels closes it. */
 export const SHEET_DISMISS_DRAG_PX = 80;
+/** Prep time assumed for the Next break strip when the user has no source in mind yet. */
+export const DEFAULT_PREP_MIN = 5;
+/** Building used for walk times until the user picks a default in Preferences (Phase 9). */
+export const DEFAULT_BUILDING = "gict";
+/** A short message ("You can order up to 10 items") stays on screen this long. */
+export const TOAST_MS = 3000;
+/** Indian Standard Time is UTC+5:30, all year. */
+export const IST_OFFSET_MIN = 330;
 /** Greeting changes at these IST hours: before noon morning, then afternoon, then evening. */
 export const GREETING_HOURS = { afternoonFrom: 12, eveningFrom: 17 } as const;
 

@@ -180,5 +180,10 @@ export function itemsBySource(sourceId: SourceId): MenuItem[] {
   return MENU_ITEMS.filter((item) => item.sourceId === sourceId);
 }
 
+/** The slowest item on a source's menu, in minutes. Used for the Next break estimate. */
+export function slowestPrepMin(sourceId: SourceId): number {
+  return Math.max(0, ...itemsBySource(sourceId).map((item) => item.prepMin));
+}
+
 /** Vending slots in machine order (A1..A6, B1..B3, C1..C6). */
 export const VENDING_SLOTS: readonly string[] = vending.map((item) => item.slot as string);

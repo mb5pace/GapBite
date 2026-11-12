@@ -3,7 +3,7 @@
  * produced on the server, and the browser only formats or counts down from it.
  * Safe to import from client components (no Redis, no Node-only code).
  */
-import { GREETING_HOURS, TIMEZONE } from "./config";
+import { GREETING_HOURS, IST_OFFSET_MIN, TIMEZONE } from "./config";
 
 const clockParts = new Intl.DateTimeFormat("en-GB", {
   timeZone: TIMEZONE,
@@ -44,4 +44,39 @@ export function formatMsLeft(ms: number): string {
 /** The greeting for right now. Server components call this so they never read the clock themselves. */
 export function greetingNow(): string {
   return greetingFor(Date.now());
+}
+
+const dateParts = new Intl.DateTimeFormat("en-GB", {
+  timeZone: TIMEZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+/** Minutes since IST midnight, 0 to 1439. */
+export function istMinutesOfDay(ms: number): number {
+  const { hour, minute } = istParts(ms);
+  return hour * 60 + minute;
+}
+
+/** Epoch ms of IST midnight on the IST day that contains `ms`. */
+export function istMidnight(ms: number): number {
+  const parts = dateParts.formatToParts(new Date(ms));
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value ?? 0);
+  return Date.UTC(get("year"), get("month") - 1, get("day")) - IST_OFFSET_MIN * 60_000;
+}
+
+/** "11:50" on the IST day of `nowMs`, as epoch ms. */
+export function slotEpoch(slot: string, nowMs: number): number {
+  const [hour, minute] = slot.split(":").map(Number);
+  return istMidnight(nowMs) + (hour * 60 + minute) * 60_000;
+}
+
+const dayLabel = new Intl.DateTimeFormat("en-GB", { timeZone: TIMEZONE, day: "numeric", month: "short" });
+
+/** "Today 14:05", "Yesterday 09:12" or "11 Nov 14:05", for ledger rows. */
+export function formatDayTime(ms: number, nowMs: number): string {
+  const days = Math.round((istMidnight(nowMs) - istMidnight(ms)) / 86_400_000);
+  const day = days === 0 ? "Today" : days === 1 ? "Yesterday" : dayLabel.format(new Date(ms));
+  return `${day} ${formatClock(ms)}`;
 }

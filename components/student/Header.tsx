@@ -1,21 +1,29 @@
 "use client";
 
+import { ArrowLeft } from "@phosphor-icons/react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { COPY } from "@/data/copy";
+import { getSource, isSourceId } from "@/data/menu";
 import { ScanButton } from "@/components/runner/ScanButton";
 import { SessionChip } from "./SessionChip";
 import { WalletChip } from "./WalletChip";
 
 type Titles = Record<string, string>;
 
-/** The header title for a path, or null on Home (which shows the greeting). */
-export function titleFor(pathname: string): string | null {
+/** What the header shows for a path: the title (null on Home, which shows the greeting) and where Back goes, if anywhere. */
+export function routeFor(pathname: string): { title: string | null; back?: string } {
   const [first, second] = pathname.split("/").filter(Boolean);
-  if (!first || first === "home") return null;
+  const titles = COPY.student.titles as Titles;
+  if (!first || first === "home") return { title: null };
+  if (first === "s") return { title: second && isSourceId(second) ? getSource(second).name : "QuickX", back: "/home" };
+  if (first === "cart") return { title: titles.cart, back: "/home" };
+  if (first === "checkout") return { title: titles.checkout, back: "/cart" };
+  if (first === "o") return { title: titles.order, back: "/orders" };
   if (first === "account" && second) {
-    return (COPY.student.accountSections as Titles)[second] ?? COPY.student.titles.account;
+    return { title: (COPY.student.accountSections as Titles)[second] ?? titles.account, back: "/account" };
   }
-  return (COPY.student.titles as Titles)[first] ?? "QuickX";
+  return { title: titles[first] ?? "QuickX" };
 }
 
 /**
@@ -39,7 +47,7 @@ export function Header({
   pathname?: string;
 }) {
   const livePath = usePathname();
-  const title = titleFor(pathname ?? livePath);
+  const { title, back } = routeFor(pathname ?? livePath);
 
   return (
     <header className="sticky top-0 z-30 bg-cream px-5 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
@@ -58,7 +66,18 @@ export function Header({
               </h1>
             </>
           ) : (
-            <h1 className="truncate font-display text-title font-extrabold text-maroon">{title}</h1>
+            <div className="flex min-w-0 items-center gap-3">
+              {back ? (
+                <Link
+                  href={back}
+                  aria-label="Back"
+                  className="flex size-11 shrink-0 items-center justify-center rounded-pill bg-sand text-espresso transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon"
+                >
+                  <ArrowLeft weight="regular" size={22} aria-hidden="true" />
+                </Link>
+              ) : null}
+              <h1 className="line-clamp-2 break-words font-display text-title font-extrabold leading-tight text-maroon">{title}</h1>
+            </div>
           )}
         </div>
         <div className="flex shrink-0 items-center gap-2">
