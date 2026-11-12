@@ -31,6 +31,14 @@ export const TOPUP_MAX = 2000;
 /** Fake "processing" step before a top-up succeeds. */
 export const TOPUP_PROCESSING_MS = 1500;
 
+/** One Admin wallet adjustment can move at most this many rupees either way (catches typos). */
+export const ADMIN_ADJUST_MAX = 10000;
+/** The note on an Admin adjustment is required, this many characters. */
+export const ADMIN_NOTE_MIN = 3;
+export const ADMIN_NOTE_MAX = 120;
+/** Admin › Users lists at most this many people at once. */
+export const ADMIN_USERS_LIST_MAX = 50;
+
 /** Ledger and Updates are trimmed to the latest N entries (ARCHITECTURE.md Redis keys). */
 export const LEDGER_KEEP = 100;
 export const UPDATES_KEEP = 50;

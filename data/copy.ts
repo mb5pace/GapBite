@@ -1,4 +1,5 @@
-import { MAX_UNITS_PER_ORDER, MORNING_CUTOFF } from "@/lib/config";
+import { ADMIN_ADJUST_MAX, ADMIN_NOTE_MAX, ADMIN_NOTE_MIN, MAX_UNITS_PER_ORDER, MORNING_CUTOFF, TOPUP_MAX, TOPUP_MIN, WALLET_MIN_TO_USE, WALLET_SUGGESTED } from "@/lib/config";
+import { formatRupees } from "@/lib/format";
 
 /**
  * Shared UI strings. Plain, short, specific to campus (UI_UX_BIBLE.md section 8).
@@ -143,7 +144,7 @@ export const COPY = {
     codeNotUnused: "That code has already been used or removed. The list is up to date now.",
     sessionAlreadyEnded: "That session has already ended.",
     slotEmpty: "There is no permanent code in that slot.",
-    nav: { codes: "Codes", staff: "Staff" },
+    nav: { codes: "Codes", staff: "Staff", users: "Users" },
     staff: {
       title: "Staff",
       intro: "Staff sign in with any student access code, then tap \"I'm QuickX staff\" and type their ID.",
@@ -157,6 +158,47 @@ export const COPY = {
       badName: "Enter a name of 2 to 20 characters, using letters, spaces, apostrophes or hyphens.",
       full: "Every staff ID is already in use.",
     },
+  },
+} as const;
+
+/** Wallet strings. Amounts come from lib/config.ts so a rule change cannot leave the words behind. */
+export const WALLET_COPY = {
+  title: "Wallet",
+  balanceLabel: "Wallet balance",
+  topUp: "Top up",
+  activity: "Wallet activity",
+  prototypeNote: "Prototype: this is a mock UPI step. No real money moves.",
+  blockedBanner: `Top up to order. You need at least ${formatRupees(WALLET_MIN_TO_USE)} in your wallet to place an order or take a run.`,
+  lowBanner: `Keep at least ${formatRupees(WALLET_SUGGESTED)} in your wallet so orders never get stuck.`,
+  emptyLedger: "No wallet activity yet. Top up to place your first order.",
+  badAmount: `Enter an amount from ${formatRupees(TOPUP_MIN)} to ${formatRupees(TOPUP_MAX)}.`,
+  otherAmount: `Other amount (${formatRupees(TOPUP_MIN)} to ${formatRupees(TOPUP_MAX)})`,
+  processing: "Processing your UPI payment",
+  processingHint: "This takes a moment. Do not close the app.",
+  cancel: "Cancel",
+  done: "Done",
+  types: {
+    topup: "Top-up",
+    order: "Order payment",
+    refund: "Refund",
+    earning: "Runner earning",
+    penalty: "Late delivery penalty",
+    adjustment: "Adjustment by QuickX",
+  },
+  admin: {
+    title: "Users and wallets",
+    intro: "Find someone by AU number, staff ID or name. Adjust their wallet with a note; every change is written to their ledger.",
+    searchLabel: "Search by AU number, staff ID or name",
+    none: "No one matches that. Students appear here after they identify themselves.",
+    noneYet: "No one has signed in yet.",
+    amountLabel: "Amount (+ adds, − takes away)",
+    amountHint: `Whole rupees, up to ${formatRupees(ADMIN_ADJUST_MAX)} at a time. A wallet cannot go below ₹0 this way.`,
+    noteLabel: "Note (required)",
+    noteHint: `${ADMIN_NOTE_MIN} to ${ADMIN_NOTE_MAX} characters. The person sees this in their ledger.`,
+    apply: "Apply adjustment",
+    badAmount: `Enter a whole number of rupees, not zero, up to ${formatRupees(ADMIN_ADJUST_MAX)}. Use − to take money away.`,
+    badNote: `Write a note of ${ADMIN_NOTE_MIN} to ${ADMIN_NOTE_MAX} characters.`,
+    noOne: "No one has that ID.",
   },
 } as const;
 

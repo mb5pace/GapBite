@@ -7,6 +7,7 @@ import { COPY } from "@/data/copy";
 const LINKS = [
   { href: "/admin", label: COPY.admin.nav.codes },
   { href: "/admin/staff", label: COPY.admin.nav.staff },
+  { href: "/admin/users", label: COPY.admin.nav.users },
 ] as const;
 
 /** Admin header links. The open page uses the selected chip colours (UI_UX_BIBLE.md section 4). */

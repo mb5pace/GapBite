@@ -133,3 +133,22 @@ export async function listStaff(): Promise<UserRecord[]> {
   const found = await redis.mget<(UserRecord | null)[]>(...keys);
   return found.filter((u): u is UserRecord => u !== null && u.role === "staff");
 }
+
+/** Everyone who has identified themselves, newest first. `query` matches part of an ID or name. */
+export async function listUsers(query: string, limit: number): Promise<UserRecord[]> {
+  const redis = getRedis();
+  const ids = (await redis.smembers(key("users"))).map(String);
+  if (ids.length === 0) return [];
+  const records = await redis.mget<(UserRecord | null)[]>(...ids.map((id) => key("user", id)));
+  const needle = query.trim().toLowerCase();
+  return records
+    .filter((u): u is UserRecord => u !== null && typeof u === "object")
+    .filter((u) => needle === "" || u.id.toLowerCase().includes(needle) || u.name.toLowerCase().includes(needle))
+    .sort((a, b) => b.createdAt - a.createdAt || a.id.localeCompare(b.id))
+    .slice(0, limit);
+}
+
+/** An AU number or a staff ID, tidied (upper case), or null if it is neither. */
+export function normalizeAnyId(input: string): string | null {
+  return normalizeStudentId(input) ?? normalizeStaffId(input);
+}

@@ -33,9 +33,9 @@ Build in this order. One phase per session or per sitting. At the end of each ph
 - [x] Cart (one source rule), cart bar, local cart state (in memory + sessionStorage wrapped in try/catch)
 
 ## Phase 4 — Wallet
-- [ ] Wallet page, mock UPI top-up sheet, ledger
-- [ ] Balance rules and banners (₹50 block, ₹100 suggestion)
-- [ ] Admin › Users and wallet adjust
+- [x] Wallet page, mock UPI top-up sheet, ledger
+- [x] Balance rules and banners (₹50 block, ₹100 suggestion)
+- [x] Admin › Users and wallet adjust
 
 ## Phase 5 — Ordering
 - [ ] Checkout (mode, building, when, bill, pay)
@@ -90,6 +90,15 @@ Raised in Phase 3 (simplest behaviour chosen, change if wrong):
 - `/checkout` is a placeholder until Phase 5. The header gets a Back button and a title on sub-pages; long titles wrap to two lines.
 - Vending stock is created in Redis (`qx:stock`) from `startStock` the first time anyone reads it, so Phase 5's atomic decrement always finds a number.
 - Cafe "Unavailable today" switches are read from `qx:unavailable` now; the Cafe portal that writes them is Phase 6.
+
+Raised in Phase 4 (simplest behaviour chosen, change if wrong):
+- Each ledger entry also stores `balance` (the balance right after it), on top of `{ at, type, amount, orderId?, note? }` in ARCHITECTURE.md. It makes the Admin ledger and any check easy.
+- A wallet only goes negative through a late-delivery penalty (rule 7), so an Admin adjustment may not take a balance below ₹0. It can lift a negative balance, and a negative balance can only be raised, never pushed lower. One adjustment is at most ₹10,000 either way (`ADMIN_ADJUST_MAX`), and the note is required, 3 to 120 characters.
+- The fake UPI step is 1.5 s (`TOPUP_PROCESSING_MS`) and the money is added by the server after it. Closing the sheet during the fake step cancels it and nothing is added. Staff can top up like anyone else.
+- `/api/me` returns `unread: 0`, `activeOrder: false` and `prefs: null` until Phases 5 and 9 have that data. The header chip and the two tab-bar dots read it live, every 4 s.
+- Home banners: under ₹50 "Top up to order ...", ₹50 to ₹99 "Keep at least ₹100 ...", nothing at ₹100 or more. The wallet chip shows an amber dot under ₹50. A negative balance shows a proper minus (−₹30).
+- Admin › Users lists everyone who has identified themselves (newest first, up to 50), searchable by part of an AU number, staff ID or name, and refreshes every 5 s so wallets can be watched live. Quick-fill buttons +₹100, +₹300, +₹500 are a demo convenience.
+- Late-delivery penalties, order payments, refunds and runner earnings will use the same `moveMoney` function in `lib/wallet.ts`. A penalty passes no floor, so it can go negative.
 
 ## Decisions (answered, or accepted by the team as written)
 

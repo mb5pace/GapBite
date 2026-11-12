@@ -16,6 +16,7 @@ import { MenuItemRow } from "./MenuItemRow";
 import { NextBreakStrip } from "./NextBreakStrip";
 import { SearchField } from "./SearchField";
 import { SourceTile } from "./SourceTile";
+import { WalletBanner } from "./WalletBanner";
 
 const STATUS_TEXT = {
   "morning-closed": COPY.student.menu.morningOnly,
@@ -34,6 +35,7 @@ export function HomeView() {
 
   return (
     <div className="flex flex-col gap-6 pt-2">
+      <WalletBanner />
       <SearchField value={query} onChange={setQuery} />
 
       {searching ? (

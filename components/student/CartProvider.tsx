@@ -32,6 +32,7 @@ import {
 } from "@/lib/cart";
 import { createCartStore } from "@/lib/cart-store";
 import { TOAST_MS } from "@/lib/config";
+import type { MeData } from "@/lib/me";
 import { maxQtyFor, type MenuState } from "@/lib/menu-rules";
 import { useMenuState } from "./menu-state";
 
@@ -164,18 +165,20 @@ function CartScope({ userId, children }: { userId: string; children: ReactNode }
   );
 }
 
-/** Seeds the menu state from the server, then provides the cart to everything below it. */
+/** Seeds the menu state and "me" from the server, then provides the cart to everything below it. */
 export function StudentProviders({
   userId,
   initialMenu,
+  initialMe,
   children,
 }: {
   userId: string;
   initialMenu: MenuState;
+  initialMe: MeData;
   children: ReactNode;
 }) {
   return (
-    <SWRConfig value={{ fallback: { "/api/menu": initialMenu } }}>
+    <SWRConfig value={{ fallback: { "/api/menu": initialMenu, "/api/me": initialMe } }}>
       <CartScope userId={userId}>{children}</CartScope>
     </SWRConfig>
   );

@@ -100,7 +100,9 @@ lib/
   gate.ts         what a typed code opens, rate limit
   codes.ts        pool fill, burn, revoke
   users.ts        user records, Identify, staff accounts
-  wallet.ts       credit, debit, ledger (atomic)
+  wallet.ts       balance, ledger, one atomic Lua move (balance + ledger entry together)
+  wallet-rules.ts ₹50 floor, ₹100 suggestion, top-up needed, top-up bounds (pure)
+  me.ts           the shell's live numbers: name, balance, dots, session time
   orders.ts       create, transitions, guards
   late.ts         sweepLate
   updates.ts

@@ -21,7 +21,7 @@ RUNNER_EARN = { near: 5, far: 8 }
 
 1. Every user (student or staff) has one QuickX wallet. All payments come out of it: food plus delivery fee, in one debit at checkout.
 2. Top-up is a mock UPI screen (amount chips ₹50, ₹100, ₹200, ₹500 or custom ₹10–₹2000). It always succeeds after a short fake "processing" step. No real payment.
-3. New users start with ₹0. The Admin portal can add money (for demos).
+3. New users start with ₹0. The Admin portal can add or take away money with a required note (for demos). An adjustment never takes a wallet below ₹0, and is at most ₹10,000 at a time.
 4. `WALLET_MIN_TO_USE = 50`. If the balance is below ₹50, the user cannot place an order and cannot accept a run. They can still browse, top up and see their orders.
 5. `WALLET_SUGGESTED = 100`. If the balance is ₹50–₹99, show a non-blocking banner: "Keep at least ₹100 in your wallet so orders never get stuck."
 6. To place an order the balance must be at least ₹50 **and** at least the order total. After paying, the balance may drop below ₹50; that is fine.

@@ -1,46 +1,34 @@
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
-import { BottomBar } from "@/components/student/BottomBar";
 import { CartBar, CartBarSpacer } from "@/components/student/CartBar";
 import { StudentProviders } from "@/components/student/CartProvider";
-import { Header } from "@/components/student/Header";
+import { LiveBottomBar, LiveHeader } from "@/components/student/Live";
 import { requirePageSession } from "@/lib/auth";
+import { getMeNow } from "@/lib/me";
 import { getMenuStateNow } from "@/lib/menu";
-import { msUntilExpiry } from "@/lib/session";
 import { greetingNow } from "@/lib/time";
-import { getUser } from "@/lib/users";
-import { getBalance } from "@/lib/wallet";
 
 /**
  * The student shell: a persistent header and the floating bottom bar around
  * every student page, in a 430 px column on cream (UI_UX_BIBLE.md section 7).
- * The unread and active-order dots stay off until Updates and orders exist
- * (Phase 5).
+ * The wallet balance and the two tab-bar dots are live from /api/me. The dots
+ * stay off until Updates and orders exist (Phase 5).
  */
 export default async function StudentLayout({ children }: { children: ReactNode }) {
   const session = await requirePageSession("student", { user: true });
-  const userId = session.userId as string;
-  const [user, balance, menu] = await Promise.all([getUser(userId), getBalance(userId), getMenuStateNow()]);
-  if (!user) redirect("/identify");
-
-  const tempMsLeft = session.codeType === "temp" ? msUntilExpiry(session) : null;
+  const [me, menu] = await Promise.all([getMeNow(session), getMenuStateNow()]);
+  if (!me) redirect("/identify");
 
   return (
-    <StudentProviders userId={userId} initialMenu={menu}>
+    <StudentProviders userId={me.user.id} initialMenu={menu} initialMe={me}>
       <div className="mx-auto min-h-dvh w-full max-w-[430px]">
-        <Header
-          greeting={greetingNow()}
-          name={user.name}
-          isStaff={user.role === "staff"}
-          balance={balance}
-          tempMsLeft={tempMsLeft}
-        />
+        <LiveHeader greeting={greetingNow()} tempMsLeft={me.sessionMsLeft} />
         <main className="px-5 pb-[calc(7rem+env(safe-area-inset-bottom))] pt-2">
           {children}
           <CartBarSpacer />
         </main>
         <CartBar />
-        <BottomBar unread={false} activeOrder={false} />
+        <LiveBottomBar />
       </div>
     </StudentProviders>
   );
