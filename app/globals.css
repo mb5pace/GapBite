@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+/*
+  QuickX design tokens. UI_UX_BIBLE.md sections 1 to 3.
+  The only place a colour value is written. Everything else uses the utilities
+  these tokens generate (bg-cream, text-maroon, border-espresso, ...).
+  The default Tailwind palette and type scale are switched off on purpose, so
+  indigo, violet, grey and friends cannot be used by accident.
+*/
+@theme {
+  --color-*: initial;
+
+  /* Surfaces and ink */
+  --color-cream: #fffcdf;
+  --color-parchment: #f4efcf;
+  --color-sand: #eee8c6;
+  --color-blush: #dcbfb7;
+  --color-maroon: #4b2220;
+  --color-espresso: #371110;
+  --color-mocha: #6d4142;
+  --color-taupe: #8f706b;
+  --color-sun: #ffcc01;
+
+  /* Status: text, borders and small dots only */
+  --color-olive: #5c6b2e;
+  --color-amber: #b7791f;
+  --color-brick: #a3261c;
+
+  /* Shape: pills are fully rounded, the rest are not all the same */
+  --radius-*: initial;
+  --radius-pill: 9999px;
+  --radius-sheet: 28px;
+  --radius-card: 24px;
+  --radius-tile: 20px;
+  --radius-field: 16px;
+
+  /* Depth by colour. The only shadow: floating bottom bar and sheets. */
+  --shadow-*: initial;
+  --shadow-float: 0 6px 20px rgba(55, 17, 16, 0.12);
+
+  /* Type scale (mobile): greeting name, screen title, section title, body, secondary, caption */
+  --text-*: initial;
+  --text-greeting: 2rem;
+  --text-greeting--line-height: 1.25;
+  --text-title: 1.5rem;
+  --text-title--line-height: 1.25;
+  --text-section: 1.125rem;
+  --text-section--line-height: 1.25;
+  --text-body: 1rem;
+  --text-body--line-height: 1.5;
+  --text-secondary: 0.875rem;
+  --text-secondary--line-height: 1.5;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.5;
+}
+
+/* The font variables are set on <html> by next/font, so these must be inline. */
+@theme inline {
+  --font-display: var(--font-grandstander), ui-rounded, system-ui, sans-serif;
+  --font-sans: var(--font-figtree), system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  background-color: var(--color-cream);
+}
+
+body {
+  background-color: var(--color-cream);
+  color: var(--color-espresso);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+::placeholder {
+  color: var(--color-taupe);
+  opacity: 1;
+}
+
+/* Motion is functional only, and off for people who ask for less. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
