@@ -10,7 +10,7 @@ Build in this order. One phase per session or per sitting. At the end of each ph
 - [x] `data/locations.ts`, `data/breaks.ts`, `data/menu.ts` from LOCATIONS.md and MENU.md
 - [x] `lib/redis.ts` client, `.env.example`
 - [x] `/api/health` route that writes and reads one Redis key (tested against a stand-in Redis only; confirm on the real one after the next box)
-- [ ] By hand: deploy to Vercel, add Upstash for Redis, add env vars, open `/api/health` and see `"ok":true`
+- [x] By hand: deploy to Vercel, add Upstash for Redis, add env vars, open `/api/health` and see `"ok":true`
 
 ## Phase 1 — Access
 - [ ] Gate screen, `/api/auth/login`, rate limit
