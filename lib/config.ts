@@ -86,6 +86,10 @@ export const ACCESS_CODE_LENGTH = 6;
 export const ACCESS_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 /** Shown grouped as K7Q-M2X; typed without the dash. */
 export const ACCESS_CODE_GROUP_SIZE = 3;
+/** What a temporary code looks like once dashes and spaces are removed. */
+export const ACCESS_CODE_PATTERN = new RegExp(
+  `^[${ACCESS_CODE_ALPHABET}]{${ACCESS_CODE_LENGTH}}$`,
+);
 
 /** Session lifetime in minutes, by what the person typed at the gate. */
 export const SESSION_MIN = {
@@ -103,6 +107,17 @@ export const TEMP_COUNTDOWN_CHIP_MIN = 3;
 
 export const SESSION_COOKIE = "qx_session";
 
+/** QX_SESSION_SECRET must be at least this long (ACCESS.md: 32+ random characters). */
+export const SESSION_SECRET_MIN_LENGTH = 32;
+/** Longest thing the gate input accepts (a code or a password). */
+export const CODE_INPUT_MAX = 64;
+/** Only one request at a time tops up the temp pool. */
+export const POOL_LOCK_TTL_SEC = 5;
+/** Tries to find a free random code before giving up. */
+export const CODE_COLLISION_RETRIES = 5;
+/** Admin lists permanent codes as K7•••• : this many characters stay visible. */
+export const PERMANENT_CODE_MASK_VISIBLE = 2;
+
 // ---------------------------------------------------------------------------
 // Identity formats
 // ---------------------------------------------------------------------------
@@ -112,6 +127,9 @@ export const STAFF_ID_PREFIX = "QX-STF-";
 export const STAFF_ID_DIGITS = 2;
 export const FIRST_NAME_MIN = 2;
 export const FIRST_NAME_MAX = 20;
+export const STAFF_ID_PATTERN = new RegExp(
+  `^${STAFF_ID_PREFIX}\\d{${STAFF_ID_DIGITS}}$`,
+);
 
 // ---------------------------------------------------------------------------
 // Live sync (polling, not websockets)
@@ -124,6 +142,17 @@ export const POLL_MS = {
   cafe: 3000,
   admin: 5000,
 } as const;
+
+// ---------------------------------------------------------------------------
+// Small UI timings
+// ---------------------------------------------------------------------------
+
+/** Countdowns tick once a second. */
+export const UI_TICK_MS = 1000;
+/** "Copied" stays on a copy button this long. */
+export const COPIED_MS = 1500;
+/** Greeting changes at these IST hours: before noon morning, then afternoon, then evening. */
+export const GREETING_HOURS = { afternoonFrom: 12, eveningFrom: 17 } as const;
 
 // ---------------------------------------------------------------------------
 // Time and storage

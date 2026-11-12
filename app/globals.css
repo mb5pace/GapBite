@@ -38,8 +38,11 @@
   --shadow-*: initial;
   --shadow-float: 0 6px 20px rgba(55, 17, 16, 0.12);
 
-  /* Type scale (mobile): greeting name, screen title, section title, body, secondary, caption */
+  /* Type scale (mobile): greeting name, screen title, section title, body, secondary, caption.
+     Display (72) is for the gate wordmark and the Admin "show code" mode only. */
   --text-*: initial;
+  --text-display: 4.5rem;
+  --text-display--line-height: 1.1;
   --text-greeting: 2rem;
   --text-greeting--line-height: 1.25;
   --text-title: 1.5rem;
@@ -52,6 +55,11 @@
   --text-secondary--line-height: 1.5;
   --text-caption: 0.75rem;
   --text-caption--line-height: 1.5;
+
+  /* Letter-spacing is only for access codes and the 4-digit codes. */
+  --tracking-*: initial;
+  --tracking-normal: 0em;
+  --tracking-code: 0.28em;
 }
 
 /* The font variables are set on <html> by next/font, so these must be inline. */

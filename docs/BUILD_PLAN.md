@@ -13,12 +13,12 @@ Build in this order. One phase per session or per sitting. At the end of each ph
 - [x] By hand: deploy to Vercel, add Upstash for Redis, add env vars, open `/api/health` and see `"ok":true`
 
 ## Phase 1 — Access
-- [ ] Gate screen, `/api/auth/login`, rate limit
-- [ ] Session cookie (`lib/session.ts`), `middleware.ts`
-- [ ] Temp code pool fill and atomic burn (`lib/codes.ts`)
-- [ ] Identify screen (AU / staff), user records
-- [ ] Logout; temp-session countdown chip
-- [ ] Minimal Admin › Codes page so the team can get temp codes
+- [x] Gate screen, `/api/auth/login`, rate limit
+- [x] Session cookie (`lib/session.ts`), `proxy.ts` (Next.js 16 name for `middleware.ts`)
+- [x] Temp code pool fill and atomic burn (`lib/codes.ts`)
+- [x] Identify screen (AU / staff), user records
+- [x] Logout; temp-session countdown chip
+- [x] Minimal Admin › Codes page so the team can get temp codes
 
 ## Phase 2 — UI kit and student shell
 - [ ] Components from bible §4: buttons, icon button, chips, card, arch card, item tile, sheet, stepper, code boxes, banner, money, empty state
@@ -92,3 +92,17 @@ Raised in Phase 0 (simplest behaviour chosen, change if wrong):
 - Late sweep and `PLACED`: `promisedAt` is only an estimate before the cafe accepts, and FLOWS says only ACCEPTED, PREPARING, READY and PICKED_UP can fail. Phase 8 will skip `PLACED` (the buyer can cancel, or the cafe can reject).
 - Vending orders chosen for delivery: FLOWS describes one-tap "Accept and ready" for vending. Phase 6 will give delivery vending orders the same one-tap path and still print a bag slip.
 - Open Peeps illustrations (UI_UX_BIBLE §5) need to be downloaded into `public/illustrations/` and the licence checked. Needs a person at a browser; raise before Phase 2 if the team wants them in the kit.
+
+Raised in Phase 1 (simplest behaviour chosen, change if wrong):
+- Rate limit is per IP, and phones on the campus Wi-Fi share one public IP, so a few people mistyping can lock the whole room out for 10 minutes. While blocked, even a correct code is refused. Built as written in ACCESS.md. Easy to loosen in `RATE_LIMIT` in `lib/config.ts`.
+- The gate input shows what is typed, as ACCESS.md describes. The cafe and admin passwords are therefore visible on a projector when typed. Say if you want them masked.
+- Permanent codes reach the Admin page masked (`K7••••`). The full code is fetched only when an admin taps Reveal or Copy, and only with an admin session. This keeps CLAUDE.md rule 5 and still gives the "reveal" and "copy" in SCREENS.md.
+- Temp code lifecycle: used code becomes `active` for 15 minutes; Logout or Admin › End session makes it `burned`; a code whose 15 minutes ran out is shown as burned. `usedBy` is filled in when Identify finishes, because the AU number is not known at the gate.
+- Any redirect from a protected page to the gate shows "Your session has ended. Ask for a new code.", including for someone who never logged in.
+- Identify: a new AU number first answers "needs a name", then the first-name field appears. First names are letters only (2 to 20), so "Mary Ann" or "D'Souza" is refused. The name is capitalised ("riya" becomes "Riya").
+- Staff can only sign in with an ID that exists. Admin › Staff is Phase 6, so until then every staff ID is refused (tested with a hand-made staff record).
+- The student shell and `/cafe` are stubs so every login has somewhere to land. Phase 2 replaces the student top bar with the real header and bottom bar; Phase 6 builds the queue. `PillButton`, `Input`, `Badge`, `Countdown` and `LogoutButton` are the first UI-kit pieces; Phase 2 finishes the rest.
+- The countdown chip reads the session cookie's expiry (same moment as the Redis session end). `/api/me` is deferred until there is a wallet to return (Phase 4).
+- The gate has no illustration yet (Open Peeps files are not in `public/illustrations/`).
+- Added a 72 px display size and a `tracking-code` letter-spacing token to the bible, for the gate wordmark and Admin's "show code" mode.
+- Preview deployments: the four `QX_*` variables exist for Production only. Login on a preview URL fails until they are added for Preview too.

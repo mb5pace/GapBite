@@ -33,8 +33,8 @@ Text on `cream`/`parchment` is `espresso` or `maroon`. Text on `maroon` is `crea
 1. **Display:** Grandstander (Google Fonts), weights 700 and 800. Greetings, screen titles, section titles, prices on item cards, the wordmark, big codes.
 2. **Text:** Figtree (Google Fonts), weights 400, 500, 700. Everything else.
 3. Load both with `next/font/google`. No other fonts.
-4. Scale (mobile): 32 greeting name, 24 screen title, 18 section title, 16 body, 14 secondary, 12 caption. Line height 1.25 for display, 1.5 for text.
-5. Sentence case everywhere. No ALL-CAPS labels. Letter-spacing only on the access code and the 4-digit codes.
+4. Scale (mobile): 32 greeting name, 24 screen title, 18 section title, 16 body, 14 secondary, 12 caption. One larger size, 72 display, only for the gate wordmark and the Admin "show code" mode (32 on phones for the code). Line height 1.25 for display (1.1 at 72), 1.5 for text.
+5. Sentence case everywhere. No ALL-CAPS labels. Letter-spacing only on the access code and the 4-digit codes (token `tracking-code`).
 6. Numbers that change (countdowns, balances) use `font-variant-numeric: tabular-nums`.
 
 ## 3. Shape, space, depth
