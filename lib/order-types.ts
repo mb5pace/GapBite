@@ -15,7 +15,8 @@ export type OrderStatus =
   | "COLLECTED"
   | "CANCELLED"
   | "REJECTED"
-  | "FAILED_LATE";
+  | "FAILED_LATE"
+  | "NO_SHOW";
 
 export type OrderMode = "pickup" | "delivery";
 
@@ -26,6 +27,7 @@ export const TERMINAL_STATUSES: readonly OrderStatus[] = [
   "CANCELLED",
   "REJECTED",
   "FAILED_LATE",
+  "NO_SHOW",
 ];
 
 export function isTerminal(status: OrderStatus): boolean {
@@ -76,6 +78,8 @@ export interface Order {
   promisedAt?: number;
   /** Epoch ms. Set when the holder taps "I'm here" at the drop point (PICKED_UP only). */
   arrivedAt?: number;
+  /** Epoch ms. A NO_SHOW bag handed to the buyer at the counter (the status stays NO_SHOW). */
+  collectedAt?: number;
   events: OrderEvent[];
   createdAt: number;
   updatedAt: number;
@@ -220,4 +224,26 @@ export interface RunPreview {
   /** Rupees the runner earns on a confirmed handover. 0 for staff. */
   earn: number;
   staff: boolean;
+}
+
+/** The cards pinned above the cafe queue. One per settled order, kept until a staff member acts. */
+export type AlertKind = "failed" | "staff-return" | "no-show";
+
+export interface CafeAlert {
+  /** The order ID: one alert per order. */
+  id: string;
+  orderId: string;
+  kind: AlertKind;
+  /** Server time it was raised, epoch ms. */
+  at: number;
+  sourceId: SourceId;
+  buildingId?: BuildingId;
+  /** What the order cost, so "₹X refunded" can be said. */
+  total: number;
+  /** failed: whether anybody had picked it up. */
+  why?: "runner" | "before-pickup";
+  holderName?: string;
+  holderKind?: "runner" | "staff";
+  /** no-show: the buyer can collect at the counter until this time. */
+  holdUntil?: number;
 }

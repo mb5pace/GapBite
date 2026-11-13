@@ -7,6 +7,7 @@ import { getSource } from "@/data/menu";
 import { CodeBoxes } from "@/components/ui/CodeBoxes";
 import { PillButton } from "@/components/ui/PillButton";
 import { CODE_DIGITS } from "@/lib/config";
+import { isDue, isUnclaimed } from "@/lib/late-rules";
 import type { CafeCard } from "@/lib/order-types";
 import { formatClock, formatMsLeft } from "@/lib/time";
 
@@ -68,6 +69,9 @@ export function OrderCard({
   const where = card.mode === "pickup" ? copy.pickup : getBuilding(card.buildingId ?? "gict").short;
   const minutes = Math.max(0, Math.floor((now - card.createdAt) / 60_000));
   const label = (text: string) => `${text} ${card.id}`;
+  // Amber ring (a full border, never a side stripe) when it is due, or when a Ready delivery has no runner yet.
+  const due = isDue(card, now);
+  const unclaimed = isUnclaimed(card, now);
 
   let buttons: React.ReactNode = null;
   switch (card.status) {
@@ -134,7 +138,9 @@ export function OrderCard({
   return (
     <article
       aria-label={`Order ${card.id}, ${source.name}`}
-      className={`flex flex-col gap-3 rounded-card p-3 transition-colors duration-200 ${fresh ? "bg-blush" : "bg-cream"}`}
+      data-due={due ? "" : undefined}
+      data-unclaimed={unclaimed ? "" : undefined}
+      className={`flex flex-col gap-3 rounded-card p-3 transition-colors duration-200 ${fresh ? "bg-blush" : "bg-cream"} ${due || unclaimed ? "ring-2 ring-amber" : ""}`}
     >
       <header className="flex items-start justify-between gap-2">
         <div className="min-w-0">
@@ -165,7 +171,8 @@ export function OrderCard({
           <div className="flex gap-1">
             <dt>{copy.promised}</dt>
             <dd className="tabular-nums text-espresso">
-              {formatClock(card.promisedAt)} · {formatMsLeft(card.promisedAt - now)} left
+              {formatClock(card.promisedAt)} ·{" "}
+              {due ? <span className="font-bold">{CAFE_COPY.due}</span> : `${formatMsLeft(card.promisedAt - now)} left`}
             </dd>
           </div>
         ) : null}
@@ -174,6 +181,8 @@ export function OrderCard({
           <dd>{minutes === 0 ? `${copy.placed} ${copy.justNow}` : `${copy.placed} ${copy.minutesAgo(minutes)}`}</dd>
         </div>
       </dl>
+
+      {unclaimed ? <p className="text-secondary font-bold text-espresso">{CAFE_COPY.noRunner}</p> : null}
 
       {card.status === "ACCEPTED" ? (
         <p className="text-secondary font-medium text-espresso">{copy.accepted}</p>

@@ -1,7 +1,7 @@
 /**
  * Today totals for the cafe desk (docs/SCREENS.md "Today"). Server-side only.
  * Counted from IST midnight. Revenue is food only (the subtotal) for orders that
- * finished. Delivery fees kept: the whole fee when staff delivered, and the fee
+ * finished (a no-show counts: the buyer is not refunded). Delivery fees kept: the whole fee when staff delivered, and the fee
  * minus the runner's earning when a runner buddy delivered.
  */
 import { SOURCES, type SourceId } from "@/data/menu";
@@ -19,6 +19,8 @@ export interface TodayTotals {
   delivered: number;
   collected: number;
   failed: number;
+  /** Deliveries the buyer missed: the money stays, the bag came back. */
+  noShow: number;
   closedEarly: number;
   refundCount: number;
   refundTotal: number;
@@ -45,6 +47,7 @@ export async function getTodayTotals(now: number): Promise<TodayTotals> {
     delivered: 0,
     collected: 0,
     failed: 0,
+    noShow: 0,
     closedEarly: 0,
     refundCount: 0,
     refundTotal: 0,
@@ -58,16 +61,17 @@ export async function getTodayTotals(now: number): Promise<TodayTotals> {
       totals.inProgress++;
       continue;
     }
-    if (order.status === "DELIVERED" || order.status === "COLLECTED") {
+    if (order.status === "DELIVERED" || order.status === "COLLECTED" || order.status === "NO_SHOW") {
       if (order.status === "DELIVERED") totals.delivered++;
-      else totals.collected++;
+      else if (order.status === "COLLECTED") totals.collected++;
+      else totals.noShow++;
       const row = totals.bySource.find((r) => r.sourceId === order.sourceId);
       if (row) {
         row.finished++;
         row.revenue += order.subtotal;
       }
       totals.revenueTotal += order.subtotal;
-      if (order.status === "DELIVERED") {
+      if (order.status === "DELIVERED" || order.status === "NO_SHOW") {
         const zone = order.buildingId ? getBuilding(order.buildingId).zone : "near";
         totals.feesKept += order.holder?.kind === "runner" ? order.fee - RUNNER_EARN[zone] : order.fee;
       }

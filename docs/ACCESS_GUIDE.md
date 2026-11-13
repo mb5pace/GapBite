@@ -19,6 +19,7 @@ Production site: **https://quickx-gapbite.vercel.app**
 | Admin codes | https://quickx-gapbite.vercel.app/admin | admin session |
 | Admin staff | https://quickx-gapbite.vercel.app/admin/staff | admin session |
 | Admin users and wallets | https://quickx-gapbite.vercel.app/admin/users | admin session |
+| Admin live orders (every order in progress, refreshed every 5 seconds, Copy order ID, Reveal code) | https://quickx-gapbite.vercel.app/admin/orders | admin session |
 | UI kit (every component) | https://quickx-gapbite.vercel.app/kit | admin session |
 | Health check | https://quickx-gapbite.vercel.app/api/health | anyone (shows `"ok":true` when the database answers) |
 
@@ -61,7 +62,7 @@ On the phone:
 3. Type the staff ID in "Your staff ID" (`QX-STF-01`) and tap **Continue**.
 4. You land on Home with a **Staff** badge next to your name. Staff have a wallet like everyone else, and show up in the **Send with staff** list on the Cafe desk.
 
-Staff can carry a delivery from the Cafe desk today. Scanning a bag with the phone and entering the buyer's handover code come in Phase 7.
+Staff carry deliveries in two ways. The Cafe desk can give a bag to them (**Send with staff**), or they can scan a bag themselves with **Scan a bag** and tap **Accept as staff delivery**. Either way the order shows under **Orders › My runs** on their phone, where they tap **I'm here** and **Enter code**. Staff deliveries earn nothing, and staff are not held to the ₹50 balance or the 3-run limit.
 
 ## 4. Hand a temporary code to someone else
 
@@ -73,38 +74,52 @@ Staff can carry a delivery from the Cafe desk today. Scanning a bag with the pho
 
 A code nobody uses never expires. For a team phone that should stay logged in all day, use a permanent code instead.
 
-## 5. Five-minute test: one pickup order and one staff delivery order
+## 5. Five-minute test: a runner delivery, a staff delivery and a late order
 
-You need: the laptop with the Cafe desk, one phone, a staff ID (section 3), and the codes from section 2. Orders and wallet money you create stay in the database; there is no reset button until Phase 10.
+You need: the laptop with the Cafe desk (Chrome, logged in with **QX_CAFE_PASSWORD**), a second browser or tab logged in as Admin on **Admin › Live orders** (https://quickx-gapbite.vercel.app/admin/orders), **two phones** (one is the buyer, one is the runner buddy; a laptop browser works as a stand-in), a staff ID (section 3) and the codes from section 2. Orders and wallet money you create stay in the database; there is no reset button until Phase 10.
 
-**Before you start (once).**
-- Laptop, Chrome: open the gate, type **QX_CAFE_PASSWORD**, you land on the queue. Click once anywhere on the page so the browser allows the new-order sound. The sound switch in the header says "Sound on".
-- Phone: open the gate, type a code from **QX_PERMANENT_CODES**, give your AU number and first name. Tap the ₹ amount at the top (it opens your Wallet), tap **Top up**, pick ₹500, tap **Pay ₹500 with UPI** (a mock step, about 2 seconds, no real money).
+**Before you start (once, 1 minute).**
+- Laptop, Chrome: click once anywhere on the Cafe page so the browser allows the new-order sound. The sound switch says "Sound on".
+- Buyer phone: open the gate, type a code from **QX_PERMANENT_CODES**, give your AU number and first name. Tap the ₹ amount at the top, tap **Top up**, pick ₹500, tap **Pay ₹500 with UPI** (a mock step, about 2 seconds, no real money).
+- Runner phone: a different code and a different AU number. Top up ₹500 too (a runner needs at least ₹50 in the wallet to take a bag).
+- Start the **late order first** (below, steps L1 to L3), because it needs a few minutes to run out. Do the two deliveries while it waits.
 
-**Pickup order (about 2 minutes).**
-1. Phone: Home › **Cafe Delice** › tap **+** on Cold Coffee and on Chilli Garlic Cheese Sandwich › **View cart** › **Checkout**.
-2. Phone: choose **Pick up at UC**, **As soon as possible**, tap **Pay ₹180 from wallet**. You land on the order page: steps, a large 4-digit code ("Show this code at the counter") and the promised time.
-3. Laptop: within 3 seconds the order appears under **New**, highlighted for 5 seconds, with a soft chime. Click **Accept**. It moves to **Preparing**.
-4. Phone (updates every few seconds): "Cafe Delice accepted your order". Open the **Updates** tab to see the same words.
-5. Laptop: **Start preparing**, then **Mark ready**. The **bag slip** opens with a QR code and "PICKUP". Click **Print** to see the print preview, then **Close**. The card is now under **Ready**.
-6. Phone: "Ready at the Cafe Delice counter". Read the 4-digit code.
-7. Laptop: type the code into the four boxes on the card and click **Collect**. (A wrong code says "Code does not match.")
-8. Phone: "Collected. Enjoy!" The order moves to **Past** on the Orders tab.
+**A. Student runner delivery (about 2 minutes).**
+1. Buyer phone: Home › **Global Bistro** › **+** on Veg Burger › **View cart** › **Checkout** › **Deliver to my building** › **GICT** › **As soon as possible** › **Pay ₹75 from wallet**. Keep the order page open: it shows a 4-digit code, "Show this code to your runner".
+2. Laptop: **Accept**, **Start preparing**, **Mark ready**. The bag slip opens with a QR code. Close it. The card sits under **Ready**. (After 3 minutes with nobody taking it the card turns amber: "No runner yet, send with staff?")
+3. Runner phone: Home › **Scan a bag**. Point the camera at the QR on the laptop, or tap **Type order ID instead**, type the order ID (for example `QX-4821`) and tap **Look up**. The preview says "Deliver to GICT, ground floor lobby", "Deliver by HH:MM" and "You earn ₹5". Tap **Accept run**.
+4. Buyer phone: "Out for delivery to GICT", "Runner buddy: <name>". Laptop: the card moves to **Out for delivery**: "Carried by <name> · Runner buddy".
+5. Runner phone: Orders tab › **My runs**. Tap **I'm here**. The buyer phone now says "Runner is waiting at ground floor lobby" and Updates says "Your runner is at GICT ground floor lobby. Show your code."
+6. Runner phone: tap **Enter code**, type the buyer's 4 digits, tap **Confirm delivery**. A wrong code says "Code does not match" and lets you try again. The right code says "Delivered. ₹5 added to your wallet."
+7. Check: the buyer's order is Delivered and in **Past**. The runner's wallet went up ₹5. The laptop card is gone from the queue. Admin › Live orders no longer lists it.
 
-**Staff delivery order (about 2 minutes).**
-1. Phone: Home › **Global Bistro** › **+** on Veg Burger › **View cart** › **Checkout**.
-2. Phone: choose **Deliver to my building**, **GICT** (drop point, walk time and the ₹5 fee are shown), **As soon as possible**, tap **Pay ₹75 from wallet**.
-3. Laptop: **Accept**, **Start preparing**, **Mark ready**. The bag slip says "Deliver to GICT, ground floor lobby". Close it.
-4. Laptop: on the Ready card click **Send with staff**, then pick the staff ID you made (`QX-STF-01 · Ramesh`). The card moves to **Out for delivery**: "Carried by Ramesh · QuickX staff".
-5. Phone: "Out for delivery to GICT" and "QuickX staff"; Updates shows "Picked up by QuickX staff."
+**B. Staff delivery (about 1.5 minutes).**
+1. Buyer phone: order a Veg Burger to GICT again (same steps as A1). Laptop: **Accept**, **Start preparing**, **Mark ready**, close the bag slip.
+2. Laptop: on the Ready card click **Send with staff** and pick the staff ID you made (`QX-STF-01 · Ramesh`). The card moves to **Out for delivery**: "Carried by Ramesh · QuickX staff".
+3. Staff phone (log in with the staff ID, section 3): Orders tab › **My runs** shows the order with the building, drop point, the buyer's first name and a countdown. Tap **I'm here**, then **Enter code**, type the buyer's 4 digits, **Confirm delivery**. It says "Delivered." and no money is added.
+4. Check: the buyer's order is Delivered, the card leaves the laptop queue, and nobody's wallet changed except the buyer's (₹75 paid).
 
-The delivery order stays at "Out for delivery". The step that marks it Delivered (the runner or staff member typing your handover code) is Phase 7.
+**L. A late order (start it first; the failure comes about 12 minutes after you press Accept).**
+1. Buyer phone: order a Veg Burger to GICT. Laptop: **Accept**, **Start preparing**, **Mark ready**. Note the **Promised** time on the card (about 7 minutes after you accepted it).
+2. Runner phone: **Scan a bag**, type the order ID, **Accept run**. Then do **not** tap I'm here and do not enter the code.
+3. Go and do A and B. At the promised time the order turns amber **Due now** in four places: the runner's My runs card, the laptop's Out for delivery card, the buyer's order page and Admin › Live orders.
+4. Five minutes after the promised time the order fails by itself (no button, the next screen refresh settles it):
+   - Laptop: a red card **Failed late**: "QX-… failed late: <runner> did not deliver it in time. ₹75 refunded." Click **Seen** to clear it.
+   - Buyer phone: "Could not reach GICT in time", ₹75 back in the wallet, and an Update "Your order could not reach GICT in time. ₹75 has been refunded to your wallet."
+   - Runner phone: ₹75 comes out of the wallet (it can go below zero, and then the runner must top up to ₹50 before taking another bag). Update: "Run QX-… was not delivered in time. ₹75 has been deducted from your wallet. The food is yours to keep."
+5. Variations, if you have a few more minutes:
+   - **Staff late:** do L1, then on the laptop **Send with staff** instead of step 2 and wait. The buyer is refunded, no wallet is debited, and the laptop shows a red **Staff returning QX-… to Global Bistro** card. Click **Returned** when the bag is back.
+   - **Buyer no-show:** do L1 and L2, then on the runner phone tap **I'm here** before the promised time. Do not enter the code. When grace ends the laptop shows an amber **No-show** card: "Buyer did not collect QX-…, keep at counter", with a 30-minute hold and four boxes. The runner still earns ₹5, the buyer is not refunded, and the buyer's page says "You missed your runner at GICT. Collect QX-… at the Global Bistro counter with your code." Type the buyer's code into the four boxes and click **Collect** to hand the bag over.
+   - **Never picked up:** accept an order on the laptop and then leave it. It fails with "nobody picked it up in time" and the buyer is refunded in full.
+
+**Admin › Live orders** shows every one of these while it happens: the order ID in large type, its status, who carries it, the promised time with a countdown (amber when due) and when the runner tapped "I'm here". **Copy order ID** puts the ID on the clipboard, which is handy for typing it into the runner phone. **Reveal code** shows that one order's 4-digit code to the admin session only. That is a demo tool so you can finish a delivery without the buyer's phone in your hand; it is never part of the list the browser downloads.
 
 **Check the numbers (30 seconds).**
-- Laptop: click **Today**. Two orders placed, one collected, one in progress, Cafe Delice revenue ₹180 (the page counts every order since midnight, so earlier tests add to these numbers).
-- Phone: tap the ₹ amount at the top. The Wallet page lists the top-up and both payments, newest first, and the balance after the pickup and delivery is ₹500 − ₹180 − ₹75 = ₹245.
+- Laptop: click **Today**. It counts orders placed, finished, failed late and missed deliveries (no-shows), and the revenue (food only, for orders that finished; a no-show counts, because the buyer is not refunded).
+- Each phone: tap the ₹ amount at the top. The Wallet page lists every top-up, payment, refund, earning and penalty, newest first.
 
 **Extras if you have time.**
+- Pickup: Home › **Cafe Delice** › **+** on Cold Coffee › **Checkout** › **Pick up at UC**. On the laptop **Accept**, **Start preparing**, **Mark ready**, then type the buyer's 4-digit code into the four boxes on the Ready card and click **Collect**. A wrong code says "Code does not match."
 - Cancel: place any order and tap **Cancel order** on the phone before the laptop accepts it. The money comes back and the page says so.
 - Reject: place one, and on the laptop click **Reject**, pick a reason. The phone shows the reason and the refund.
 - Vending: on the phone order a Paper Boat from **UC Vending Machine** (pick up), on the laptop click **Accept and ready**, then open **Vending › Open the kiosk**, type the phone's 4-digit code on the keypad and watch the slot light up.

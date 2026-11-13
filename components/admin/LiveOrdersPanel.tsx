@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, EyeSlash, Receipt } from "@phosphor-icons/react";
+import { Eye, EyeSlash, Receipt, Warning } from "@phosphor-icons/react";
 import { useState } from "react";
 import useSWR from "swr";
 import { getBuilding } from "@/data/locations";
@@ -14,6 +14,7 @@ import { PillButton } from "@/components/ui/PillButton";
 import { SourceGlyph } from "@/components/ui/SourceGlyph";
 import { useServerNow } from "@/components/ui/useServerNow";
 import { POLL_MS } from "@/lib/config";
+import { isDue } from "@/lib/late-rules";
 import { getJson, postJson } from "@/lib/http";
 import { formatClock, formatMsLeft } from "@/lib/time";
 import type { LiveOrderRow } from "@/lib/admin-live";
@@ -29,6 +30,7 @@ const COPY = {
   intro: "Every order in progress, refreshed every 5 seconds. Reveal code is a demo tool: it shows one order's 4-digit code to this admin session only.",
   empty: "No orders in progress. Orders placed from the student app show up here.",
   noHolder: "No runner yet",
+  due: "Due now",
   pickup: "Pickup at UC",
   promised: "Promised",
   left: "left",
@@ -44,8 +46,9 @@ function Row({ order, now, code, onToggle, busy }: { order: LiveOrderRow; now: n
   const source = getSource(order.sourceId);
   const building = order.buildingId ? getBuilding(order.buildingId) : null;
   const msLeft = order.promisedAt !== undefined ? order.promisedAt - now : null;
+  const due = isDue(order, now);
   return (
-    <li className="flex flex-col gap-3 rounded-card bg-parchment p-4">
+    <li data-due={due ? "" : undefined} className={`flex flex-col gap-3 rounded-card bg-parchment p-4 ${due ? "ring-2 ring-amber" : ""}`}>
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
         <div className="min-w-44">
           <p className="font-display text-greeting font-extrabold tabular-nums text-maroon">{order.id}</p>
@@ -80,7 +83,16 @@ function Row({ order, now, code, onToggle, busy }: { order: LiveOrderRow; now: n
             <span className="text-mocha">{COPY.promised} </span>
             <span className="tabular-nums">{formatClock(order.promisedAt)}</span>
             <span className="text-mocha"> · </span>
-            <span className="tabular-nums">{formatMsLeft(Math.max(0, msLeft))}</span> {COPY.left}
+            {due ? (
+              <span className="inline-flex items-center gap-1 font-bold">
+                <Warning size={16} weight="regular" className="text-amber" aria-hidden="true" />
+                {COPY.due}
+              </span>
+            ) : (
+              <>
+                <span className="tabular-nums">{formatMsLeft(Math.max(0, msLeft))}</span> {COPY.left}
+              </>
+            )}
           </p>
         ) : null}
         <span className="ml-auto flex items-center gap-2">

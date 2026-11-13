@@ -1,6 +1,6 @@
 "use client";
 
-import { Receipt } from "@phosphor-icons/react";
+import { Receipt, Warning } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
@@ -15,6 +15,7 @@ import { PillButton, PillLink } from "@/components/ui/PillButton";
 import { useRunner } from "@/components/runner/RunnerProvider";
 import { SourceGlyph } from "@/components/ui/SourceGlyph";
 import { POLL_MS } from "@/lib/config";
+import { isDue } from "@/lib/late-rules";
 import { getJson, postJson } from "@/lib/http";
 import { isTerminal, type OrderSummary, type RunCard } from "@/lib/order-types";
 import { formatClock, formatDayTime, formatMsLeft } from "@/lib/time";
@@ -49,7 +50,7 @@ function RunItem({ run, now }: { run: RunCard; now: number }) {
   }
 
   return (
-    <li className="flex flex-col gap-3 rounded-card bg-parchment p-4">
+    <li data-due={due ? "" : undefined} className={`flex flex-col gap-3 rounded-card bg-parchment p-4 ${due ? "ring-2 ring-amber" : ""}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-display text-section font-bold text-maroon">
@@ -61,8 +62,11 @@ function RunItem({ run, now }: { run: RunCard; now: number }) {
           </p>
         </div>
         {run.promisedAt !== undefined ? (
-          <p className="shrink-0 text-right font-display text-section font-bold tabular-nums text-maroon">
-            {due ? RUN_COPY.dueNow : formatMsLeft(remaining)}
+          <p className="flex shrink-0 flex-col items-end text-right font-display text-section font-bold tabular-nums text-maroon">
+            <span className="flex items-center gap-2">
+              {due ? <Warning size={20} weight="regular" className="text-amber" aria-hidden={true} /> : null}
+              {due ? RUN_COPY.dueNow : formatMsLeft(remaining)}
+            </span>
             <span className="block font-sans text-caption font-medium text-mocha">{due ? "" : RUN_COPY.left}</span>
           </p>
         ) : null}
@@ -86,11 +90,13 @@ function RunItem({ run, now }: { run: RunCard; now: number }) {
 
 function OrderCard({ order, now }: { order: OrderSummary; now: number }) {
   const promised = isTerminal(order.status) ? null : promisedLine(order);
+  const due = isDue(order, now);
   return (
     <li>
       <Link
         href={`/o/${order.id}`}
-        className="flex flex-col gap-2 rounded-card bg-parchment p-4 transition-transform duration-150 ease-out active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon"
+        data-due={due ? "" : undefined}
+        className={`flex flex-col gap-2 rounded-card bg-parchment p-4 ${due ? "ring-2 ring-amber" : ""} transition-transform duration-150 ease-out active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon`}
       >
         <span className="flex items-center justify-between gap-3">
           <span className="flex min-w-0 items-center gap-2 font-display text-section font-bold text-maroon">

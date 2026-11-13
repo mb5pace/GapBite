@@ -8,6 +8,7 @@ import {
   Receipt,
   ShoppingBag,
   Storefront,
+  Warning,
   X,
 } from "@phosphor-icons/react";
 import { useState, type ComponentType } from "react";
@@ -18,7 +19,7 @@ import { ORDER_COPY, ORDER_DETAIL_COPY, RUN_COPY, codeInstruction, endedBanner, 
 import { Banner } from "@/components/ui/Banner";
 import { Card } from "@/components/ui/Card";
 import { CodeBoxes } from "@/components/ui/CodeBoxes";
-import { useCountdown } from "@/components/ui/Countdown";
+import { useServerNow } from "@/components/ui/useServerNow";
 import { Money } from "@/components/ui/Money";
 import { PillButton } from "@/components/ui/PillButton";
 import { Sheet } from "@/components/ui/Sheet";
@@ -27,6 +28,7 @@ import { Stepper, type StepperStep } from "@/components/ui/Stepper";
 import { POLL_MS } from "@/lib/config";
 import { formatRupees } from "@/lib/format";
 import { getJson, postJson } from "@/lib/http";
+import { isDue, noShowHold } from "@/lib/late-rules";
 import { isTerminal, stepsFor, type Order, type OrderStatus } from "@/lib/order-types";
 import { formatClock, formatMsLeft } from "@/lib/time";
 
@@ -48,6 +50,7 @@ const STEP_ICON: Record<OrderStatus, IconType> = {
   CANCELLED: X,
   REJECTED: X,
   FAILED_LATE: X,
+  NO_SHOW: X,
 };
 
 const STEP_LABEL: Record<OrderStatus, string> = {
@@ -61,6 +64,7 @@ const STEP_LABEL: Record<OrderStatus, string> = {
   CANCELLED: "Cancelled",
   REJECTED: "Rejected",
   FAILED_LATE: "Failed late",
+  NO_SHOW: "Missed delivery",
 };
 
 /** Builds the tracker: steps reached are done, the current one has the sun ring, an early end is a brick node. */
@@ -72,7 +76,7 @@ export function buildSteps(order: Order): StepperStep[] {
     return <Icon weight="regular" size={20} aria-hidden={true} />;
   };
 
-  if (order.status === "CANCELLED" || order.status === "REJECTED" || order.status === "FAILED_LATE") {
+  if (order.status === "CANCELLED" || order.status === "REJECTED" || order.status === "FAILED_LATE" || order.status === "NO_SHOW") {
     const steps: StepperStep[] = planned
       .filter((status) => reached.has(status))
       .map((status) => ({ label: STEP_LABEL[status], state: "done", time: formatClock(reached.get(status) as number), icon: iconFor(status) }));
@@ -90,21 +94,36 @@ export function buildSteps(order: Order): StepperStep[] {
 }
 
 function PromisedTime({ order, now }: { order: Order; now: number }) {
-  const msLeft = Math.max(0, (order.promisedAt ?? now) - now);
-  const remaining = useCountdown(msLeft);
+  // `now` is the server's clock, already ticking once a second (useServerNow), so the countdown reads it directly.
+  const remaining = Math.max(0, (order.promisedAt ?? now) - now);
   const line = promisedLine(order);
   if (!line) return null;
+  // Amber ring (a full border) and an amber icon from the promised time until grace ends. Past that it has failed.
+  const due = remaining <= 0 && isDue(order, now);
   return (
-    <div className="flex items-start justify-between gap-3 rounded-card bg-parchment p-4">
+    <div data-due={due ? "" : undefined} className={`flex items-start justify-between gap-3 rounded-card bg-parchment p-4 ${due ? "ring-2 ring-amber" : ""}`}>
       <div>
         <p className="text-secondary font-medium text-mocha">{ORDER_DETAIL_COPY.promised}</p>
         <p className="text-body font-medium text-espresso">{line}</p>
       </div>
-      <p className="shrink-0 text-right font-display text-section font-bold tabular-nums text-maroon" aria-live="off">
+      <p className="flex shrink-0 items-center gap-2 text-right font-display text-section font-bold tabular-nums text-maroon" aria-live="off">
+        {due ? <Warning size={20} weight="regular" className="text-amber" aria-hidden={true} /> : null}
         {remaining <= 0 ? ORDER_DETAIL_COPY.dueNow : formatMsLeft(remaining)}
       </p>
     </div>
   );
+}
+
+/**
+ * How often to ask again. A finished order needs no more polling, except a no-show the buyer can still collect (the
+ * cafe may hand it over). This lives outside the component on purpose: SWR restarts its timer whenever the function
+ * it is given is a new one, and this page re-renders every second to keep the clock, so an inline function would
+ * restart the timer before it ever fired.
+ */
+function pollEvery(latest?: OrderReply): number {
+  if (!latest) return POLL_MS.student;
+  const finished = isTerminal(latest.order.status);
+  return finished && noShowHold(latest.order, latest.now)?.open !== true ? 0 : POLL_MS.student;
 }
 
 /**
@@ -116,14 +135,17 @@ export function OrderView({ initial }: { initial: OrderReply }) {
   const { mutate } = useSWRConfig();
   const { data, mutate: refresh } = useSWR<OrderReply>(`/api/orders/${initial.order.id}`, getJson, {
     fallbackData: initial,
-    refreshInterval: (latest) => (latest && isTerminal(latest.order.status) ? 0 : POLL_MS.student),
+    refreshInterval: pollEvery,
     revalidateOnFocus: true,
     keepPreviousData: true,
   });
-  const { order, now } = data ?? initial;
+  const { order, now: replyNow } = data ?? initial;
+  const now = useServerNow(replyNow);
   const source = getSource(order.sourceId);
   const ended = endedBanner(order);
-  const showCode = !isTerminal(order.status);
+  // A missed delivery: the buyer can still collect at the counter with the same code until the hold ends.
+  const hold = noShowHold(order, now);
+  const showCode = !isTerminal(order.status) || hold?.open === true;
 
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -156,6 +178,16 @@ export function OrderView({ initial }: { initial: OrderReply }) {
 
       {ended ? <Banner tone={ended.tone}>{ended.text}</Banner> : null}
 
+      {hold ? (
+        <Banner tone={hold.open ? "warning" : "info"}>
+          {order.collectedAt !== undefined
+            ? ORDER_DETAIL_COPY.noShowCollected
+            : hold.open
+              ? `${ORDER_DETAIL_COPY.noShowCollect(order.id, source.name)} ${ORDER_DETAIL_COPY.holdUntil(formatClock(hold.until))}.`
+              : ORDER_DETAIL_COPY.noShowHoldEnded(order.id)}
+        </Banner>
+      ) : null}
+
       {order.status === "PICKED_UP" && order.arrivedAt !== undefined && order.buildingId ? (
         <Banner>{RUN_COPY.runnerWaiting(getBuilding(order.buildingId).dropPoint)}</Banner>
       ) : null}
@@ -164,8 +196,8 @@ export function OrderView({ initial }: { initial: OrderReply }) {
 
       {showCode ? (
         <Card className="flex flex-col items-center gap-3 p-5">
-          <p className="text-body font-medium text-espresso">{codeInstruction(order)}</p>
-          <CodeBoxes value={order.code} label={order.mode === "delivery" ? "Handover code" : "Collect code"} />
+          <p className="text-body font-medium text-espresso">{hold ? ORDER_DETAIL_COPY.noShowCode : codeInstruction(order)}</p>
+          <CodeBoxes value={order.code} label={order.mode === "delivery" && !hold ? "Handover code" : "Collect code"} />
         </Card>
       ) : null}
 

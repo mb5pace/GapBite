@@ -1,5 +1,6 @@
 import { ORDER_COPY } from "@/data/order-copy";
 import { AppError, handle, ok } from "@/lib/api";
+import { sweepLate } from "@/lib/late";
 import { requireApiSession } from "@/lib/auth";
 import { getOrderForBuyer } from "@/lib/orders";
 
@@ -15,6 +16,7 @@ export async function GET(_req: Request, ctx: RouteContext<"/api/orders/[id]">) 
   return handle(async () => {
     const session = await requireApiSession("student", { user: true });
     const { id } = await ctx.params;
+    await sweepLate(Date.now());
     const found = await getOrderForBuyer(id, session.userId as string);
     if (!found) throw new AppError(404, ORDER_COPY.noSuchOrder);
     return ok(found);

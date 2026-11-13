@@ -8,6 +8,7 @@ import { Chip } from "@/components/ui/Chip";
 import { TOAST_MS } from "@/lib/config";
 import { postJson } from "@/lib/http";
 import { columnOf, type CafeCard, type QueueColumnId } from "@/lib/order-types";
+import { AlertStrip } from "./AlertStrip";
 import { BagSlipDialog } from "./BagSlipDialog";
 import { OrderCard } from "./OrderCard";
 import { useQueue } from "./QueueProvider";
@@ -93,6 +94,7 @@ export function QueueView() {
 
       {queue.stale ? <Banner tone="warning">{CAFE_COPY.queueError}</Banner> : null}
       {notice ? <Banner>{notice}</Banner> : null}
+      <AlertStrip />
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4" aria-busy={queue.loading}>
         {COLUMNS.map((column) => {

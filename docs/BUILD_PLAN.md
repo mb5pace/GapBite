@@ -79,11 +79,11 @@ What was checked, and what it found and fixed.
 - [x] Admin › Live orders with Reveal code (pulled forward from Phase 10)
 
 ## Phase 8 — Late handling
-- [ ] Promised time math (`lib/time.ts`), countdowns, amber due state in buyer, runner, cafe and Admin views
-- [ ] `sweepLate` with penalty lock: `FAILED_LATE` (runner debited, staff, before pickup) and `NO_SHOW`, refunds, Updates
-- [ ] Cafe alert cards (Seen, Returned, no-show collect), 3-minute "No runner yet" highlight
-- [ ] Settle the two old staff orders QX-2959 and QX-3846 on the first sweep
-- [ ] Test: let each kind of late order expire on purpose and check every wallet, ledger entry, Update and screen
+- [x] Promised time math (`lib/time.ts`, `lib/late-rules.ts`), countdowns, amber due state in buyer, runner, cafe and Admin views
+- [x] `sweepLate` with penalty lock: `FAILED_LATE` (runner debited, staff, before pickup) and `NO_SHOW`, refunds, Updates
+- [x] Cafe alert cards (Seen, Returned, no-show collect), 3-minute "No runner yet" highlight
+- [x] Settle the two old staff orders QX-2959 and QX-3846 on the first sweep (tested with orders of the same shape: sent with staff, overdue by hours, in nobody's run list)
+- [x] Test: let each kind of late order expire on purpose and check every wallet, ledger entry, Update and screen
 
 ## Phase 9 — Account and Discover
 - [ ] Profile, Preferences, Notifications, Order History, Refund Status, Terms, Feedback, Support
@@ -105,7 +105,7 @@ Raised in Phase 6 (the docs were silent, simplest behaviour kept until answered)
 - Send with staff tells the buyer exactly "Picked up by QuickX staff." (FLOWS wording). It does not add "On the way to GICT" as the runner version does.
 - A vending pickup is collected only at the kiosk. Its Ready card says "Waiting for the buyer at the vending kiosk." and has no Collect box. If two ready vending pickups share a code, the older one is dispensed first.
 - The kiosk locks for a minute after 5 wrong codes (`KIOSK_RATE_LIMIT`) so nobody can walk up and guess. While locked even the right code is refused, as at the gate.
-- The amber "due" border, the 3-minute "no runner yet" highlight and the red failed-order cards are Phase 8 in this plan, so they are not built. The promised-time countdown stops at 0:00.
+- The amber "due" border, the 3-minute "no runner yet" highlight and the red failed-order cards were left for Phase 8, and are built there.
 - Staff delivery stops at "Out for delivery" until Phase 7 adds the handover code entry that marks an order DELIVERED.
 - Browsers only allow sound after one tap on the page, so the desk shows "Click once on this page so the browser allows sound." beside the sound switch until then.
 - Today: "orders placed" counts orders placed since IST midnight. Revenue is the food subtotal of finished orders. Delivery fees kept = the whole fee for a staff delivery, the fee minus the runner's earning for a runner delivery. Refunds count cancelled, rejected and failed orders.
@@ -121,6 +121,18 @@ Raised in Phase 7 (the docs were silent, simplest behaviour kept until answered)
 - **Run lists:** `qx:runs:live:<id>` is the source for My runs and the 3-run limit. A check that runs when the lists are read adds any held order the list is missing, so orders the cafe gave to staff before runs existed still appear.
 - **The Orders tab dot** also lights while you carry a run, not only while you have an order of your own.
 - **Escape in sheets** now works wherever focus is (it used to need focus inside the sheet).
+
+Raised in Phase 8 (the docs were silent, simplest behaviour kept until answered):
+- **Grace, to the second:** an order is overdue when the server's time is at or after the promised time + 5 minutes (`GRACE_MIN`). An on-time "I'm here" is one at or before the promised time; arriving exactly on the minute counts as on time.
+- **No-show beats late:** if the holder tapped "I'm here" on time, the order is a no-show whoever carries it, even when the buyer was the one who was late. A runner who arrives after the promised time is late (rule 2c) even if they were waiting when grace ended.
+- **No-show money:** the buyer is not refunded and the order counts as revenue on Cafe › Today. A student runner is paid the usual ₹5 (₹8 far zone); staff earn nothing. The bag stays at the source counter and the vending items are **not** put back (the bag exists).
+- **Failed-late stock:** when the food is not kept by a runner (staff late, or late before pickup), vending items go back into the machine count. When a student runner keeps the food, they do not.
+- **A cafe alert stays until someone acts:** failed-late alerts need **Seen**; staff-returning alerts need **Returned**; a no-show needs the buyer's code (**Collect**) or, once the 30-minute hold ends, **Seen**. Seen is refused while the buyer can still collect ("The buyer can still collect it until HH:MM.").
+- **Collecting a no-show bag** only stamps `collectedAt` and sends "Collected. Enjoy!"; the status stays `NO_SHOW` and no money moves.
+- **Buyer page for a no-show:** shows the code and "Hold until HH:MM" while the hold is open, then "The hold on QX-NNNN has ended. Nothing was refunded."
+- **Wallet below zero:** a runner who was late can go negative. They cannot take another run until they top up to ₹50 (existing rule).
+- **Polling:** the sweep runs at most once a second, at the start of the cafe queue poll, the buyer's order list and order page, the runner's runs and Admin › Live orders, so it does not need a cron job.
+- **SWR note for later screens:** a `refreshInterval` function must be defined outside the component if the component re-renders every second (it restarts SWR's timer otherwise). `OrderView` does this in `pollEvery`.
 
 Waiting on the team:
 - Real break times for the semester (placeholder list in `data/breaks.ts`).

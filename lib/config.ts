@@ -205,6 +205,8 @@ export const SCAN_WIDTH_IDEAL = 1280;
 export const SCAN_HEIGHT_IDEAL = 720;
 /** Handover code entry pauses for a minute after this many wrong codes on one order, so a 4-digit code cannot be guessed. Not a penalty. */
 export const HANDOVER_RATE_LIMIT = { maxWrongTries: 8, windowSec: 60 } as const;
+/** The late check runs at most this often, however many screens are polling. */
+export const SWEEP_MIN_INTERVAL_MS = 1000;
 /** The check that adds held orders to their holder's My runs runs at most this often. */
 export const RUN_HEAL_MIN_INTERVAL_MS = 2000;
 /** The kiosk locks for a minute after this many wrong codes, so nobody can walk up and guess. */

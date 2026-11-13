@@ -34,6 +34,8 @@ export function statusWord(status: OrderStatus, mode: "pickup" | "delivery"): st
       return "Rejected";
     case "FAILED_LATE":
       return "Failed late";
+    case "NO_SHOW":
+      return "Missed delivery";
   }
 }
 
@@ -63,6 +65,8 @@ export function headline(order: Shape): string {
       return `${source} could not make this order`;
     case "FAILED_LATE":
       return order.buildingId ? `Could not reach ${building} in time` : "Not ready in time";
+    case "NO_SHOW":
+      return `You missed your runner at ${building}`;
   }
 }
 
@@ -136,6 +140,43 @@ export function rejectedUpdate(order: Pick<Order, "id" | "sourceId" | "total">, 
   return {
     title: "Order rejected",
     body: `${getSource(order.sourceId).name} could not make order ${order.id} because ${reasonText}. ${formatRupees(order.total)} has been refunded to your wallet.`,
+  };
+}
+
+/** The Updates for a late or missed delivery, in the words of docs/BUSINESS_RULES.md "When grace ends". */
+export function failedLateBuyerUpdate(order: Pick<Order, "total" | "buildingId">): { title: string; body: string } {
+  const where = order.buildingId ? getBuilding(order.buildingId).short : "you";
+  return { title: "Order failed", body: `Your order could not reach ${where} in time. ${formatRupees(order.total)} has been refunded to your wallet.` };
+}
+
+export function runnerPenaltyUpdate(order: Pick<Order, "id" | "total">): { title: string; body: string } {
+  return {
+    title: "Run not delivered in time",
+    body: `Run ${order.id} was not delivered in time. ${formatRupees(order.total)} has been deducted from your wallet. The food is yours to keep.`,
+  };
+}
+
+export function staffReturnUpdate(order: Pick<Order, "id" | "sourceId">): { title: string; body: string } {
+  return { title: "Bring the bag back", body: `${order.id} ran out of time. Please bring it back to ${getSource(order.sourceId).name}.` };
+}
+
+export function noShowBuyerUpdate(order: Pick<Order, "id" | "sourceId" | "buildingId">): { title: string; body: string } {
+  const where = order.buildingId ? getBuilding(order.buildingId).short : "the drop point";
+  return {
+    title: "You missed your runner",
+    body: `You missed your runner at ${where}. Collect ${order.id} at the ${getSource(order.sourceId).name} counter with your code.`,
+  };
+}
+
+/** To whoever carried it: the buyer did not show. A student runner still earns; staff do not. */
+export function noShowHolderUpdate(order: Pick<Order, "id" | "sourceId">, earned: number): { title: string; body: string } {
+  const source = getSource(order.sourceId).name;
+  return {
+    title: "Buyer did not show up",
+    body:
+      earned > 0
+        ? `Buyer did not show up for ${order.id}. ${formatRupees(earned)} has been added to your wallet. Please bring the bag back to ${source}.`
+        : `Buyer did not show up for ${order.id}. Please bring the bag back to ${source}.`,
   };
 }
 
@@ -278,6 +319,11 @@ export const ORDERS_COPY = {
 } as const;
 
 export const ORDER_DETAIL_COPY = {
+  holdUntil: (time: string) => `Hold until ${time}`,
+  noShowCollect: (id: string, source: string) => `Collect ${id} at the ${source} counter with your code.`,
+  noShowHoldEnded: (id: string) => `The hold on ${id} has ended. Nothing was refunded.`,
+  noShowCollected: "Collected at the counter. Enjoy!",
+  noShowCode: "Show this code at the counter",
   items: "Items",
   subtotal: "Subtotal",
   deliveryFee: "Delivery fee",

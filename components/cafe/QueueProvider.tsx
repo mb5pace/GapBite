@@ -5,15 +5,18 @@ import useSWR from "swr";
 import { getJson } from "@/lib/http";
 import { NEW_ORDER_HIGHLIGHT_MS, POLL_MS, UI_TICK_MS } from "@/lib/config";
 import { playChime, unlockAudio } from "@/lib/chime";
-import type { CafeCard } from "@/lib/order-types";
+import { isTerminal, type CafeAlert, type CafeCard } from "@/lib/order-types";
 
 export interface QueueReply {
   orders: CafeCard[];
+  /** The cards pinned above the columns: failed orders, bags coming back, no-shows. */
+  alerts: CafeAlert[];
   now: number;
 }
 
 interface QueueState {
   orders: CafeCard[];
+  alerts: CafeAlert[];
   loading: boolean;
   /** True when the last poll failed. Old data stays on screen. */
   stale: boolean;
@@ -165,9 +168,7 @@ export function QueueProvider({ children, initialNow }: { children: ReactNode; i
           if (!current) return current;
           const orders = current.orders.filter((o) => o.id !== card.id);
           // Finished orders leave the queue. The others stay, with their new status.
-          if (card.status !== "COLLECTED" && card.status !== "DELIVERED" && card.status !== "REJECTED" && card.status !== "CANCELLED" && card.status !== "FAILED_LATE") {
-            orders.push(card);
-          }
+          if (!isTerminal(card.status)) orders.push(card);
           orders.sort((a, b) => a.createdAt - b.createdAt || a.id.localeCompare(b.id));
           return { ...current, orders };
         },
@@ -179,6 +180,7 @@ export function QueueProvider({ children, initialNow }: { children: ReactNode; i
 
   const value: QueueState = {
     orders: data?.orders ?? [],
+    alerts: data?.alerts ?? [],
     loading: isLoading && !data,
     stale: !!error,
     now,

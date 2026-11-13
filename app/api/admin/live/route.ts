@@ -4,6 +4,7 @@ import { AppError, handle, ok, parseBody } from "@/lib/api";
 import { requireApiSession } from "@/lib/auth";
 import { INPUT_MAX } from "@/lib/config";
 import { listLiveOrders, revealCode } from "@/lib/admin-live";
+import { sweepLate } from "@/lib/late";
 import { parseOrderRef } from "@/lib/order-ref";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +13,9 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   return handle(async () => {
     await requireApiSession("admin");
-    return ok(await listLiveOrders(Date.now()));
+    const now = Date.now();
+    await sweepLate(now);
+    return ok(await listLiveOrders(now));
   });
 }
 

@@ -85,7 +85,7 @@ app/
     cafe/queue/route.ts         GET (runs sweepLate first). Cards have no code, buyer or prices
     cafe/orders/[id]/route.ts   GET bag slip (with QR path); POST action: accept|reject|start|ready|staff|collect
     cafe/staff/route.ts         GET existing staff IDs, for Send with staff
-    cafe/alerts/route.ts        POST seen (Phase 8)
+    cafe/alerts/route.ts        POST seen | returned | collect (+ 4-digit code) on one alert card
     cafe/stock/route.ts         GET; POST adjust one slot or refill all
     cafe/availability/route.ts  GET; POST switch one item on or off (qx:unavailable)
     cafe/kiosk/route.ts         POST code -> the slots to release; locks for a minute after 5 wrong codes
@@ -121,7 +121,9 @@ lib/
   cafe-today.ts   Today totals from the order records
   qr.ts           the QR module path for a bag slip (no colours: the browser fills it with the text colour)
   chime.ts        the new-order sound, made with the Web Audio API (browser only)
-  late.ts         sweepLate: called first in every queue poll, an empty stub until Phase 8
+  late-rules.ts   when an order is due, when grace ends, which of the four outcomes applies, the 3-minute "No runner yet" test, the no-show hold (pure; the browser and the server use the same functions)
+  late.ts         sweepLate and settleOrder: one Lua script per order (the lock, status change, refund or runner debit or earning, stock, Updates, indexes and the alert together). Called first in the cafe queue poll, the buyer's order list and order page, the runner's runs and Admin › Live orders; throttled to once a second
+  alerts.ts       the cards pinned above the cafe queue: list, and Seen / Returned / Collect (one Lua script each)
   updates.ts      Updates feed: push, unread count, mark read
   ids.ts          staff ids now; order ids and 4-digit codes with ordering
   format.ts       rupees (₹1,25,000), initials
@@ -170,10 +172,11 @@ All values JSON unless noted. Prefix everything with `qx:` so reset can scan saf
 | `qx:handover:wrong:<orderId>` | integer, TTL 60 | wrong handover codes on this order (8 pauses entry for the rest of the minute) |
 | `qx:heal` | string, TTL 2 s | throttle for the check that adds held orders to My runs |
 | `qx:lock:order:<orderId>` | string NX | accept lock |
-| `qx:penalty:<orderId>` | string NX | late penalty applied once |
+| `qx:penalty:<orderId>` | string NX | settlement lock: an order is settled (FAILED_LATE or NO_SHOW) exactly once, whoever polls first |
+| `qx:sweep` | string, TTL 1 s | throttle for sweepLate |
 | `qx:updates:<userId>` | list | Updates, keep last 50 |
 | `qx:unread:<userId>` | integer | unread count |
-| `qx:alerts` | list | cafe red alerts |
+| `qx:alerts` | hash | orderId -> alert (failed, staff-return, no-show) until a staff member acts on it |
 | `qx:stock` | hash | slot -> count |
 | `qx:unavailable` | set | item ids off today |
 | `qx:codes:temp` | hash | code -> record (ACCESS.md) |
@@ -187,7 +190,7 @@ Use `redis.eval` (Lua) or `MULTI` for every multi-step money or ownership change
 1. **Place order:** check balance ≥ ₹50 and ≥ total, decrement stock for vending, debit wallet, write order, add to indexes, push ledger.
 2. **Accept run:** one Lua script checks the order (READY, delivery, no holder, not the scanner's own) and the scanner (balance, run count, students only), then sets the holder and `PICKED_UP` and adds it to the scanner's runs. First valid scan wins; the rest are told "Already taken".
 3. **Handover:** one Lua script checks `PICKED_UP`, the holder and the code, sets `DELIVERED`, moves the indexes and credits the runner (students) with the shared money-move function.
-4. **Fail late:** `SET qx:penalty:<id> 1 NX` first; only the winner refunds and debits.
+4. **Settle a late order:** one Lua script per order. It takes `qx:penalty:<id>` (`SET NX`) and re-reads the order's status inside the script, so a handover and the sweep at the same instant end in exactly one outcome, never both. Only the winner refunds, debits or pays, writes the alert and the Updates.
 5. **Burn temp code:** Lua script that flips `unused → active` only if still unused, then adds a new code.
 
 ## API conventions

@@ -21,6 +21,7 @@ export function TodayView() {
         [copy.delivered, String(data.delivered)],
         [copy.collected, String(data.collected)],
         [copy.failed, String(data.failed)],
+        [copy.noShow, String(data.noShow)],
         [copy.closedEarly, String(data.closedEarly)],
         [copy.refunds, copy.refundLine(data.refundCount, formatRupees(data.refundTotal))],
         [copy.feesKept, formatRupees(data.feesKept)],

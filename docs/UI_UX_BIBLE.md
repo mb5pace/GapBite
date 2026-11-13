@@ -61,6 +61,7 @@ Text on `cream`/`parchment` is `espresso` or `maroon`. Text on `maroon` is `crea
 10. **Banner:** `parchment` strip with an icon and one sentence; amber left icon for warnings, never a coloured side stripe.
 11. **Money:** `₹240` with no decimals, Indian digit grouping (`₹1,250`). Credits in `olive` with `+`, debits in `brick` with `−`.
 12. **Empty states:** one line illustration, one sentence, one action.
+13. **Due and alert states (Phase 8):** a card that is due, or a Ready delivery with no runner for 3 minutes, gets a 2 px `amber` ring all round (a full border, never a side stripe) and, where there is room, a small amber warning icon. Alert cards pinned above the cafe queue are `cream` with a 2 px ring: `brick` for a failed order or a bag being brought back, `amber` for a no-show. The colour is the ring and the icon only; the words stay in `espresso`, so contrast is never a problem. Same rule as the Banner: amber is never used as text.
 
 ## 5. Illustrations and imagery
 

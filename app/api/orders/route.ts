@@ -6,7 +6,8 @@ import { handle, ok, parseBody } from "@/lib/api";
 import { requireApiSession } from "@/lib/auth";
 import { INPUT_MAX, MAX_UNITS_PER_ORDER, REQUEST_ID_MIN } from "@/lib/config";
 import { placeOrder } from "@/lib/orders";
-import { healRunIndexes, listOrdersAndRuns } from "@/lib/runs";
+import { sweepLate } from "@/lib/late";
+import { listOrdersAndRuns } from "@/lib/runs";
 import { getUser } from "@/lib/users";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +16,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   return handle(async () => {
     const session = await requireApiSession("student", { user: true });
-    await healRunIndexes();
+    await sweepLate(Date.now()); // also adds held orders to My runs
     return ok(await listOrdersAndRuns(session.userId as string));
   });
 }

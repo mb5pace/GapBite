@@ -29,7 +29,7 @@ import { formatRupees } from "./format";
 import { isMorningClosed } from "./menu-rules";
 import { parseOrderRef } from "./order-ref";
 import { estimatePromisedAt, feeFor, priceLines, slotAvailable, walkFor } from "./order-rules";
-import { summarize, type Order, type OrderMode, type OrderStatus, type OrderSummary } from "./order-types";
+import { summarize, TERMINAL_STATUSES, type Order, type OrderMode, type OrderStatus, type OrderSummary } from "./order-types";
 import { getRedis, key } from "./redis";
 import { ensureStock } from "./stock";
 import { makeUpdate, unreadKey, updatesKey } from "./updates";
@@ -44,6 +44,8 @@ export const liveKey = (userId: string) => key("orders", "live", userId);
 /** Orders this person is carrying right now (runner buddy or staff), and every order they have carried. */
 export const runsLiveKey = (userId: string) => key("runs", "live", userId);
 export const runsByKey = (userId: string) => key("runs", "by", userId);
+/** The cards pinned above the cafe queue: a hash, order ID -> alert. */
+export const alertsKey = () => key("alerts");
 const idemKey = (userId: string, token: string) => key("idem", userId, token);
 const walletKey = (userId: string) => key("wallet", userId);
 const ledgerKey = (userId: string) => key("ledger", userId);
@@ -293,7 +295,7 @@ export async function listOrdersFor(userId: string): Promise<{ active: OrderSumm
   if (ids.length === 0) return { active: [], past: [], now: Date.now() };
   const orders = await redis.mget<(Order | null)[]>(...ids.map((id) => orderKey(String(id))));
   const summaries = orders.filter((o): o is Order => o !== null && typeof o === "object").map(summarize);
-  const finished: OrderStatus[] = ["COLLECTED", "DELIVERED", "CANCELLED", "REJECTED", "FAILED_LATE"];
+  const finished: readonly OrderStatus[] = TERMINAL_STATUSES;
   return {
     active: summaries.filter((o) => !finished.includes(o.status)),
     past: summaries.filter((o) => finished.includes(o.status)),

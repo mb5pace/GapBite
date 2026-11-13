@@ -23,7 +23,8 @@ import { AppError } from "./api";
 import { CAFE_ORDERS_MAX, KIOSK_RATE_LIMIT, SLIP_QR_PREFIX, UPDATES_KEEP } from "./config";
 import { activeKey, doneKey, getOrder, liveKey, orderKey, refundOrder, runsByKey, runsLiveKey } from "./orders";
 import { estimatePromisedAt } from "./order-rules";
-import { isTerminal, toCafeCard, type CafeCard, type Order, type OrderStatus } from "./order-types";
+import { listAlerts } from "./alerts";
+import { isTerminal, toCafeCard, type CafeAlert, type CafeCard, type Order, type OrderStatus } from "./order-types";
 import { qrPath, type QrPath } from "./qr";
 import { getRedis, key } from "./redis";
 import { makeUpdate, unreadKey, updatesKey } from "./updates";
@@ -145,16 +146,17 @@ async function load(id: string): Promise<Order> {
 // ---------------------------------------------------------------------------
 
 /** Every order still in progress, oldest first. No codes, no buyers, no prices. */
-export async function listQueue(now: number): Promise<{ orders: CafeCard[]; now: number }> {
+export async function listQueue(now: number): Promise<{ orders: CafeCard[]; alerts: CafeAlert[]; now: number }> {
   const redis = getRedis();
+  const alerts = await listAlerts();
   const ids = await redis.zrange<string[]>(activeKey(), 0, CAFE_ORDERS_MAX - 1);
-  if (ids.length === 0) return { orders: [], now };
+  if (ids.length === 0) return { orders: [], alerts, now };
   const found = await redis.mget<(Order | null)[]>(...ids.map((id) => orderKey(String(id))));
   const orders = found
     .filter((order): order is Order => order !== null && typeof order === "object")
     .map(toCafeCard)
     .sort((a, b) => a.createdAt - b.createdAt || a.id.localeCompare(b.id));
-  return { orders, now };
+  return { orders, alerts, now };
 }
 
 // ---------------------------------------------------------------------------
