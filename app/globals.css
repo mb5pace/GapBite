@@ -1,4 +1,11 @@
-@import "tailwindcss";
+/*
+  Tailwind in its three parts instead of the single "tailwindcss" import, so the reset can be our
+  own copy without the color-mix placeholder rule (see preflight.css).
+*/
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "./preflight.css" layer(base);
+@import "tailwindcss/utilities.css" layer(utilities);
 
 /*
   QuickX design tokens. UI_UX_BIBLE.md sections 1 to 3.
@@ -25,6 +32,10 @@
   --color-olive: #5c6b2e;
   --color-amber: #b7791f;
   --color-brick: #a3261c;
+
+  /* The one translucent colour: the dim layer behind a sheet or dialog. Plain sRGB with alpha
+     (#RRGGBBAA = espresso at 40%), so every browser blends it the same way. */
+  --color-scrim: #37111066;
 
   /* Shape: pills are fully rounded, the rest are not all the same */
   --radius-*: initial;
@@ -100,12 +111,25 @@
   --font-sans: var(--font-figtree), system-ui, sans-serif;
 }
 
+/*
+  Colour consistency (UI_UX_BIBLE.md "Colour consistency"): QuickX is light only and looks the
+  same on every phone and browser.
+*/
 :root {
-  color-scheme: light;
+  /* "only light" tells browsers that force dark mode on websites (Chrome Android auto-dark,
+     Samsung Internet, Opera, Edge) to leave QuickX alone. The same is said in a <meta> tag. */
+  color-scheme: only light;
 }
 
 html {
   background-color: var(--color-cream);
+  color: var(--color-espresso);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  accent-color: var(--color-maroon);
+  caret-color: var(--color-maroon);
+  scrollbar-color: var(--color-taupe) var(--color-cream);
 }
 
 body {
@@ -115,6 +139,58 @@ body {
   font-size: var(--text-body);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Form controls: no browser styling, and colours from our tokens. Utilities (in a later layer)
+   still decide how each control looks; these are what shows when nothing else says. */
+@layer base {
+  input,
+  textarea,
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: var(--color-sand);
+    color: var(--color-espresso);
+  }
+  button {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: transparent;
+    color: inherit;
+  }
+  input[type="search"]::-webkit-search-decoration,
+  input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+  }
+}
+
+/* Autofill: the browser paints it yellow or blue. Paint it sand instead. The long transition
+   keeps the browser's own background from ever showing. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px var(--color-sand) inset;
+  box-shadow: 0 0 0 1000px var(--color-sand) inset;
+  -webkit-text-fill-color: var(--color-espresso);
+  caret-color: var(--color-espresso);
+  transition:
+    background-color 600000s 0s,
+    color 600000s 0s;
+}
+input:autofill,
+textarea:autofill,
+select:autofill {
+  box-shadow: 0 0 0 1000px var(--color-sand) inset;
+  -webkit-text-fill-color: var(--color-espresso);
+  caret-color: var(--color-espresso);
+}
+
+::selection {
+  background-color: var(--color-blush);
+  color: var(--color-espresso);
 }
 
 ::placeholder {

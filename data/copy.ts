@@ -16,6 +16,15 @@ export const COPY = {
     needUser: "Tell us who's ordering first.",
   },
 
+  /** The pages Next shows when a page is missing or breaks. They carry our colours, never the browser's. */
+  errorPages: {
+    notFound: "We could not find that page. It may have moved, or it belongs to someone else.",
+    goHome: "Go to Home",
+    goBack: "Back to QuickX",
+    broke: "This page stopped working. Try again, and if it keeps happening tell the QuickX team.",
+    tryAgain: "Try again",
+  },
+
   gate: {
     label: "Enter your QuickX access code",
     placeholder: "K7Q-M2X",

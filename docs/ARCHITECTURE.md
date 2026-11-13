@@ -30,6 +30,9 @@ Why lazy late-checks and not cron: Vercel Hobby cron runs at most once a day. `s
 
 ```
 app/
+  fonts.ts                      the two next/font fonts, shared by the layout and global-error
+  preflight.css                 Tailwind's reset with its color-mix rule removed (UI_UX_BIBLE.md "Colour consistency")
+  not-found.tsx  error.tsx  global-error.tsx    our own missing-page and error pages (cream, never the browser's white)
   page.tsx                      gate
   identify/page.tsx
   (student)/

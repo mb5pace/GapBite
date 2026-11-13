@@ -36,11 +36,15 @@ export function Toggle({
       {...rest}
     >
       <span
-        className={`flex h-8 w-14 items-center rounded-pill px-1 transition-colors duration-150 ${checked ? "bg-maroon" : "bg-sand"} ${disabled ? "opacity-50" : ""}`}
+        className={`flex h-8 w-14 items-center rounded-pill px-1 transition-colors duration-150 ${
+          disabled ? (checked ? "bg-blush" : "bg-sand") : checked ? "bg-maroon" : "bg-sand"
+        }`}
         aria-hidden="true"
       >
         <span
-          className={`size-6 rounded-pill transition-transform duration-150 ${checked ? "translate-x-6 bg-cream" : "translate-x-0 bg-taupe"}`}
+          className={`size-6 rounded-pill transition-transform duration-150 ${checked ? "translate-x-6" : "translate-x-0"} ${
+            disabled ? "bg-taupe" : checked ? "bg-cream" : "bg-taupe"
+          }`}
         />
       </span>
     </button>

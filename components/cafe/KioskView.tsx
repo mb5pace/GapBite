@@ -29,7 +29,7 @@ const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9"] as const;
 
 const KEY_CLASS =
   "flex size-16 items-center justify-center rounded-pill bg-cream font-display font-bold text-maroon " +
-  "transition-transform duration-150 ease-out active:scale-[0.97] disabled:opacity-50 " +
+  "transition-transform duration-150 ease-out active:scale-[0.97] disabled:bg-blush " +
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream";
 
 /**
