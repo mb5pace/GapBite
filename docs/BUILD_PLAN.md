@@ -86,8 +86,8 @@ What was checked, and what it found and fixed.
 - [x] Test: let each kind of late order expire on purpose and check every wallet, ledger entry, Update and screen
 
 ## Phase 9 — Account and Discover
-- [ ] Profile, Preferences, Notifications, Order History, Refund Status, Terms, Feedback, Support
-- [ ] Discover pages and FAQ
+- [x] Profile, Preferences, Notifications, Order History, Refund Status, Terms, Feedback, Support
+- [x] Discover pages and FAQ
 
 ## Phase 10 — Demo polish
 - [ ] Admin demo tools (seed, reset). (Live orders was pulled forward to Phase 7.) Seed still creates `QX-STF-01 Ramesh`, but through the same `qx:staff:seq` counter and only if that ID does not exist yet, because staff can now be added by hand
@@ -134,7 +134,21 @@ Raised in Phase 8 (the docs were silent, simplest behaviour kept until answered)
 - **Polling:** the sweep runs at most once a second, at the start of the cafe queue poll, the buyer's order list and order page, the runner's runs and Admin › Live orders, so it does not need a cron job.
 - **SWR note for later screens:** a `refreshInterval` function must be defined outside the component if the component re-renders every second (it restarts SWR's timer otherwise). `OrderView` does this in `pollEvery`.
 
+Raised in Phase 9 (the docs were silent, simplest behaviour kept until answered):
+- **Default time** has two choices, As soon as possible and Next break. "Next break" means the first break still open when Checkout opens (it follows the mode and building), and falls back to as soon as possible when none is. Picking a time yourself on Checkout wins over the preference for that visit.
+- **Sounds are off by default.** The chime plays only while QuickX is open, only after one tap on the page, and a phone on silent stays silent. Order updates and Wallet updates are cosmetic and say "Not connected yet".
+- **Preferences are saved on the server**, so they follow a person to any phone. They have an explicit Save button; the notification switches save as you flip them. A damaged stored value is read as far as it goes and the rest falls back to the defaults.
+- **Order History** shows finished orders (the same list as Orders › Past) and finished runs. A run shows what it did to the wallet, read from the ledger (which keeps the last 100 lines), so an old run may show no amount. Runs still being carried stay in Orders › My runs.
+- **Refund Status** is read from the order records: cancelled, rejected and failed-late orders, always the full total, always to the wallet. A no-show is not a refund. It reads the user's most recent 60 orders, like Orders.
+- **Feedback** is saved with the sender's ID and role, so the team can follow up. There is no screen for reading it yet; it is the Redis list `feedback`. One per person per 10 seconds, 500 characters, last 500 kept. A reader in Admin could be added in Phase 10.
+- **Support** has generic UC help desk text (ask at the cafe counter or the UC help desk) because no help desk hours or place are in the docs. The team contact is a visible placeholder.
+- **Terms and Conditions** is short plain text written for the prototype (not legal advice), with the Open Peeps credit placeholder and the icon and font credits.
+- **My Profile** changes the first name by the same rules as Identify. Orders already placed keep the name they had. The ID and role cannot be changed.
+- **Log out** on Account asks first (a confirm sheet). The Cafe and Admin headers keep the plain Logout button.
+- **The FAQ reads every number from `lib/config.ts` and the building list**, so it cannot disagree with the app.
+
 Waiting on the team:
+- UC help desk hours and place, and the team's contact details, for the Support page.
 - Real break times for the semester (placeholder list in `data/breaks.ts`).
 - Real walk times (estimates in `data/locations.ts`).
 - Real vending snack names loaded in the UC machine.

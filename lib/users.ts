@@ -50,6 +50,20 @@ export function cleanFirstName(input: string): string | null {
     .replace(/(^|[ '-])(\p{L})/gu, (_all, sep: string, letter: string) => sep + letter.toLocaleUpperCase("en-IN"));
 }
 
+/**
+ * Account › My Profile: changes the user's first name, by the same rules as Identify. Orders already placed keep the
+ * name they were made with. The ID and the role never change here.
+ */
+export async function renameUser(id: string, input: string): Promise<UserRecord> {
+  const name = cleanFirstName(input);
+  if (!name) throw new AppError(400, COPY.identify.badName);
+  const user = await getUser(id);
+  if (!user) throw new AppError(403, COPY.common.needUser);
+  const next: UserRecord = { ...user, name };
+  await getRedis().set(key("user", id), next);
+  return next;
+}
+
 export async function getUser(id: string): Promise<UserRecord | null> {
   return getRedis().get<UserRecord>(key("user", id));
 }

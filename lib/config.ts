@@ -269,3 +269,19 @@ export const REDIS_PREFIX_DEV = "qxdev:";
 
 /** /api/health writes one key and reads it back. It expires on its own. */
 export const HEALTH_KEY_TTL_SEC = 60;
+
+// ---------------------------------------------------------------------------
+// Account and Discover (Phase 9)
+// ---------------------------------------------------------------------------
+
+/** Account › Preferences: "when" starts as As soon as possible. */
+export const DEFAULT_WHEN = "asap" as const;
+/** Account › Notifications. Quiet by default: a phone that chimes in class is worse than one that does not. */
+export const DEFAULT_NOTIFICATIONS = { orderUpdates: true, walletUpdates: true, sounds: false } as const;
+/** Feedback: the longest comment, how many entries are kept, and how soon the same person can send another. */
+export const FEEDBACK_TEXT_MAX = 500;
+export const FEEDBACK_KEEP = 500;
+export const FEEDBACK_MIN_INTERVAL_SEC = 10;
+/** Order History › Runs: how many of the user's recent runs are read. */
+export const HISTORY_RUNS_KEEP = 50;
+

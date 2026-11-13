@@ -1,28 +1,39 @@
 import { notFound } from "next/navigation";
-import { User } from "@phosphor-icons/react/ssr";
-import { COPY } from "@/data/copy";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { PillLink } from "@/components/ui/PillButton";
+import { FeedbackForm } from "@/components/account/FeedbackForm";
+import { HistoryView } from "@/components/account/HistoryView";
+import { NotificationsView } from "@/components/account/NotificationsView";
+import { PreferencesView } from "@/components/account/PreferencesView";
+import { ProfileView } from "@/components/account/ProfileView";
+import { RefundsView } from "@/components/account/RefundsView";
+import { SupportView } from "@/components/account/SupportView";
+import { TermsView } from "@/components/account/TermsView";
 
-/**
- * Placeholder for Account › Wallet, My Profile, Preferences and the rest, so the
- * wallet chip and later links never land on a missing page. Wallet is Phase 4,
- * the others Phase 9.
- */
+/** The pages under Account except Wallet (which has its own page): My Profile, Preferences, Notifications, and the rest. */
 export default async function AccountSection({ params }: PageProps<"/account/[section]">) {
   const { section } = await params;
-  if (!(section in COPY.student.accountSections)) notFound();
 
-  return (
-    <EmptyState
-      icon={<User weight="regular" size={40} />}
-      action={
-        <PillLink variant="secondary" href="/account">
-          {COPY.student.accountSections[section as keyof typeof COPY.student.accountSections]}
-        </PillLink>
-      }
-    >
-      {COPY.student.stubs.section}
-    </EmptyState>
-  );
+  switch (section) {
+    case "profile":
+      return <ProfileView />;
+    case "preferences":
+      return <PreferencesView />;
+    case "notifications":
+      return <NotificationsView />;
+    case "history":
+      return <HistoryView />;
+    case "refunds":
+      return <RefundsView />;
+    case "terms":
+      return <TermsView />;
+    case "feedback":
+      return (
+        <div className="pt-2">
+          <FeedbackForm />
+        </div>
+      );
+    case "support":
+      return <SupportView />;
+    default:
+      notFound();
+  }
 }

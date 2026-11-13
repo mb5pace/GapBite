@@ -80,8 +80,11 @@ app/
     wallet/route.ts             GET ledger
     wallet/topup/route.ts       POST amount
     updates/route.ts            GET list, POST mark-read
-    prefs/route.ts
-    feedback/route.ts
+    prefs/route.ts              GET; PUT (any part: default building, mode, time, the three notification switches). Strict: unknown fields are refused
+    profile/route.ts            PUT { name } -> your first name (same rules as Identify); the ID and role cannot change
+    feedback/route.ts           POST { rating 1-5, text? } -> kept for the team; one every 10 s per person
+    history/route.ts            GET your finished orders and finished runs (no codes)
+    refunds/route.ts            GET every refund with its reason, and the total
     cafe/queue/route.ts         GET (runs sweepLate first). Cards have no code, buyer or prices
     cafe/orders/[id]/route.ts   GET bag slip (with QR path); POST action: accept|reject|start|ready|staff|collect
     cafe/staff/route.ts         GET existing staff IDs, for Send with staff
@@ -110,7 +113,12 @@ lib/
   users.ts        user records, Identify, staff accounts
   wallet.ts       balance, ledger, one atomic Lua move (balance + ledger entry together). The move is a Lua function (LUA_MOVE_MONEY) that the handover and settlement scripts include, so their money steps are the same code
   wallet-rules.ts ₹50 floor, ₹100 suggestion, top-up needed, top-up bounds (pure)
-  me.ts           the shell's live numbers: name, balance, dots, session time
+  me.ts           the shell's live numbers: name, balance, dots, session time, saved preferences
+  prefs-rules.ts  the preferences shape, defaults, tolerant reading and patching (pure, also used by the browser)
+  prefs.ts        read and save one user's preferences
+  feedback.ts     save a feedback entry (rating, comment) with the per-person throttle
+  history.ts      Order History and Refund Status, read from the order records and the ledger (history-types.ts holds the shapes)
+  version.ts      the version line: package.json version, short commit, "· dev" on a preview (set at build time by next.config.ts)
   order-types.ts  Order, status list, which steps each kind of order shows (pure)
   order-rules.ts  pricing from the menu, fee and walk lookups, break-slot cutoff, promised-time estimate (pure)
   orders.ts       place (one Lua script), read, list, cancel and refund (the refund script is reused by reject)
@@ -136,10 +144,12 @@ lib/
   search.ts       menu search across all five sources (pure)
   time.ts         IST formatting, promised time math
 data/
-  menu.ts  locations.ts  breaks.ts  copy.ts (shared UI strings)  order-copy.ts (order words, headlines, Update texts)  cafe-copy.ts (Cafe portal and kiosk words, reject reasons)
+  menu.ts  locations.ts  breaks.ts  copy.ts (shared UI strings)  order-copy.ts (order words, headlines, Update texts)  cafe-copy.ts (Cafe portal and kiosk words, reject reasons)  account-copy.ts (Account words)  discover-copy.ts (Discover pages and the FAQ; every number in it is read from lib/config.ts)
 components/
-  ui/             PillButton (+ PillLink), IconButton, Chip, Card, ArchCard, ItemTile, SourceGlyph, Stepper, Sheet (bottom sheet, or centred dialog on the laptop portals), Input, CodeBoxes, Banner, Badge, EmptyState, Countdown, Money, LogoutButton, Toggle, PortalNav
+  ui/             PillButton (+ PillLink), IconButton, Chip, Card, ArchCard, ItemTile, SourceGlyph, Stepper, Sheet (bottom sheet, or centred dialog on the laptop portals), Input, Textarea, CodeBoxes, Banner, Badge, EmptyState, Countdown, Money, LogoutButton, Toggle, PortalNav, NavRow (link or button row), Accordion, FaceRating, VersionLine
   kit/            KitGallery, the admin-only /kit page
+  account/        AccountView (profile card + rows), LogoutRow (confirm sheet), ProfileView, PreferencesView, NotificationsView, HistoryView, RefundsView, TermsView, SupportView, FeedbackForm (also used by Discover)
+  discover/       DiscoverList, DiscoverPages (Introduction, Help, Smart Vending, FAQ)
   student/        Header, BottomBar, WalletChip, SessionChip (Phase 2); SourceTile, CartBar, OrderStrip (later)
   runner/         RunnerProvider (the one sheet for the student app), RunnerSheet (scan, preview, accept, handover), QrScanner (camera, decoder served from /scanner), ScanButton
   cafe/           QueueProvider (one poll, new-order highlight and chime, server clock), CafeHeader, QueueView, OrderCard, RejectDialog, StaffDialog, BagSlipDialog, VendingStockView, MenuAvailabilityView, TodayView, KioskView (AlertCard waits for Phase 8)
@@ -175,7 +185,7 @@ All values JSON unless noted.
 | `qx:staff:seq` | counter | last staff number |
 | `qx:wallet:<id>` | integer string | balance in rupees (use INCRBY/DECRBY) |
 | `qx:ledger:<id>` | list (LPUSH) | `{ at, type, amount, orderId?, note? }`, keep last 100 |
-| `qx:prefs:<id>` | string | preferences |
+| `qx:prefs:<id>` | string | `{ defaultBuilding, defaultMode, defaultWhen, notifications: { orderUpdates, walletUpdates, sounds } }`. Read tolerantly: a bad field falls back to its default |
 | `qx:order:<orderId>` | string | Order (FLOWS.md) |
 | `qx:orders:active` | sorted set | orderId scored by createdAt |
 | `qx:orders:done` | sorted set | terminal orders |
@@ -197,7 +207,8 @@ All values JSON unless noted.
 | `qx:codes:temp` | hash | code -> record (ACCESS.md) |
 | `qx:kiosk:wrong` | integer, TTL 60 | wrong codes typed at the kiosk (5 locks it for the rest of the minute) |
 | `qx:ratelimit:<ip>` | integer, TTL 600 | wrong code tries |
-| `qx:feedback` | list | feedback entries |
+| `qx:feedback` | list | `{ at, userId, role, rating, text }`, newest first, last 500 kept. No screen reads it yet: open it in Upstash |
+| `qx:feedback:last:<id>` | string, TTL 10 s | one feedback per person per 10 seconds |
 
 ## Concurrency
 

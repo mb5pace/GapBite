@@ -13,6 +13,15 @@ Both environments share one Upstash database. **From v0.9.0** every Redis key st
 
 The preview deployment needs the same settings as production (names only; values stay in Vercel): the Redis connection, the cafe and admin passwords, the permanent codes and the session secret. Check **Vercel › the project › Settings › Environment Variables** and make sure each is ticked for **Preview** as well as **Production**.
 
+## 1a. One-time setup for the dev link (in Vercel, by the team)
+
+A preview deployment only works for the team if two things are set. Neither is in git.
+
+1. **The four settings that are Production-only today.** `QX_PERMANENT_CODES`, `QX_SESSION_SECRET`, `QX_ADMIN_PASSWORD` and `QX_CAFE_PASSWORD` must also be set for **Preview** (Settings › Environment Variables › each one › tick Preview, or add it again for Preview). Without them nobody can get past the gate on the dev link. You can give Preview the same values as Production or different ones (different is safer: a leaked dev password then opens nothing real). The Redis settings (`KV_*`) are already set for Preview.
+2. **Deployment Protection.** The project has Vercel Authentication on for preview URLs, so anyone who opens the dev link is asked to log in to Vercel. Students' phones cannot. Either turn Vercel Authentication off for Preview (Settings › Deployment Protection; QuickX has its own access-code gate and the dev data is kept apart from production), or give the team Vercel accounts on the project.
+
+The stable dev link is `https://gapbite-git-dev-boards-team.vercel.app`. Each push also gets its own one-off link; always use the stable one.
+
 ## 2. Day to day
 
 1. All work is committed and pushed to `dev`. Never push to `main`.
