@@ -238,8 +238,10 @@ export async function settleOrder(order: Order, outcome: LateOutcome, now: numbe
  */
 export async function sweepLate(now: number): Promise<void> {
   const redis = getRedis();
-  if (!(await redis.set(key("sweep"), "1", { nx: true, px: SWEEP_MIN_INTERVAL_MS }))) return;
+  // Orders the cafe gave to staff before runs existed are added to My runs. This has its own short throttle, so it
+  // is asked first: a poll that the once-a-second sweep throttle turns away must still find them.
   await healRunIndexes();
+  if (!(await redis.set(key("sweep"), "1", { nx: true, px: SWEEP_MIN_INTERVAL_MS }))) return;
   const ids = await redis.zrange<string[]>(activeKey(), 0, CAFE_ORDERS_MAX - 1);
   if (ids.length === 0) return;
   const found = await redis.mget<(Order | null)[]>(...ids.map((id) => orderKey(String(id))));
