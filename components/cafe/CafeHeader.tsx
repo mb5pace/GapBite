@@ -6,6 +6,7 @@ import { COPY } from "@/data/copy";
 import { LogoutButton } from "@/components/ui/LogoutButton";
 import { PillButton } from "@/components/ui/PillButton";
 import { PortalNav } from "@/components/ui/PortalNav";
+import { VersionLine } from "@/components/ui/VersionLine";
 import { formatClock } from "@/lib/time";
 import { useQueue } from "./QueueProvider";
 
@@ -23,7 +24,10 @@ export function CafeHeader() {
   return (
     <header className="bg-parchment">
       <div className="mx-auto flex min-h-16 max-w-[1440px] flex-wrap items-center gap-x-6 gap-y-2 px-6 py-2">
-        <span className="font-display text-section font-extrabold whitespace-nowrap text-maroon">{COPY.cafe.title}</span>
+        <span className="flex flex-col leading-tight">
+          <span className="font-display text-section font-extrabold whitespace-nowrap text-maroon">{COPY.cafe.title}</span>
+          <VersionLine />
+        </span>
         <PortalNav label="Cafe desk" links={links} />
         <span className="ml-auto flex items-center gap-3">
           <span

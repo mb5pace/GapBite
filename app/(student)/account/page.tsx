@@ -2,6 +2,7 @@ import { User } from "@phosphor-icons/react/ssr";
 import { COPY } from "@/data/copy";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LogoutButton } from "@/components/ui/LogoutButton";
+import { VersionLine } from "@/components/ui/VersionLine";
 
 /**
  * Placeholder Account. The profile card and the rows (Wallet, My Profile, ...)
@@ -9,8 +10,11 @@ import { LogoutButton } from "@/components/ui/LogoutButton";
  */
 export default function Account() {
   return (
-    <EmptyState icon={<User weight="regular" size={40} />} action={<LogoutButton />}>
-      {COPY.student.stubs.account}
-    </EmptyState>
+    <div className="flex flex-col gap-6">
+      <EmptyState icon={<User weight="regular" size={40} />} action={<LogoutButton />}>
+        {COPY.student.stubs.account}
+      </EmptyState>
+      <VersionLine className="text-center" />
+    </div>
   );
 }
