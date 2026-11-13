@@ -1,8 +1,9 @@
-import { Receipt } from "@phosphor-icons/react/ssr";
-import { COPY } from "@/data/copy";
-import { EmptyState } from "@/components/ui/EmptyState";
+import { OrdersView } from "@/components/student/OrdersView";
+import { requirePageSession } from "@/lib/auth";
+import { listOrdersFor } from "@/lib/orders";
 
-/** Placeholder. Orders (Active and Past) is Phase 5. */
-export default function Orders() {
-  return <EmptyState icon={<Receipt weight="regular" size={40} />}>{COPY.student.stubs.orders}</EmptyState>;
+/** Orders: Active and Past. */
+export default async function Orders() {
+  const session = await requirePageSession("student", { user: true });
+  return <OrdersView initial={await listOrdersFor(session.userId as string)} />;
 }

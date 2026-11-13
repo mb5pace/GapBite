@@ -13,6 +13,7 @@ import { itemStatus } from "@/lib/menu-rules";
 import { searchMenu } from "@/lib/search";
 import { useCart } from "./CartProvider";
 import { MenuItemRow } from "./MenuItemRow";
+import { ActiveOrderStrip } from "./ActiveOrderStrip";
 import { NextBreakStrip } from "./NextBreakStrip";
 import { SearchField } from "./SearchField";
 import { SourceTile } from "./SourceTile";
@@ -36,6 +37,7 @@ export function HomeView() {
   return (
     <div className="flex flex-col gap-6 pt-2">
       <WalletBanner />
+      <ActiveOrderStrip />
       <SearchField value={query} onChange={setQuery} />
 
       {searching ? (

@@ -1,12 +1,13 @@
 import type { ReactNode } from "react";
 
-type Tone = "olive" | "amber" | "brick" | "taupe";
+type Tone = "olive" | "amber" | "brick" | "taupe" | "maroon";
 
 const DOT: Record<Tone, string> = {
   olive: "bg-olive",
   amber: "bg-amber",
   brick: "bg-brick",
   taupe: "bg-taupe",
+  maroon: "bg-maroon",
 };
 
 /**
@@ -15,8 +16,8 @@ const DOT: Record<Tone, string> = {
  */
 export function Badge({ tone, children }: { tone: Tone; children: ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-pill bg-sand px-3 py-1 text-secondary font-medium text-espresso">
-      <span className={`size-2 rounded-pill ${DOT[tone]}`} aria-hidden="true" />
+    <span className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-pill bg-sand px-3 py-1 text-secondary font-medium text-espresso">
+      <span className={`size-2 shrink-0 rounded-pill ${DOT[tone]}`} aria-hidden="true" />
       <span>{children}</span>
     </span>
   );

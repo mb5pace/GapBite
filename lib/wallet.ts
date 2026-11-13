@@ -6,8 +6,10 @@
  * crash or two simultaneous requests can never leave them disagreeing
  * (docs/ARCHITECTURE.md "Concurrency"). The ledger keeps the latest LEDGER_KEEP entries.
  */
+import { adjustmentUpdate, topUpUpdate } from "@/data/order-copy";
 import { LEDGER_KEEP } from "./config";
 import { getRedis, key } from "./redis";
+import { makeUpdate, pushUpdate } from "./updates";
 
 export type LedgerType = "topup" | "order" | "refund" | "earning" | "penalty" | "adjustment";
 
@@ -97,18 +99,28 @@ export async function getBalances(userIds: string[]): Promise<number[]> {
   return raw.map((value) => (typeof value === "number" && Number.isFinite(value) ? Math.trunc(value) : 0));
 }
 
-/** Mock UPI top-up: always succeeds, adds `amount` and writes a "topup" entry. */
-export function topUp(userId: string, amount: number, now: number): Promise<MoveResult> {
-  return moveMoney(userId, amount, { type: "topup", note: "Mock UPI top-up" }, now);
+/** Mock UPI top-up: always succeeds, adds `amount`, writes a "topup" entry and tells the user in Updates. */
+export async function topUp(userId: string, amount: number, now: number): Promise<MoveResult> {
+  const result = await moveMoney(userId, amount, { type: "topup", note: "Mock UPI top-up" }, now);
+  if (result.ok) {
+    const text = topUpUpdate(amount, result.balance);
+    await pushUpdate(makeUpdate(userId, { ...text, kind: "wallet" }, now));
+  }
+  return result;
 }
 
 /**
  * Admin adjustment, positive or negative, with the note the admin typed. A wallet
  * can only go negative through a late-delivery penalty (rule 7), so an adjustment
- * may not take the balance under ₹0.
+ * may not take the balance under ₹0. The person is told in Updates.
  */
-export function adjust(userId: string, amount: number, note: string, now: number): Promise<MoveResult> {
-  return moveMoney(userId, amount, { type: "adjustment", note }, now, { floor: 0 });
+export async function adjust(userId: string, amount: number, note: string, now: number): Promise<MoveResult> {
+  const result = await moveMoney(userId, amount, { type: "adjustment", note }, now, { floor: 0 });
+  if (result.ok) {
+    const text = adjustmentUpdate(amount, note, result.balance);
+    await pushUpdate(makeUpdate(userId, { ...text, kind: "wallet" }, now));
+  }
+  return result;
 }
 
 export interface WalletSnapshot {

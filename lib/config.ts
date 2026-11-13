@@ -174,6 +174,14 @@ export const DEFAULT_BUILDING = "gict";
 export const TOAST_MS = 3000;
 /** Indian Standard Time is UTC+5:30, all year. */
 export const IST_OFFSET_MIN = 330;
+/** Checkout opens on delivery until Preferences (Phase 9) can remember a default. */
+export const DEFAULT_MODE = "delivery";
+/** A double-tap or a retry within this long places only one order. */
+export const IDEMPOTENCY_TTL_SEC = 300;
+/** Tries to find a free random order ID before giving up. Orders are never deleted, so the 9,000 IDs fill up over a long demo day; 40 tries still succeed when most are taken. */
+export const ORDER_ID_RETRIES = 40;
+/** The Orders tab lists at most this many of your latest orders. */
+export const ORDERS_LIST_MAX = 60;
 /** Greeting changes at these IST hours: before noon morning, then afternoon, then evening. */
 export const GREETING_HOURS = { afternoonFrom: 12, eveningFrom: 17 } as const;
 

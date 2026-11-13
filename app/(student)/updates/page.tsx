@@ -1,8 +1,9 @@
-import { Bell } from "@phosphor-icons/react/ssr";
-import { COPY } from "@/data/copy";
-import { EmptyState } from "@/components/ui/EmptyState";
+import { UpdatesView } from "@/components/student/UpdatesView";
+import { requirePageSession } from "@/lib/auth";
+import { listUpdates } from "@/lib/updates";
 
-/** Placeholder. The Updates feed is Phase 5. */
-export default function Updates() {
-  return <EmptyState icon={<Bell weight="regular" size={40} />}>{COPY.student.stubs.updates}</EmptyState>;
+/** Updates: the notification feed, grouped Today and Earlier. */
+export default async function Updates() {
+  const session = await requirePageSession("student", { user: true });
+  return <UpdatesView initial={await listUpdates(session.userId as string)} />;
 }

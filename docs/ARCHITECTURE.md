@@ -103,9 +103,11 @@ lib/
   wallet.ts       balance, ledger, one atomic Lua move (balance + ledger entry together)
   wallet-rules.ts ₹50 floor, ₹100 suggestion, top-up needed, top-up bounds (pure)
   me.ts           the shell's live numbers: name, balance, dots, session time
-  orders.ts       create, transitions, guards
+  order-types.ts  Order, status list, which steps each kind of order shows (pure)
+  order-rules.ts  pricing from the menu, fee and walk lookups, break-slot cutoff, promised-time estimate (pure)
+  orders.ts       place (one Lua script), read, list, cancel and refund; later transitions and guards
   late.ts         sweepLate
-  updates.ts
+  updates.ts      Updates feed: push, unread count, mark read
   ids.ts          staff ids now; order ids and 4-digit codes with ordering
   format.ts       rupees (₹1,25,000), initials
   photos.ts       which item photos exist (list made at build time in next.config.ts)
@@ -117,7 +119,7 @@ lib/
   search.ts       menu search across all five sources (pure)
   time.ts         IST formatting, promised time math
 data/
-  menu.ts  locations.ts  breaks.ts  copy.ts (shared UI strings)
+  menu.ts  locations.ts  breaks.ts  copy.ts (shared UI strings)  order-copy.ts (order words, headlines, Update texts)
 components/
   ui/             PillButton (+ PillLink), IconButton, Chip, Card, ArchCard, ItemTile, SourceGlyph, Stepper, Sheet, Input, CodeBoxes, Banner, Badge, EmptyState, Countdown, Money, LogoutButton
                   (Toggle waits for Phase 9, where Notifications uses it)
@@ -147,6 +149,8 @@ All values JSON unless noted. Prefix everything with `qx:` so reset can scan saf
 | `qx:orders:active` | sorted set | orderId scored by createdAt |
 | `qx:orders:done` | sorted set | terminal orders |
 | `qx:orders:by:<userId>` | sorted set | buyer's orders |
+| `qx:orders:live:<userId>` | set | buyer's orders that are not finished yet (drives the Orders tab dot and the Home strip) |
+| `qx:idem:<userId>:<token>` | string, TTL 300 | order id placed for this checkout press, so a double tap or retry places one order |
 | `qx:runs:by:<userId>` | sorted set | orders this user carried |
 | `qx:lock:order:<orderId>` | string NX | accept lock |
 | `qx:penalty:<orderId>` | string NX | late penalty applied once |

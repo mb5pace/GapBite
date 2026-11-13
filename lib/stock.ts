@@ -9,7 +9,7 @@ import { getRedis, key } from "./redis";
 const stockKey = () => key("stock");
 
 /** HSETNX every slot: only slots that do not exist yet are created. */
-async function ensureStock(): Promise<void> {
+export async function ensureStock(): Promise<void> {
   const redis = getRedis();
   if ((await redis.exists(stockKey())) === 1) return;
   const pipeline = redis.pipeline();
