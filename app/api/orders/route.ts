@@ -5,16 +5,18 @@ import { ORDER_COPY } from "@/data/order-copy";
 import { handle, ok, parseBody } from "@/lib/api";
 import { requireApiSession } from "@/lib/auth";
 import { INPUT_MAX, MAX_UNITS_PER_ORDER, REQUEST_ID_MIN } from "@/lib/config";
-import { listOrdersFor, placeOrder } from "@/lib/orders";
+import { placeOrder } from "@/lib/orders";
+import { healRunIndexes, listOrdersAndRuns } from "@/lib/runs";
 import { getUser } from "@/lib/users";
 
 export const dynamic = "force-dynamic";
 
-/** GET -> your orders, split into in progress and finished. Summaries: no codes. */
+/** GET -> your orders, split into in progress and finished, and the runs you are carrying. Summaries: no codes. */
 export async function GET() {
   return handle(async () => {
     const session = await requireApiSession("student", { user: true });
-    return ok(await listOrdersFor(session.userId as string));
+    await healRunIndexes();
+    return ok(await listOrdersAndRuns(session.userId as string));
   });
 }
 

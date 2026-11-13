@@ -73,22 +73,24 @@ What was checked, and what it found and fixed.
 - **Totals:** unit tests 110; API suites 480 (integration 135, wallet 71, orders 109, cafe 125, flows 40); browser suites 479 (access 52, shell 65, browse and cart 73, wallet 62, ordering 88, cafe 111, and 28 for `docs/ACCESS_GUIDE.md` followed step by step), plus the 51-screen style audit.
 
 ## Phase 7 — Runner
-- [ ] Scan button + runner sheet (camera + manual entry)
-- [ ] Preview and atomic accept, all error messages
-- [ ] My runs in Orders, handover code entry, earning credit
+- [x] Scan button + runner sheet (camera + manual entry)
+- [x] Preview and atomic accept, all error messages
+- [x] My runs in Orders (students and staff, including Send with staff), I'm here, handover code entry, earning credit
+- [x] Admin › Live orders with Reveal code (pulled forward from Phase 10)
 
 ## Phase 8 — Late handling
-- [ ] Promised time math (`lib/time.ts`), countdowns, amber due state
-- [ ] `sweepLate` with penalty lock, refunds, runner debit, alerts, Updates
-- [ ] Unclaimed 3-minute highlight
-- [ ] Test: let one run expire on purpose and check every wallet and screen
+- [ ] Promised time math (`lib/time.ts`), countdowns, amber due state in buyer, runner, cafe and Admin views
+- [ ] `sweepLate` with penalty lock: `FAILED_LATE` (runner debited, staff, before pickup) and `NO_SHOW`, refunds, Updates
+- [ ] Cafe alert cards (Seen, Returned, no-show collect), 3-minute "No runner yet" highlight
+- [ ] Settle the two old staff orders QX-2959 and QX-3846 on the first sweep
+- [ ] Test: let each kind of late order expire on purpose and check every wallet, ledger entry, Update and screen
 
 ## Phase 9 — Account and Discover
 - [ ] Profile, Preferences, Notifications, Order History, Refund Status, Terms, Feedback, Support
 - [ ] Discover pages and FAQ
 
 ## Phase 10 — Demo polish
-- [ ] Admin demo tools (seed, reset), live orders view. Seed still creates `QX-STF-01 Ramesh`, but through the same `qx:staff:seq` counter and only if that ID does not exist yet, because staff can now be added by hand
+- [ ] Admin demo tools (seed, reset). (Live orders was pulled forward to Phase 7.) Seed still creates `QX-STF-01 Ramesh`, but through the same `qx:staff:seq` counter and only if that ID does not exist yet, because staff can now be added by hand
 - [ ] Every screen checked against bible §9 and §10
 - [ ] Test on two real phones + laptop at the same time over the deployed URL
 - [ ] Walk through DEMO_SCRIPT.md twice end to end
@@ -109,6 +111,16 @@ Raised in Phase 6 (the docs were silent, simplest behaviour kept until answered)
 - Today: "orders placed" counts orders placed since IST midnight. Revenue is the food subtotal of finished orders. Delivery fees kept = the whole fee for a staff delivery, the fee minus the runner's earning for a runner delivery. Refunds count cancelled, rejected and failed orders.
 - The Toggle (planned for Phase 9) was needed now for "Available today", so it is built and in the kit. `Sheet` has a centred variant for laptop dialogs.
 - The full-screen kiosk has a "Back to the cafe desk" link and a Full screen button, since it has no header.
+
+Raised in Phase 7 (the docs were silent, simplest behaviour kept until answered):
+- **Handover code guessing:** 8 wrong codes in a row on one order pause the entry for a minute (`HANDOVER_RATE_LIMIT`). A 4-digit code with free retries could otherwise be guessed by whoever holds the bag. It is not a penalty.
+- **Extra refusal line:** scanning a finished or cancelled order says "That order is closed." (FLOWS has no line for it). A new order says "Not ready yet"; one on its way says "Already taken by someone else".
+- **Runner and staff Updates do not link to the order** (the order page belongs to the buyer). The earning Update is "Delivered. ₹5 added to your wallet."
+- **Drop point wording:** "GICT ground floor lobby" (the building, then the drop point in lower case) everywhere a runner or buyer is told where to go, as in FLOWS 3b.
+- **Camera:** the runner sheet asks for the rear camera and falls back to any camera (a laptop has none at the back). The QR decoder file is served from our own site (`public/scanner/zxing_reader.wasm`, zxing-wasm 3.1.6) so scanning does not need a CDN. Copy it again if `@yudiel/react-qr-scanner` is upgraded.
+- **Run lists:** `qx:runs:live:<id>` is the source for My runs and the 3-run limit. A check that runs when the lists are read adds any held order the list is missing, so orders the cafe gave to staff before runs existed still appear.
+- **The Orders tab dot** also lights while you carry a run, not only while you have an order of your own.
+- **Escape in sheets** now works wherever focus is (it used to need focus inside the sheet).
 
 Waiting on the team:
 - Real break times for the semester (placeholder list in `data/breaks.ts`).
@@ -171,6 +183,14 @@ Phase 4 (wallet), accepted by the team
 - Home banners: under ₹50 "Top up to order ...", ₹50 to ₹99 "Keep at least ₹100 ...", nothing at ₹100 or more. The wallet chip shows an amber dot under ₹50. A negative balance shows a proper minus (−₹30).
 - Admin › Users lists everyone who has identified themselves (newest first, up to 50), searchable by part of an AU number, staff ID or name, and refreshes every 5 s so wallets can be watched live. Quick-fill buttons +₹100, +₹300, +₹500 are a demo convenience.
 - Late-delivery penalties, order payments, refunds and runner earnings will use the same `moveMoney` function in `lib/wallet.ts`. A penalty passes no floor, so it can go negative.
+
+Phase 7 and 8 (runner and late handling), team decisions
+- **I'm here (a):** the holder (runner buddy or staff) taps it at the drop point on a run in Orders › My runs. Server records `arrivedAt`; the buyer gets "Your runner is at <building> <drop point>. Show your code." Only while `PICKED_UP`, only by the holder.
+- **Buyer no-show (b):** `arrivedAt ≤ promisedAt` and not delivered when grace ends → new terminal status `NO_SHOW`. Runner (students only) still earns `RUNNER_EARN`; buyer is not refunded; the bag goes back to the source counter; amber cafe card; the buyer can still collect with the same code for `PICKUP_STALE_MIN`.
+- **Late by a runner buddy (c):** `FAILED_LATE`, buyer refunded in full, runner debited the full total (can go negative), no earning, runner keeps the food.
+- **Late by staff (d):** `FAILED_LATE`, buyer refunded in full, nobody debited, the cafe absorbs it, red cafe alert "Staff returning QX-NNNN to <source>" with a **Returned** button.
+- **Late before pickup (e):** `FAILED_LATE`, buyer refunded in full, the cafe absorbs it.
+- **Admin › Live orders (f)** is pulled forward from Phase 10. **Reveal code is a demo tool**: it shows one order's 4-digit code to an admin session, checked on the server, never in the list reply. Remove or hide it before real use.
 
 Phase 5 (ordering), accepted by the team
 - Checkout opens on "Deliver to my building" with GICT selected until Preferences (Phase 9) can remember a default. Confirmed by the team.

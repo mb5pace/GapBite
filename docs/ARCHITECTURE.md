@@ -61,7 +61,7 @@ app/
     page.tsx                    codes
     staff/page.tsx
     users/page.tsx
-    orders/page.tsx
+    orders/page.tsx             Live orders (every order in progress, Copy order ID, Reveal code)
     demo/page.tsx
   api/
     auth/login/route.ts         POST code -> sets cookie, returns portal
@@ -72,9 +72,11 @@ app/
     orders/route.ts             GET mine (orders + runs), POST create
     orders/[id]/route.ts        GET one (buyer, holder, cafe, admin only)
     orders/[id]/cancel/route.ts
-    runs/preview/route.ts       POST scanned id -> preview or error
-    runs/accept/route.ts        POST id -> atomic accept
-    runs/handover/route.ts      POST id + code -> deliver
+    runs/route.ts               GET the runs I am carrying (students and staff): building, buyer first name, promised time. No codes
+    runs/preview/route.ts       POST scanned id (or QX:ORDER:<id>) -> preview with the earning line, or the refusal
+    runs/accept/route.ts        POST id -> atomic accept (first valid scan wins)
+    runs/arrive/route.ts        POST id -> "I'm here": arrivedAt + buyer Update, holder only
+    runs/handover/route.ts      POST id + code -> DELIVERED and the earning, one atomic step
     wallet/route.ts             GET ledger
     wallet/topup/route.ts       POST amount
     updates/route.ts            GET list, POST mark-read
@@ -92,6 +94,7 @@ app/
     admin/staff/route.ts
     admin/users/route.ts
     admin/wallet/route.ts       POST adjust
+    admin/live/route.ts         GET every order in progress (never a code); POST reveal one order's code (admin session, demo tool)
     admin/demo/route.ts         POST seed|reset
 proxy.ts          (Next.js 16 name for middleware.ts)
 lib/
@@ -105,12 +108,15 @@ lib/
   gate.ts         what a typed code opens, rate limit
   codes.ts        pool fill, burn, revoke
   users.ts        user records, Identify, staff accounts
-  wallet.ts       balance, ledger, one atomic Lua move (balance + ledger entry together)
+  wallet.ts       balance, ledger, one atomic Lua move (balance + ledger entry together). The move is a Lua function (LUA_MOVE_MONEY) that the handover and settlement scripts include, so their money steps are the same code
   wallet-rules.ts ₹50 floor, ₹100 suggestion, top-up needed, top-up bounds (pure)
   me.ts           the shell's live numbers: name, balance, dots, session time
   order-types.ts  Order, status list, which steps each kind of order shows (pure)
   order-rules.ts  pricing from the menu, fee and walk lookups, break-slot cutoff, promised-time estimate (pure)
   orders.ts       place (one Lua script), read, list, cancel and refund (the refund script is reused by reject)
+  runs.ts         runs: preview, accept (one Lua script, with the 3-run and ₹50 rules inside), I'm here, handover (delivers and pays in one script), the run lists
+  order-ref.ts    reads QX-4821 or a slip's QX:ORDER:QX-4821 (pure)
+  admin-live.ts   Admin › Live orders: the list and Reveal code
   cafe.ts         what the cafe desk does: queue, accept, reject, start, ready, collect by code, send with staff, bag slip, kiosk (one Lua script moves an order and tells the buyer)
   cafe-today.ts   Today totals from the order records
   qr.ts           the QR module path for a bag slip (no colours: the browser fills it with the text colour)
@@ -133,9 +139,9 @@ components/
   ui/             PillButton (+ PillLink), IconButton, Chip, Card, ArchCard, ItemTile, SourceGlyph, Stepper, Sheet (bottom sheet, or centred dialog on the laptop portals), Input, CodeBoxes, Banner, Badge, EmptyState, Countdown, Money, LogoutButton, Toggle, PortalNav
   kit/            KitGallery, the admin-only /kit page
   student/        Header, BottomBar, WalletChip, SessionChip (Phase 2); SourceTile, CartBar, OrderStrip (later)
-  runner/         ScanButton, RunnerSheet (scan, preview, accept, handover)
+  runner/         RunnerProvider (the one sheet for the student app), RunnerSheet (scan, preview, accept, handover), QrScanner (camera, decoder served from /scanner), ScanButton
   cafe/           QueueProvider (one poll, new-order highlight and chime, server clock), CafeHeader, QueueView, OrderCard, RejectDialog, StaffDialog, BagSlipDialog, VendingStockView, MenuAvailabilityView, TodayView, KioskView (AlertCard waits for Phase 8)
-  admin/          CodeTable, ...
+  admin/          CodesPanel, CodeTable, PermanentCodes, ShowCode, StaffPanel, UsersPanel, LiveOrdersPanel, CopyButton, AdminNav
 public/
   illustrations/  (see bible)
   food/           optional real photos <item-id>.jpg
@@ -159,7 +165,10 @@ All values JSON unless noted. Prefix everything with `qx:` so reset can scan saf
 | `qx:orders:by:<userId>` | sorted set | buyer's orders |
 | `qx:orders:live:<userId>` | set | buyer's orders that are not finished yet (drives the Orders tab dot and the Home strip) |
 | `qx:idem:<userId>:<token>` | string, TTL 300 | order id placed for this checkout press, so a double tap or retry places one order |
-| `qx:runs:by:<userId>` | sorted set | orders this user carried |
+| `qx:runs:by:<userId>` | sorted set | orders this user has carried (run history) |
+| `qx:runs:live:<userId>` | set | orders this user is carrying now (My runs, the 3-run limit) |
+| `qx:handover:wrong:<orderId>` | integer, TTL 60 | wrong handover codes on this order (8 pauses entry for the rest of the minute) |
+| `qx:heal` | string, TTL 2 s | throttle for the check that adds held orders to My runs |
 | `qx:lock:order:<orderId>` | string NX | accept lock |
 | `qx:penalty:<orderId>` | string NX | late penalty applied once |
 | `qx:updates:<userId>` | list | Updates, keep last 50 |
@@ -176,8 +185,8 @@ All values JSON unless noted. Prefix everything with `qx:` so reset can scan saf
 
 Use `redis.eval` (Lua) or `MULTI` for every multi-step money or ownership change, so it is all-or-nothing:
 1. **Place order:** check balance ≥ ₹50 and ≥ total, decrement stock for vending, debit wallet, write order, add to indexes, push ledger.
-2. **Accept run:** `SET qx:lock:order:<id> <userId> NX`; if it fails → "Already taken". Then re-read status, set holder and `PICKED_UP`.
-3. **Handover:** check status `PICKED_UP` and code, set `DELIVERED`, credit runner, move index.
+2. **Accept run:** one Lua script checks the order (READY, delivery, no holder, not the scanner's own) and the scanner (balance, run count, students only), then sets the holder and `PICKED_UP` and adds it to the scanner's runs. First valid scan wins; the rest are told "Already taken".
+3. **Handover:** one Lua script checks `PICKED_UP`, the holder and the code, sets `DELIVERED`, moves the indexes and credits the runner (students) with the shared money-move function.
 4. **Fail late:** `SET qx:penalty:<id> 1 NX` first; only the winner refunds and debits.
 5. **Burn temp code:** Lua script that flips `unused → active` only if still unused, then adds a new code.
 

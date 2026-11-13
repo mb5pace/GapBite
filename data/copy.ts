@@ -91,12 +91,6 @@ export const COPY = {
       feedback: "Feedback",
       support: "Support",
     },
-    scan: {
-      label: "Scan a bag",
-      title: "Scan a bag",
-      body: "Runner buddies will scan the bag slip here. Scanning opens in a later release.",
-      close: "Close",
-    },
     home: {
       searchLabel: "Search the menu",
       searchPlaceholder: "Search poha, cold coffee, Paper Boat…",
@@ -146,7 +140,7 @@ export const COPY = {
     codeNotUnused: "That code has already been used or removed. The list is up to date now.",
     sessionAlreadyEnded: "That session has already ended.",
     slotEmpty: "There is no permanent code in that slot.",
-    nav: { codes: "Codes", staff: "Staff", users: "Users" },
+    nav: { codes: "Codes", staff: "Staff", users: "Users", orders: "Live orders" },
     staff: {
       title: "Staff",
       intro: "Staff sign in with any student access code, then tap \"I'm QuickX staff\" and type their ID.",

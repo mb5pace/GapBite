@@ -40,13 +40,13 @@ Items with steppers and remove, source name, "Add more items" pill, subtotal. "C
 Mode toggle (Pick up at UC / Deliver to my building). Building list (6 rows: short name, drop point, walk time, fee). When: "As soon as possible" or slot chips (disabled if too late). Bill: subtotal, delivery fee, total. Wallet: balance now and after. Promised time estimate. Big pill button "Pay ₹235 from wallet". Disabled reasons shown in plain words.
 
 ### Order Detail `/o/[orderId]`
-Order ID, source, status headline ("Out for delivery to GICT"). **Vertical stepper** (Placed, Accepted, Preparing, Ready, Picked up, Delivered, or the pickup variant) with times. Large code box (4 digits) with the instruction line. Holder line ("Runner buddy: Aarav" / "QuickX staff"). Promised time with countdown; amber when due, red when failed. Items and bill. Cancel button only while `PLACED`.
+Order ID, source, status headline ("Out for delivery to GICT"). **Vertical stepper** (Placed, Accepted, Preparing, Ready, Picked up, Delivered, or the pickup variant) with times. Large code box (4 digits) with the instruction line. Holder line ("Runner buddy: Aarav" / "QuickX staff"). Promised time with countdown; amber "Due now" when due, red when failed. While the holder has tapped "I'm here" and the order is `PICKED_UP`: a line "Runner is waiting at <drop point>" above the code. A `NO_SHOW` order reads "You missed your runner at <building>" with the instruction "Collect QX-4821 at the <source> counter with your code", keeps the code box and shows "Hold until HH:MM" while the buyer can still collect (`PICKUP_STALE_MIN`). Items and bill. Cancel button only while `PLACED`.
 
 ### Discover
 List of five rows, each opening a simple content page: **Introduction** (what QuickX is, 3 short paragraphs with one illustration), **Help** (how to order, how pickup works, how delivery works), **Smart Vending** (how paying for the vending machine works, with a button "Open vending" → `/s/vending`), **Feedback** (textarea + 1–5 face rating, saved to Redis, thank-you state), **FAQ** (accordion: fees, wallet minimum, what happens if late, how runners earn, refunds).
 
 ### Orders
-Two tabs: **Active** and **Past**. Active has two groups when relevant: "My orders" and "My runs". Run cards show building, drop point, buyer first name, countdown, "Enter code" button. Past shows terminal orders with status badge (Delivered, Collected, Cancelled, Rejected, Failed late) and amount.
+Two tabs: **Active** and **Past**. Active has two groups when relevant: "My orders" and "My runs". Run cards (students and staff, including orders given to staff with "Send with staff") show building, drop point, buyer first name, a countdown to the promised time (amber "Due now" once it passes), an **I'm here** button (becomes "Arrived" after it is tapped) and an **Enter code** button. Past shows terminal orders with status badge (Delivered, Collected, Cancelled, Rejected, Failed late, Missed delivery) and amount.
 
 ### Updates
 Reverse-chronological feed grouped by Today / Earlier. Each row: small icon by kind, title, body, time. Unread rows have a maroon dot. Tapping opens the order if linked. Empty state with illustration: "Nothing yet. Your order updates show up here."
@@ -74,7 +74,13 @@ States: **Scanning** (camera view + "Type order ID instead" link) → **Preview*
 Header: "QuickX · UC Cafe Desk", source filter tabs (All, Truly Indian, Global Bistro, Cafe Delice, Greens and Grains, Vending), sound toggle, clock, Logout.
 
 ### Queue (default)
-Four columns: **New**, **Preparing**, **Ready**, **Out for delivery**. Cards show order ID, source, items with quantities, mode badge (Pickup / building short name), "when", promised time with live countdown, age. Card buttons by column: New → Accept / Reject (reason picker); Preparing → Mark ready; Ready (delivery) → Show bag slip, Send with staff; Ready (pickup) → Collect (4-digit input); Out for delivery → holder name and kind, countdown. Amber border when due or unclaimed for 3 min. Red alert cards pinned above the columns for failed orders with "Seen".
+Four columns: **New**, **Preparing**, **Ready**, **Out for delivery**. Cards show order ID, source, items with quantities, mode badge (Pickup / building short name), "when", promised time with live countdown, age. Amber border when due, or when a Ready delivery order has had no runner for 3 minutes ("No runner yet, send with staff?"). Red and amber alert cards sit pinned above the columns (see Alerts). Card buttons by column: New → Accept / Reject (reason picker); Preparing → Mark ready; Ready (delivery) → Show bag slip, Send with staff; Ready (pickup) → Collect (4-digit input); Out for delivery → holder name and kind, countdown. 
+
+### Alerts (pinned above the four columns)
+Each stays until a staff member acts on it.
+- **Red, failed:** "QX-4821 failed late: <why>. ₹X refunded." with **Seen**.
+- **Red, staff returning:** "Staff returning QX-4821 to <source>" with **Returned** (the bag is back at the counter).
+- **Amber, no-show:** "Buyer did not collect QX-4821, keep at counter", the hold time (`PICKUP_STALE_MIN`) with a countdown and the 4-digit **Collect** input for the buyer's code. When the hold ends the card says so and shows **Seen**.
 
 ### Bag slip (modal)
 Printable layout: big QR, order ID, source, items, building + drop point or PICKUP, promised time. "Print" uses the browser print dialog with a print stylesheet.
@@ -95,10 +101,10 @@ Totals: orders, delivered, collected, failed, revenue by source, fees kept, refu
 
 ## Admin portal (laptop) `/admin`
 
-Header: "QuickX Admin", links **Codes** and **Staff** (the open page uses the selected chip colours), Logout.
+Header: "QuickX Admin", links **Codes**, **Staff**, **Users** and **Live orders** (the open page uses the selected chip colours), Logout.
 
 1. **Codes:** permanent codes (masked, reveal, copy). Temporary pool table: code, status (unused / active with time left / burned / revoked), used by, used at. Buttons: Copy, Revoke (unused), End session (active), Generate now (refill). A large "show code" mode to display one unused code in big type for someone to type in.
 2. **Staff** (`/admin/staff`): "Add staff" takes a first name and creates the next ID (`QX-STF-01`, `QX-STF-02`, …), shown clearly with a Copy button and a line saying how they sign in. Below it, the list of staff (ID, name, Copy). Empty state: Phosphor icon in a sand circle, "No staff yet. Add the first person above."
 3. **Users and wallets:** search by AU/staff ID, see balance and ledger, "Adjust" (+/− amount with a required note).
-4. **Live orders:** read-only list of all active orders with status and holder (useful during the demo).
+4. **Live orders** (`/admin/orders`, pulled forward from Phase 10): every active order, refreshed every 5 s. Each row: the order ID in large type, source, status, mode, building and drop point (delivery), holder name and kind (runner buddy or staff), promised time with a countdown (amber when due), and when the holder tapped "I'm here". Each row has **Copy order ID** and **Reveal code**. Reveal code shows that one order's 4-digit code (it is fetched on tap, only with an admin session, checked on the server, and is never part of the list reply); tap again to hide. Reveal code is a demo tool.
 5. **Demo tools:** "Seed demo data" (creates users AU2340101 Riya ₹300, AU2340102 Aarav ₹120, AU2340103 Meera ₹300, staff QX-STF-01 Ramesh, and 2 past delivered orders), "Create late-test order" (picks a buyer and a runner, creates a delivery order already `PICKED_UP` by that runner with the promised time 1 minute from now, so the grace runs out about 6 minutes later on stage), "Reset all data" (orders, wallets, users, updates, stock; keeps codes and staff unless ticked) with typed confirmation `RESET`.

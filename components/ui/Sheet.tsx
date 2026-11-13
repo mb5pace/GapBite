@@ -42,6 +42,30 @@ export function Sheet({
   const dragDistance = useRef(0);
   const [dragY, setDragY] = useState(0);
 
+  // Escape closes, and Tab brings focus back in, wherever focus is. It can be nowhere: when the button
+  // that had it is replaced (a failed lookup, a new step), the browser drops focus on the page.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+  useEffect(() => {
+    if (!open) return;
+    function onDocumentKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        onCloseRef.current();
+        return;
+      }
+      const panel = panelRef.current;
+      if (event.key === "Tab" && panel && !panel.contains(document.activeElement)) {
+        event.preventDefault();
+        const items = Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE));
+        (items[0] ?? panel).focus();
+      }
+    }
+    document.addEventListener("keydown", onDocumentKeyDown);
+    return () => document.removeEventListener("keydown", onDocumentKeyDown);
+  }, [open]);
+
   // Lock page scroll, move focus in, and give it back on close.
   useEffect(() => {
     if (!open) return;
@@ -59,11 +83,6 @@ export function Sheet({
   const center = placement === "center";
 
   function onKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-    if (event.key === "Escape") {
-      event.stopPropagation();
-      onClose();
-      return;
-    }
     if (event.key !== "Tab" || !panelRef.current) return;
     const items = Array.from(panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE));
     if (items.length === 0) {

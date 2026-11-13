@@ -9,7 +9,7 @@ import { COPIED_MS } from "@/lib/config";
  * Copies text to the clipboard. `getText` runs on click, so a code that is
  * still masked can be fetched at that moment instead of being held in the page.
  */
-export function CopyButton({ getText }: { getText: () => Promise<string | null> }) {
+export function CopyButton({ getText, label = "Copy", name }: { getText: () => Promise<string | null>; label?: string; name?: string }) {
   const [state, setState] = useState<"idle" | "copied" | "failed">("idle");
   const timer = useRef<number | undefined>(undefined);
 
@@ -32,13 +32,13 @@ export function CopyButton({ getText }: { getText: () => Promise<string | null> 
   }
 
   return (
-    <PillButton variant="secondary" size="md" onClick={copy} aria-live="polite">
+    <PillButton variant="secondary" size="md" onClick={copy} aria-live="polite" aria-label={name}>
       {state === "copied" ? (
         <Check weight="bold" size={18} aria-hidden="true" />
       ) : (
         <Copy weight="regular" size={18} aria-hidden="true" />
       )}
-      {state === "copied" ? "Copied" : state === "failed" ? "Copy failed" : "Copy"}
+      {state === "copied" ? "Copied" : state === "failed" ? "Copy failed" : label}
     </PillButton>
   );
 }

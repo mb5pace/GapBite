@@ -14,7 +14,7 @@ import { useState, type ComponentType } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { getBuilding } from "@/data/locations";
 import { getSource } from "@/data/menu";
-import { ORDER_COPY, ORDER_DETAIL_COPY, codeInstruction, endedBanner, headline, promisedLine } from "@/data/order-copy";
+import { ORDER_COPY, ORDER_DETAIL_COPY, RUN_COPY, codeInstruction, endedBanner, headline, promisedLine } from "@/data/order-copy";
 import { Banner } from "@/components/ui/Banner";
 import { Card } from "@/components/ui/Card";
 import { CodeBoxes } from "@/components/ui/CodeBoxes";
@@ -155,6 +155,10 @@ export function OrderView({ initial }: { initial: OrderReply }) {
       </div>
 
       {ended ? <Banner tone={ended.tone}>{ended.text}</Banner> : null}
+
+      {order.status === "PICKED_UP" && order.arrivedAt !== undefined && order.buildingId ? (
+        <Banner>{RUN_COPY.runnerWaiting(getBuilding(order.buildingId).dropPoint)}</Banner>
+      ) : null}
 
       <Stepper steps={buildSteps(order)} />
 

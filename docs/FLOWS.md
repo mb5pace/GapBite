@@ -9,10 +9,14 @@ PLACED ──accept──▶ ACCEPTED ──start──▶ PREPARING ──ready
   └─cafe reject──▶ REJECTED                                    │
                                                                └─(delivery) scan accepted──▶ PICKED_UP ──handover code ok──▶ DELIVERED
 
-Any of ACCEPTED, PREPARING, READY, PICKED_UP ──grace ended──▶ FAILED_LATE
+PICKED_UP ──"I'm here" (holder only)──▶ stays PICKED_UP, arrivedAt recorded
+
+Delivery orders only, once promisedAt + GRACE_MIN has passed (section 5):
+  PICKED_UP and arrivedAt ≤ promisedAt ────────────────▶ NO_SHOW
+  any other order in ACCEPTED, PREPARING, READY, PICKED_UP ──▶ FAILED_LATE
 ```
 
-Terminal statuses: `COLLECTED`, `DELIVERED`, `CANCELLED`, `REJECTED`, `FAILED_LATE`. Active = any other status. Each transition is a server function in `lib/orders.ts` that checks the current status and rejects anything not on this diagram.
+Terminal statuses: `COLLECTED`, `DELIVERED`, `CANCELLED`, `REJECTED`, `FAILED_LATE`, `NO_SHOW`. Active = any other status. (A `NO_SHOW` order can still be handed over at the counter for `PICKUP_STALE_MIN`; that is recorded as `collectedAt` and the status stays `NO_SHOW`.) Each transition is a server function in `lib/orders.ts` that checks the current status and rejects anything not on this diagram.
 
 For vending orders the cafe portal shows a single "Mark ready" button (no Preparing step), because nothing is cooked: `PLACED → ACCEPTED → READY` can be done in one tap ("Accept and ready").
 
@@ -37,6 +41,8 @@ interface Order {
   prepMin: number;
   walkMin: number;
   promisedAt?: number;        // epoch ms, set at placement as estimate, fixed at accept
+  arrivedAt?: number;         // epoch ms, set when the holder taps "I'm here" (PICKED_UP only)
+  collectedAt?: number;       // epoch ms, a NO_SHOW bag handed to the buyer at the counter
   events: { at: number; status: OrderStatus; note?: string }[];
   createdAt: number;
   updatedAt: number;
@@ -78,6 +84,7 @@ interface Order {
 5. On success → `PICKED_UP`, holder set. Popup shows "Run accepted. Take it to GICT ground floor lobby by 11:47." Cafe card moves to **Out for delivery** with the runner's name. Buyer Update: "Picked up by runner buddy Aarav. On the way to GICT." (staff: "Picked up by QuickX staff.")
 6. Failure messages, one line each: "Already taken by someone else", "Not ready yet", "This is your own order", "Top up to at least ₹50 to run", "You already have 3 active runs", "This order is for pickup at UC".
 7. Scanning several bags in a row is the batching: each scan is its own accept.
+8. A run (including one given to staff with "Send with staff", 3c) then shows in Orders › My runs until it is delivered or settled.
 
 ## 3c. Staff from the counter
 
@@ -85,24 +92,42 @@ On a Ready delivery order in the Cafe portal, **Send with staff** opens a picker
 
 ## 4. Handover
 
-1. Runner reaches the drop point. Orders › Active shows their runs under "My runs" with building, buyer first name and a countdown to promised time.
-2. Runner taps the run → **Enter handover code** popup (same popup component as Scan).
-3. Buyer shows their 4-digit code. Runner types it.
-4. Match → `DELIVERED`. Runner wallet +₹5 / +₹8 (students only). Runner sees "Delivered. ₹5 added to your wallet." Buyer Update: "Delivered at GICT. Enjoy!" Order moves to Past for both.
-5. No match → "Code does not match", try again.
+1. Runner reaches the drop point. Orders › Active shows their runs under "My runs" with building, drop point, buyer first name and a countdown to promised time (amber "Due now" once it passes).
+2. Runner taps **I'm here**. Allowed only while the order is `PICKED_UP` and only by the holder. The server records `arrivedAt` and the buyer gets an Update: "Your runner is at GICT ground floor lobby. Show your code." The buyer's Order Detail shows "Runner is waiting at Ground floor lobby". The button turns into "Arrived" and cannot be tapped again.
+3. Runner taps **Enter code** → the **Enter handover code** popup (same popup component as Scan).
+4. Buyer shows their 4-digit code. Runner types it.
+5. Match, and the order is still `PICKED_UP` and held by this person → `DELIVERED`. Runner wallet +₹5 / +₹8 (students only; staff earn nothing). The delivery and the credit are one atomic step. Runner sees "Delivered. ₹5 added to your wallet." (staff: "Delivered."). Buyer Update: "Delivered at GICT. Enjoy!" Order moves to Past for both and leaves the cafe's Out for delivery column.
+6. No match → "Code does not match", try again. After several wrong tries in a row the entry pauses for a minute.
 
 ## 5. Late detection
 
-There is no background job on the free tier. Lateness is evaluated lazily and idempotently by `lib/late.ts › sweepLate()`, called at the start of every cafe queue poll, every buyer/runner order poll and the admin dashboard. With at least one portal open, every order is checked every few seconds.
+There is no background job on the free tier. Lateness is evaluated lazily and idempotently by `lib/late.ts › sweepLate()`, called at the start of every cafe queue poll, every buyer and runner order poll and the Admin Live orders poll. With at least one portal open, every order is checked every few seconds. (It runs at most once a second, however many screens are polling.)
 
-1. For each active delivery order with `promisedAt`: if `now ≥ promisedAt`, mark it **due** (display only, amber). If `now ≥ promisedAt + GRACE_MIN`, fail it.
-2. Failing uses a one-time lock (`SET penalty:QX-4821 1 NX`) so refund and penalty run exactly once even if three devices poll at the same moment.
-3. Apply the table in BUSINESS_RULES "Late delivery penalty". Write ledger entries and Updates for buyer and runner. Create a red alert in the cafe portal.
-4. Ready delivery orders with no holder for 3 minutes get the amber "No runner yet" highlight in the cafe portal (display only).
+1. For each active **delivery** order with `promisedAt` in `ACCEPTED`, `PREPARING`, `READY` or `PICKED_UP`: if `now ≥ promisedAt`, it is **due** (display only, amber, in the buyer, runner, cafe and Admin views). If `now ≥ promisedAt + GRACE_MIN`, it is settled. `PLACED` and pickup orders are never swept.
+2. Settling is **one atomic step** that checks the order is still in the state the sweep saw, takes the one-time penalty lock (`SET qx:penalty:QX-4821 NX`) and does everything in BUSINESS_RULES "When grace ends": the order status and indexes, the buyer's refund and ledger entry, the holder's debit or earning and ledger entry, vending stock, the Updates and the cafe alert. If three devices poll at the same moment, one of them wins and the others change nothing.
+3. Which outcome: `PICKED_UP` with `arrivedAt ≤ promisedAt` → `NO_SHOW`. Otherwise, a student runner → `FAILED_LATE` with the runner debited; staff → `FAILED_LATE`, nobody debited; no holder yet → `FAILED_LATE`, the cafe absorbs it.
+4. Cafe alert cards, pinned above the four columns and kept until a staff member acts:
+   - red "failed" card with **Seen** (rows 2 and 4);
+   - red "Staff returning QX-4821 to Cafe Delice" with **Returned**, which marks the bag back at the counter (row 3);
+   - amber "Buyer did not collect QX-4821, keep at counter" with the buyer's code entry (**Collect**) until the hold ends, then **Seen** (row 1).
+5. Ready delivery orders with no holder for 3 minutes (`UNCLAIMED_ALERT_MIN`) get the amber "No runner yet, send with staff?" highlight in the cafe portal (display only).
+6. An order the sweep finds already in a later state (delivered a moment ago, cancelled) is left alone.
 
 ## 6. Notifications (Updates tab)
 
 Every status change and money event creates an Update for the affected users: `{ id, userId, orderId?, title, body, kind: "order" | "wallet" | "alert", at, read }`. The bottom bar shows an unread dot on Updates. Opening the tab marks all as read. Tapping an Update with an orderId opens that order.
+
+The words, for the ordering, run and late events (buyer unless said otherwise):
+
+| Event | Update |
+|---|---|
+| Runner buddy accepts | "Picked up by runner buddy Aarav. On the way to GICT." (staff: "Picked up by QuickX staff.") |
+| Holder taps I'm here | "Your runner is at GICT ground floor lobby. Show your code." |
+| Delivered | "Delivered at GICT. Enjoy!" Runner (student): "Delivered. ₹5 added to your wallet." |
+| Failed late | "Your order could not reach GICT in time. ₹X has been refunded to your wallet." |
+| Failed late, student runner | "Run QX-4821 was not delivered in time. ₹X has been deducted from your wallet. The food is yours to keep." |
+| Failed late, staff | "QX-4821 ran out of time. Please bring it back to Cafe Delice." |
+| No-show | "You missed your runner at GICT. Collect QX-4821 at the Cafe Delice counter with your code." Student runner: "Buyer did not show up for QX-4821. ₹5 has been added to your wallet. Please bring the bag back to Cafe Delice." Staff: "Buyer did not show up for QX-4821. Please bring the bag back to Cafe Delice." |
 
 ## 7. Live sync
 

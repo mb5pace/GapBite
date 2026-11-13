@@ -54,6 +54,7 @@ export const CAFE_COPY = {
     runnerBuddy: "Runner buddy",
     staff: "QuickX staff",
     heldBy: "Carried by",
+    arrivedAt: (time: string) => `At the drop point since ${time}`,
     atKiosk: "Waiting for the buyer at the vending kiosk.",
   },
   actions: {

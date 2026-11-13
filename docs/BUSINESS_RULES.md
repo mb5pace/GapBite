@@ -25,7 +25,7 @@ RUNNER_EARN = { near: 5, far: 8 }
 4. `WALLET_MIN_TO_USE = 50`. If the balance is below ₹50, the user cannot place an order and cannot accept a run. They can still browse, top up and see their orders.
 5. `WALLET_SUGGESTED = 100`. If the balance is ₹50–₹99, show a non-blocking banner: "Keep at least ₹100 in your wallet so orders never get stuck."
 6. To place an order the balance must be at least ₹50 **and** at least the order total. After paying, the balance may drop below ₹50; that is fine.
-7. The wallet can go negative, but only through a late-delivery penalty (below). A negative wallet is below ₹50, so rule 4 blocks the user until they top up.
+7. The wallet can go negative, but only through a late-delivery penalty ("When grace ends", below). A negative wallet is below ₹50, so rule 4 blocks the user until they top up.
 8. Every change writes a ledger entry: top-up, order payment, refund, runner earning, penalty, admin adjustment. The ledger is what Account › Wallet shows.
 
 ## Runner buddy rules
@@ -35,7 +35,9 @@ RUNNER_EARN = { near: 5, far: 8 }
 3. Maximum 3 active runs at once (`MAX_ACTIVE_RUNS = 3`). Encourage runs to the same building; do not enforce it.
 4. Only orders in status `READY` with mode `delivery` can be accepted. First valid scan wins; everyone else sees "Already taken".
 5. On a correct handover code: order becomes `DELIVERED`, runner's wallet is credited with RUNNER_EARN for that zone.
-6. Wrong handover code: show "Code does not match", allow retries, no penalty for wrong tries.
+6. Wrong handover code: show "Code does not match", allow retries, no penalty for wrong tries. (Too many wrong tries in a row pause the entry for a minute, so a code cannot be guessed. That is a limit, not a penalty.)
+7. **Arrival ("I'm here").** At the drop point the holder taps "I'm here" on the run in Orders › My runs. Allowed only while the order is `PICKED_UP` and only by the holder. The server records `arrivedAt` (server time) and tells the buyer. An arrival at or before the promised time protects the holder at grace end (see "When grace ends"). Tapping again changes nothing.
+8. Only the holder can enter the handover code for an order.
 
 ## Staff delivery
 
@@ -43,26 +45,40 @@ RUNNER_EARN = { near: 5, far: 8 }
 2. Staff have no run limit and no ₹50 requirement for runs.
 3. Staff earn nothing to their wallet; the delivery fee stays with the cafe.
 4. In the Cafe portal, staff at the counter can also tap "Send with staff" on a Ready order to assign it to staff without scanning.
-5. `UNCLAIMED_ALERT_MIN = 3`: if a Ready delivery order has no runner after 3 minutes, the cafe portal highlights it as "No runner yet, send with staff?".
+5. Orders given to staff with "Send with staff" appear in that staff member's Orders › My runs, so they can tap "I'm here" and enter the handover code like a runner. Nothing is credited to a staff wallet.
+6. `UNCLAIMED_ALERT_MIN = 3`: if a Ready delivery order has no runner after 3 minutes, the cafe portal highlights it as "No runner yet, send with staff?".
 
 ## Promised time and grace
 
 1. **As soon as possible:** promised time = time the cafe accepts + prep time + walk time to the building + `BUFFER_MIN` (2). Before acceptance, show the estimate from placement time.
 2. **For a break slot:** promised time = the slot time. A slot can be chosen only if `now + prep + walk + SLOT_LEAD_BUFFER_MIN` (5) is before the slot; otherwise it is greyed out.
 3. **Pickup:** promised time = accept + prep. Pickup orders never fail automatically; uncollected pickups are shown to the cafe after `PICKUP_STALE_MIN` (30) minutes and can be closed manually.
-4. `GRACE_MIN = 5`. At the promised time, the order turns amber ("Due now") in both buyer and cafe views. At promised time + 5 minutes, if not `DELIVERED`, it fails.
+4. `GRACE_MIN = 5`. At the promised time, a delivery order that is not yet delivered turns amber ("Due now") in the buyer, runner, cafe and Admin views. At promised time + 5 minutes, if it is still not `DELIVERED`, it is settled by "When grace ends" below. The promised time is fixed when the cafe accepts and never moves again.
 
-## Late delivery penalty (when grace ends)
+## When grace ends
 
-Whoever is holding the order when grace ends is responsible.
+Grace ends at the promised time + `GRACE_MIN`. Only delivery orders in `ACCEPTED`, `PREPARING`, `READY` or `PICKED_UP` are checked (`PLACED` is skipped: the buyer can cancel or the cafe can reject; pickups never fail by themselves). Each order is settled exactly once. The first row that fits wins.
 
-| Holder at grace end | Order becomes | Buyer | Responsible party |
-|---|---|---|---|
-| Runner buddy (status `PICKED_UP`) | `FAILED_LATE` | full refund to wallet (food + fee) | runner wallet debited by the full order total; no earning |
-| Staff (status `PICKED_UP`, staff) | `FAILED_LATE` | full refund | cafe absorbs it; no wallet debited |
-| No one yet (`ACCEPTED`, `PREPARING`, `READY`) | `FAILED_LATE` | full refund | cafe absorbs it |
+| # | Situation when grace ends | Order becomes | Buyer | Holder | Cafe |
+|---|---|---|---|---|---|
+| 1 | `PICKED_UP`, and the holder tapped "I'm here" at or before the promised time (`arrivedAt ≤ promisedAt`) | `NO_SHOW` (terminal) | **no refund**: the buyer missed the delivery | a student runner **still earns** RUNNER_EARN; staff earn nothing | the bag goes back to the source counter; amber card "Buyer did not collect QX-NNNN, keep at counter" |
+| 2 | `PICKED_UP`, held by a student runner buddy, no on-time arrival | `FAILED_LATE` | full refund to the wallet (food + fee) | wallet **debited the full order total** (can go negative), no earning; **keeps the food**, they paid for it | red alert card with "Seen" |
+| 3 | `PICKED_UP`, held by staff, no on-time arrival | `FAILED_LATE` | full refund | no wallet is debited; staff bring the bag back to the cafe | the cafe absorbs it; red alert card "Staff returning QX-NNNN to <source>" with a "Returned" button |
+| 4 | Nobody picked it up yet (`ACCEPTED`, `PREPARING` or `READY`) | `FAILED_LATE` | full refund | – | the cafe absorbs it; red alert card with "Seen" |
 
-After failing, the handover code stops working. The cafe portal shows a red alert card that stays until a staff member taps "Seen". The buyer gets an Update: "Your order could not reach GICT in time. ₹X has been refunded to your wallet." The runner gets: "Run QX-4821 was not delivered in time. ₹X has been deducted from your wallet."
+After a failure or no-show the handover code stops working, except as row 1 says below.
+
+**Buyer no-show (row 1).** The buyer keeps the same 4-digit code and can collect the bag at the source counter for `PICKUP_STALE_MIN` minutes after the no-show. The cafe types the code into the amber card to hand it over. When that time is over the card says the hold ended and can be dismissed with "Seen". Nothing is refunded in either case. If a vending item was in the bag, its stock is not returned.
+
+**Stock.** A vending order that fails in row 3 or 4 puts its items back into the machine count with the refund (the bag stays with the cafe). In row 2 the runner keeps the food, so nothing goes back. No-show returns nothing.
+
+**Messages.**
+- Buyer, rows 2 to 4: "Your order could not reach GICT in time. ₹X has been refunded to your wallet."
+- Buyer, row 1: "You missed your runner at GICT. Collect QX-NNNN at the <source> counter with your code."
+- Student runner, row 2: "Run QX-NNNN was not delivered in time. ₹X has been deducted from your wallet. The food is yours to keep."
+- Staff, row 3: "QX-NNNN ran out of time. Please bring it back to <source>."
+- Student runner, row 1: "Buyer did not show up for QX-NNNN. ₹X has been added to your wallet. Please bring the bag back to <source>." Staff, row 1: "Buyer did not show up for QX-NNNN. Please bring the bag back to <source>."
+- Buyer, when the holder taps "I'm here": "Your runner is at GICT ground floor lobby. Show your code."
 
 Because a penalty can be larger than the runner's balance, the runner's wallet can go negative (see Wallet rule 7).
 
@@ -70,7 +86,7 @@ Because a penalty can be larger than the runner's balance, the runner's wallet c
 
 1. Buyer can cancel only while status is `PLACED` (before the cafe accepts): full refund.
 2. Cafe can reject a `PLACED` order (for example, item ran out): full refund, buyer notified with the reason.
-3. After `ACCEPTED`, no cancellation by the buyer.
+3. After `ACCEPTED`, no cancellation by the buyer. (A late or missed delivery is settled by "When grace ends".)
 4. Refunds return vending stock if the item was not dispensed.
 
 ## Other limits

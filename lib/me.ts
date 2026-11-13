@@ -4,6 +4,7 @@
  * the same thing for polling. Server-side only; the type is safe to import anywhere.
  */
 import { countLiveOrders } from "./orders";
+import { countRuns } from "./runs";
 import type { Session } from "./session";
 import { getUnread } from "./updates";
 import { getUser } from "./users";
@@ -15,7 +16,7 @@ export interface MeData {
   balance: number;
   /** Unread Updates: lights the dot on the Updates tab. */
   unread: number;
-  /** True while the user has an order in progress: lights the dot on the Orders tab. */
+  /** True while the user has an order in progress, or a run they are carrying: lights the dot on the Orders tab. */
   activeOrder: boolean;
   /** Time left on a temp-code session, measured on the server; null for other sessions. */
   sessionMsLeft: number | null;
@@ -27,18 +28,19 @@ export interface MeData {
 
 export async function getMe(session: Session, now: number): Promise<MeData | null> {
   if (!session.userId) return null;
-  const [user, balance, unread, live] = await Promise.all([
+  const [user, balance, unread, live, runs] = await Promise.all([
     getUser(session.userId),
     getBalance(session.userId),
     getUnread(session.userId),
     countLiveOrders(session.userId),
+    countRuns(session.userId),
   ]);
   if (!user) return null;
   return {
     user: { id: user.id, name: user.name, role: user.role },
     balance,
     unread,
-    activeOrder: live > 0,
+    activeOrder: live > 0 || runs > 0,
     sessionMsLeft: session.codeType === "temp" ? Math.max(0, session.exp * 1000 - now) : null,
     prefs: null,
     now,

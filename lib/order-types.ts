@@ -74,6 +74,8 @@ export interface Order {
   walkMin: number;
   /** Epoch ms. An estimate at placement, fixed when the cafe accepts. */
   promisedAt?: number;
+  /** Epoch ms. Set when the holder taps "I'm here" at the drop point (PICKED_UP only). */
+  arrivedAt?: number;
   events: OrderEvent[];
   createdAt: number;
   updatedAt: number;
@@ -137,6 +139,8 @@ export interface CafeCard {
   createdAt: number;
   /** When it became READY, for how long a bag has been waiting. */
   readyAt?: number;
+  /** When the holder tapped "I'm here". */
+  arrivedAt?: number;
   holder?: Holder;
 }
 
@@ -153,6 +157,7 @@ export function toCafeCard(order: Order): CafeCard {
     promisedAt: order.promisedAt,
     createdAt: order.createdAt,
     readyAt: ready?.at,
+    arrivedAt: order.arrivedAt,
     holder: order.holder,
   };
 }
@@ -174,4 +179,45 @@ export function columnOf(status: OrderStatus): QueueColumnId | null {
     default:
       return null;
   }
+}
+
+/**
+ * A run as the person carrying it sees it (Orders › My runs). The buyer's first name is
+ * there so the runner can call it out at the drop point. No code, no buyer ID, no prices.
+ */
+export interface RunCard {
+  id: string;
+  sourceId: SourceId;
+  buildingId: BuildingId;
+  buyerName: string;
+  status: OrderStatus;
+  promisedAt?: number;
+  arrivedAt?: number;
+  pickedUpAt?: number;
+}
+
+export function toRunCard(order: Order): RunCard {
+  const picked = [...order.events].reverse().find((event) => event.status === "PICKED_UP" && event.note === undefined);
+  return {
+    id: order.id,
+    sourceId: order.sourceId,
+    buildingId: order.buildingId as BuildingId,
+    buyerName: order.buyerName,
+    status: order.status,
+    promisedAt: order.promisedAt,
+    arrivedAt: order.arrivedAt,
+    pickedUpAt: picked?.at,
+  };
+}
+
+/** What the runner is shown before they accept: where it goes, by when, and what they earn. No buyer details. */
+export interface RunPreview {
+  id: string;
+  sourceName: string;
+  units: number;
+  buildingId: BuildingId;
+  promisedAt?: number;
+  /** Rupees the runner earns on a confirmed handover. 0 for staff. */
+  earn: number;
+  staff: boolean;
 }

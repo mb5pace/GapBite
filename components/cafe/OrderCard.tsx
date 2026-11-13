@@ -121,6 +121,9 @@ export function OrderCard({
           <span className="text-mocha">{copy.heldBy} </span>
           <span className="font-bold">{card.holder.name}</span>
           <span className="text-mocha"> · {card.holder.kind === "staff" ? copy.staff : copy.runnerBuddy}</span>
+          {card.arrivedAt !== undefined ? (
+            <span className="block text-mocha">{copy.arrivedAt(formatClock(card.arrivedAt))}</span>
+          ) : null}
         </p>
       ) : null;
       break;

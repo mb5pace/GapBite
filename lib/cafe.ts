@@ -21,7 +21,7 @@ import {
 } from "@/data/order-copy";
 import { AppError } from "./api";
 import { CAFE_ORDERS_MAX, KIOSK_RATE_LIMIT, SLIP_QR_PREFIX, UPDATES_KEEP } from "./config";
-import { activeKey, doneKey, getOrder, liveKey, orderKey, refundOrder } from "./orders";
+import { activeKey, doneKey, getOrder, liveKey, orderKey, refundOrder, runsByKey, runsLiveKey } from "./orders";
 import { estimatePromisedAt } from "./order-rules";
 import { isTerminal, toCafeCard, type CafeCard, type Order, type OrderStatus } from "./order-types";
 import { qrPath, type QrPath } from "./qr";
@@ -30,10 +30,12 @@ import { makeUpdate, unreadKey, updatesKey } from "./updates";
 import { getUser, normalizeStaffId } from "./users";
 
 /**
- * KEYS: 1 order, 2 active, 3 done, 4 buyer's live set, 5 buyer's updates, 6 buyer's unread.
+ * KEYS: 1 order, 2 active, 3 done, 4 buyer's live set, 5 buyer's updates, 6 buyer's unread,
+ *       7 and 8 the new holder's live runs and run history (unused unless ARGV 10 is set).
  * ARGV: 1 order id, 2 allowed current statuses (JSON), 3 "1" = only if nobody holds it,
  *       4 now, 5 fields to set (JSON), 6 steps to record (JSON: status, note?), 7 "1" = the last
- *       step ends the order, 8 Updates (JSON array of ready-made JSON strings), 9 updates size.
+ *       step ends the order, 8 Updates (JSON array of ready-made JSON strings), 9 updates size,
+ *       10 the new holder's id, so the order shows in their My runs ("" for none).
  * Returns { 1, orderJson } or { 0, reason } with nothing changed.
  */
 const ADVANCE_LUA = `
@@ -71,6 +73,10 @@ if #updates > 0 then
   redis.call('LTRIM', KEYS[5], 0, tonumber(ARGV[9]) - 1)
   redis.call('INCRBY', KEYS[6], #updates)
 end
+if ARGV[10] ~= '' then
+  redis.call('SADD', KEYS[7], ARGV[1])
+  redis.call('ZADD', KEYS[8], now, ARGV[1])
+end
 return { 1, cjson.encode(order) }
 `;
 
@@ -81,6 +87,8 @@ interface Advance {
   patch?: Record<string, unknown>;
   updates: { title: string; body: string }[];
   noHolder?: boolean;
+  /** The person who now carries the order, so it appears in their Orders › My runs. */
+  runHolderId?: string;
 }
 
 /** Runs the script. Null means the order was not in an allowed status any more (someone else got there first). */
@@ -91,7 +99,16 @@ async function tryAdvance(order: Order, change: Advance, now: number): Promise<O
   );
   const result = (await getRedis().eval(
     ADVANCE_LUA,
-    [orderKey(order.id), activeKey(), doneKey(), liveKey(order.buyerId), updatesKey(order.buyerId), unreadKey(order.buyerId)],
+    [
+      orderKey(order.id),
+      activeKey(),
+      doneKey(),
+      liveKey(order.buyerId),
+      updatesKey(order.buyerId),
+      unreadKey(order.buyerId),
+      runsLiveKey(change.runHolderId ?? order.buyerId),
+      runsByKey(change.runHolderId ?? order.buyerId),
+    ],
     [
       order.id,
       JSON.stringify(change.expected),
@@ -102,6 +119,7 @@ async function tryAdvance(order: Order, change: Advance, now: number): Promise<O
       isTerminal(last) ? "1" : "0",
       JSON.stringify(updates),
       UPDATES_KEEP,
+      change.runHolderId ?? "",
     ],
   )) as [number, (string | Order)?];
   if (result[0] !== 1) return null;
@@ -237,6 +255,7 @@ export async function sendWithStaff(id: string, staffId: string, now: number): P
       steps: [{ status: "PICKED_UP" }],
       patch: { holder: { kind: "staff", id: staff.id, name: staff.name } },
       updates: [staffPickedUpUpdate()],
+      runHolderId: staff.id,
     },
     now,
   );

@@ -29,23 +29,35 @@ const balanceKey = (userId: string) => key("wallet", userId);
 const ledgerKey = (userId: string) => key("ledger", userId);
 
 /**
- * KEYS: balance, ledger. ARGV: delta, entry JSON, ledger size, floor ("" for none).
- * With a floor, a debit that would leave the balance under it changes nothing.
+ * The one way money moves: add `delta` to a wallet and write the ledger entry, together.
+ * It is a Lua function so a script that does more (a handover that credits the runner, a
+ * late settlement that refunds one person and debits another) can include it and stay one
+ * atomic step. `moveMoney` below runs exactly this. `floor` is "" for none; with a floor, a
+ * debit that would leave the balance under it changes nothing.
  * Returns { 1, newBalance } on success and { 0, currentBalance } when refused.
  */
-const MOVE_LUA = `
-local bal = tonumber(redis.call('GET', KEYS[1]) or '0')
-local delta = tonumber(ARGV[1])
-local after = bal + delta
-if ARGV[4] ~= '' and delta < 0 and after < tonumber(ARGV[4]) then
-  return { 0, bal }
+export const LUA_MOVE_MONEY = `
+local function move_money(balanceKey, ledgerKey, delta, entryJson, ledgerSize, floor)
+  local bal = tonumber(redis.call('GET', balanceKey) or '0')
+  local change = tonumber(delta)
+  local after = bal + change
+  if floor ~= '' and change < 0 and after < tonumber(floor) then
+    return { 0, bal }
+  end
+  redis.call('SET', balanceKey, after)
+  local entry = cjson.decode(entryJson)
+  entry.balance = after
+  redis.call('LPUSH', ledgerKey, cjson.encode(entry))
+  redis.call('LTRIM', ledgerKey, 0, tonumber(ledgerSize) - 1)
+  return { 1, after }
 end
-redis.call('SET', KEYS[1], after)
-local entry = cjson.decode(ARGV[2])
-entry.balance = after
-redis.call('LPUSH', KEYS[2], cjson.encode(entry))
-redis.call('LTRIM', KEYS[2], 0, tonumber(ARGV[3]) - 1)
-return { 1, after }
+`;
+
+/** KEYS: balance, ledger. ARGV: delta, entry JSON, ledger size, floor ("" for none). */
+const MOVE_LUA =
+  LUA_MOVE_MONEY +
+  `
+return move_money(KEYS[1], KEYS[2], ARGV[1], ARGV[2], ARGV[3], ARGV[4])
 `;
 
 export interface MoveResult {

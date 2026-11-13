@@ -3,24 +3,85 @@
 import { Receipt } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useState } from "react";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
+import { getBuilding } from "@/data/locations";
 import { getSource } from "@/data/menu";
-import { ORDERS_COPY, promisedLine } from "@/data/order-copy";
+import { ORDERS_COPY, RUN_COPY, promisedLine } from "@/data/order-copy";
 import { Chip } from "@/components/ui/Chip";
+import { useCountdown } from "@/components/ui/Countdown";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Money } from "@/components/ui/Money";
-import { PillLink } from "@/components/ui/PillButton";
+import { PillButton, PillLink } from "@/components/ui/PillButton";
+import { useRunner } from "@/components/runner/RunnerProvider";
 import { SourceGlyph } from "@/components/ui/SourceGlyph";
 import { POLL_MS } from "@/lib/config";
-import { getJson } from "@/lib/http";
-import { isTerminal, type OrderSummary } from "@/lib/order-types";
-import { formatDayTime } from "@/lib/time";
+import { getJson, postJson } from "@/lib/http";
+import { isTerminal, type OrderSummary, type RunCard } from "@/lib/order-types";
+import { formatClock, formatDayTime, formatMsLeft } from "@/lib/time";
 import { StatusBadge, orderPlaceLine } from "./OrderParts";
 
 export interface OrdersReply {
   active: OrderSummary[];
   past: OrderSummary[];
+  /** Orders this person is carrying for someone else (runner buddy or staff). */
+  runs: RunCard[];
   now: number;
+}
+
+/** A run you are carrying: where it goes, who it is for, a countdown, "I'm here" and "Enter code". */
+function RunItem({ run, now }: { run: RunCard; now: number }) {
+  const { openHandover } = useRunner();
+  const { mutate } = useSWRConfig();
+  const building = getBuilding(run.buildingId);
+  const remaining = useCountdown(run.promisedAt !== undefined ? Math.max(0, run.promisedAt - now) : 0);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const arrived = run.arrivedAt !== undefined;
+  const due = run.promisedAt !== undefined && remaining <= 0;
+
+  async function arrive() {
+    setBusy(true);
+    setError("");
+    const res = await postJson<{ run: RunCard }>("/api/runs/arrive", { orderId: run.id });
+    if (!res.ok) setError(res.error ?? "");
+    await Promise.all([mutate("/api/orders"), mutate("/api/runs")]);
+    setBusy(false);
+  }
+
+  return (
+    <li className="flex flex-col gap-3 rounded-card bg-parchment p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-display text-section font-bold text-maroon">
+            {building.short}, {building.dropPoint.toLowerCase()}
+          </p>
+          <p className="text-secondary text-mocha">
+            {RUN_COPY.forBuyer(run.buyerName)} · {RUN_COPY.fromSource(getSource(run.sourceId).name)} ·{" "}
+            <span className="tabular-nums">{run.id}</span>
+          </p>
+        </div>
+        {run.promisedAt !== undefined ? (
+          <p className="shrink-0 text-right font-display text-section font-bold tabular-nums text-maroon">
+            {due ? RUN_COPY.dueNow : formatMsLeft(remaining)}
+            <span className="block font-sans text-caption font-medium text-mocha">{due ? "" : RUN_COPY.left}</span>
+          </p>
+        ) : null}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <PillButton variant="secondary" size="md" disabled={arrived || busy} aria-busy={busy} onClick={arrive} aria-label={`${arrived ? RUN_COPY.arrived : RUN_COPY.imHere} ${run.id}`}>
+          {arrived ? RUN_COPY.arrivedAt(formatClock(run.arrivedAt as number)) : RUN_COPY.imHere}
+        </PillButton>
+        <PillButton size="md" onClick={() => openHandover(run)} aria-label={`${RUN_COPY.enterCode} ${run.id}`}>
+          {RUN_COPY.enterCode}
+        </PillButton>
+      </div>
+      {error ? (
+        <p role="alert" className="text-secondary font-medium text-brick">
+          {error}
+        </p>
+      ) : null}
+    </li>
+  );
 }
 
 function OrderCard({ order, now }: { order: OrderSummary; now: number }) {
@@ -67,6 +128,7 @@ export function OrdersView({ initial }: { initial: OrdersReply }) {
   const orders = data ?? initial;
   const [tab, setTab] = useState<"active" | "past">("active");
   const list = tab === "active" ? orders.active : orders.past;
+  const runs = tab === "active" ? orders.runs : [];
 
   return (
     <div className="flex flex-col gap-5 pt-2">
@@ -81,12 +143,25 @@ export function OrdersView({ initial }: { initial: OrdersReply }) {
             onClick={() => setTab(value)}
           >
             {value === "active" ? ORDERS_COPY.active : ORDERS_COPY.past}
-            {value === "active" && orders.active.length > 0 ? ` (${orders.active.length})` : ""}
+            {value === "active" && orders.active.length + orders.runs.length > 0 ? ` (${orders.active.length + orders.runs.length})` : ""}
           </Chip>
         ))}
       </div>
 
-      {list.length === 0 ? (
+      {runs.length > 0 ? (
+        <section aria-labelledby="runs-heading">
+          <h2 id="runs-heading" className="mb-3 font-display text-section font-bold text-maroon">
+            {RUN_COPY.myRuns}
+          </h2>
+          <ul className="flex flex-col gap-3">
+            {runs.map((run) => (
+              <RunItem key={run.id} run={run} now={orders.now} />
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {list.length === 0 && runs.length === 0 ? (
         <EmptyState
           icon={<Receipt weight="regular" size={40} />}
           action={
@@ -99,7 +174,7 @@ export function OrdersView({ initial }: { initial: OrdersReply }) {
         >
           {tab === "active" ? ORDERS_COPY.noActive : ORDERS_COPY.noPast}
         </EmptyState>
-      ) : (
+      ) : list.length === 0 ? null : (
         <section aria-labelledby="orders-heading">
           {tab === "active" ? (
             <h2 id="orders-heading" className="mb-3 font-display text-section font-bold text-maroon">

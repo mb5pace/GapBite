@@ -200,6 +200,13 @@ export const SLIP_QR_PREFIX = "QX:ORDER:";
 export const QR_QUIET_MODULES = 4;
 /** The soft chime for a new order: two short notes (Hz), each this long, at a low volume (0 to 1). */
 export const CHIME = { notesHz: [880, 1175], noteMs: 160, volume: 0.08 } as const;
+/** The picture size the runner's camera is asked for (ideal, not required, so any camera works). */
+export const SCAN_WIDTH_IDEAL = 1280;
+export const SCAN_HEIGHT_IDEAL = 720;
+/** Handover code entry pauses for a minute after this many wrong codes on one order, so a 4-digit code cannot be guessed. Not a penalty. */
+export const HANDOVER_RATE_LIMIT = { maxWrongTries: 8, windowSec: 60 } as const;
+/** The check that adds held orders to their holder's My runs runs at most this often. */
+export const RUN_HEAL_MIN_INTERVAL_MS = 2000;
 /** The kiosk locks for a minute after this many wrong codes, so nobody can walk up and guess. */
 export const KIOSK_RATE_LIMIT = { maxWrongTries: 5, windowSec: 60 } as const;
 /** Kiosk: each slot stays lit this long while the machine "releases" it. */

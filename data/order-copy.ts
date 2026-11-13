@@ -2,8 +2,9 @@
  * Words for orders: status headlines, code instructions, Update texts, errors.
  * Plain, short, specific to campus (UI_UX_BIBLE.md section 8). Pure, safe anywhere.
  */
-import { getBuilding } from "@/data/locations";
+import { getBuilding, type BuildingId } from "@/data/locations";
 import { getSource } from "@/data/menu";
+import { MAX_ACTIVE_RUNS, WALLET_MIN_TO_USE } from "@/lib/config";
 import { formatRupees } from "@/lib/format";
 import type { Order, OrderStatus, OrderSummary } from "@/lib/order-types";
 import { formatClock } from "@/lib/time";
@@ -146,6 +147,97 @@ export function adjustmentUpdate(amount: number, note: string, balance: number):
   const verb = amount > 0 ? `${formatRupees(amount)} added` : `${formatRupees(Math.abs(amount))} taken`;
   return { title: "Wallet adjusted by QuickX", body: `${verb}: ${note}. Balance ${formatRupees(balance)}.` };
 }
+
+/** "GICT ground floor lobby": the drop point, as a runner reads it. */
+export function dropLine(buildingId: BuildingId): string {
+  const building = getBuilding(buildingId);
+  return `${building.short} ${building.dropPoint.toLowerCase()}`;
+}
+
+/** Why a scan or a run step is refused. One line each, the words from docs/FLOWS.md sections 3b and 4. */
+export const RUN_ERRORS = {
+  notFound: "We could not find that order.",
+  notSlip: "That is not a QuickX bag slip. Scan the QR code on the bag, or type the order ID.",
+  taken: "Already taken by someone else",
+  notReady: "Not ready yet",
+  own: "This is your own order",
+  lowBalance: `Top up to at least ${formatRupees(WALLET_MIN_TO_USE)} to run`,
+  tooMany: `You already have ${MAX_ACTIVE_RUNS} active runs`,
+  pickup: "This order is for pickup at UC",
+  closed: "That order is closed.",
+  notHolder: "You are not carrying this order.",
+  notOut: "This order is not out for delivery.",
+  badCode: "Code does not match",
+  needDigits: "Enter the 4 digits.",
+  locked: "Too many wrong codes. Try again in a minute.",
+} as const;
+
+/** The Updates for the run, in the words of docs/FLOWS.md sections 3b and 4. */
+export function pickedUpUpdate(holder: { kind: "runner" | "staff"; name: string }, buildingId: BuildingId): { title: string; body: string } {
+  if (holder.kind === "staff") return { title: "On the way", body: "Picked up by QuickX staff." };
+  return { title: "On the way", body: `Picked up by runner buddy ${holder.name}. On the way to ${getBuilding(buildingId).short}.` };
+}
+
+export function runnerArrivedUpdate(buildingId: BuildingId): { title: string; body: string } {
+  return { title: "Your runner is here", body: `Your runner is at ${dropLine(buildingId)}. Show your code.` };
+}
+
+export function deliveredUpdate(buildingId: BuildingId): { title: string; body: string } {
+  return { title: "Delivered", body: `Delivered at ${getBuilding(buildingId).short}. Enjoy!` };
+}
+
+export function runnerEarnedUpdate(amount: number): { title: string; body: string } {
+  return { title: "Delivery done", body: `Delivered. ${formatRupees(amount)} added to your wallet.` };
+}
+
+/** The runner sheet: scanning, preview, accepted, handover. */
+export const RUN_COPY = {
+  scanLabel: "Scan a bag",
+  scanTitle: "Scan a bag",
+  scanHint: "Point the camera at the QR code on the bag slip.",
+  typeInstead: "Type order ID instead",
+  useCamera: "Use the camera",
+  cameraOff: "The camera is not available. Type the order ID instead.",
+  orderIdLabel: "Order ID",
+  orderIdHint: "QX- and 4 digits, like QX-4821. It is on the bag slip.",
+  lookUp: "Look up",
+  looking: "Looking",
+  previewTitle: "Take this bag?",
+  items: (n: number) => `${n} ${n === 1 ? "item" : "items"}`,
+  deliverTo: "Deliver to",
+  promised: "Deliver by",
+  youEarn: (amount: number) => `You earn ${formatRupees(amount)}`,
+  noEarn: "Staff deliveries earn nothing",
+  accept: "Accept run",
+  acceptStaff: "Accept as staff delivery",
+  accepting: "Accepting",
+  back: "Back",
+  acceptedTitle: "Run accepted",
+  acceptedLine: (where: string, time: string) => `Run accepted. Take it to ${where} by ${time}.`,
+  scanAnother: "Scan another bag",
+  close: "Close",
+  errorTitle: "Cannot take this bag",
+  tryAgain: "Try again",
+  // My runs
+  myRuns: "My runs",
+  forBuyer: (name: string) => `For ${name}`,
+  fromSource: (source: string) => `From ${source}`,
+  imHere: "I'm here",
+  arrived: "Arrived",
+  arrivedAt: (time: string) => `Arrived ${time}`,
+  enterCode: "Enter code",
+  dueNow: "Due now",
+  left: "left",
+  // Handover
+  handoverTitle: "Enter handover code",
+  handoverHint: "Ask the buyer to show their 4-digit code, then type it.",
+  confirm: "Confirm delivery",
+  confirming: "Checking",
+  deliveredTitle: "Delivered",
+  deliveredEarned: (amount: number) => `Delivered. ${formatRupees(amount)} added to your wallet.`,
+  deliveredStaff: "Delivered.",
+  runnerWaiting: (dropPoint: string) => `Runner is waiting at ${dropPoint}`,
+} as const;
 
 export const CHECKOUT_COPY = {
   pickup: "Pick up at UC",

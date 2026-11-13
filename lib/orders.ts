@@ -27,6 +27,7 @@ import {
 } from "./config";
 import { formatRupees } from "./format";
 import { isMorningClosed } from "./menu-rules";
+import { parseOrderRef } from "./order-ref";
 import { estimatePromisedAt, feeFor, priceLines, slotAvailable, walkFor } from "./order-rules";
 import { summarize, type Order, type OrderMode, type OrderStatus, type OrderSummary } from "./order-types";
 import { getRedis, key } from "./redis";
@@ -40,18 +41,18 @@ export const doneKey = () => key("orders", "done");
 export const byUserKey = (userId: string) => key("orders", "by", userId);
 /** Orders of this buyer that are not finished yet (a set), so /api/me can tell if one is in progress with a single count. */
 export const liveKey = (userId: string) => key("orders", "live", userId);
+/** Orders this person is carrying right now (runner buddy or staff), and every order they have carried. */
+export const runsLiveKey = (userId: string) => key("runs", "live", userId);
+export const runsByKey = (userId: string) => key("runs", "by", userId);
 const idemKey = (userId: string, token: string) => key("idem", userId, token);
 const walletKey = (userId: string) => key("wallet", userId);
 const ledgerKey = (userId: string) => key("ledger", userId);
 const stockKey = () => key("stock");
 const unavailableKey = () => key("unavailable");
 
-const ORDER_ID_PATTERN = new RegExp(`^${ORDER_ID_PREFIX}\\d{${ORDER_ID_DIGITS}}$`);
-
-/** "qx-4821" becomes "QX-4821", or null if it is not an order ID. */
+/** "qx-4821" becomes "QX-4821", or null if it is not an order ID. A bag slip's "QX:ORDER:QX-4821" works too. */
 export function normalizeOrderId(input: string): string | null {
-  const id = input.trim().toUpperCase();
-  return ORDER_ID_PATTERN.test(id) ? id : null;
+  return parseOrderRef(input);
 }
 
 function newOrderId(): string {
