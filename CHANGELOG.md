@@ -4,6 +4,10 @@ Everything that changes in QuickX is written here, newest first. The format foll
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-13
+
+Account and Discover are built, and the dev preview now keeps its own data. Production keeps working exactly as before: its orders, wallets and staff IDs are untouched.
+
 ### Added
 - **Account** is now a real page: your name, ID, a Staff badge if you are staff, and your wallet balance, then Wallet, My Profile, Preferences, Notifications, Order History, Refund Status, Terms and Conditions, Feedback, Support and Log out (it asks first).
 - **My Profile**: change your first name.
@@ -59,5 +63,6 @@ First tagged version. It covers everything built in Phases 0 to 8: ordering from
 ### Changed
 - The colours look the same on every phone and laptop, including phones set to dark mode or "darken websites".
 
-[Unreleased]: https://github.com/mb5pace/GapBite/compare/v0.8.0...dev
+[Unreleased]: https://github.com/mb5pace/GapBite/compare/v0.9.0...dev
+[0.9.0]: https://github.com/mb5pace/GapBite/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/mb5pace/GapBite/releases/tag/v0.8.0
