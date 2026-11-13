@@ -100,7 +100,7 @@ proxy.ts          (Next.js 16 name for middleware.ts)
 lib/
   config.ts       every number from BUSINESS_RULES.md (and ACCESS.md, FLOWS.md)
   env.ts          reads env text, forgiving stray spaces and quotes
-  redis.ts        single client (reads KV_REST_API_* or UPSTASH_REDIS_REST_*)
+  redis.ts        single client (reads KV_REST_API_* or UPSTASH_REDIS_REST_*), and the one place a key is built: key(), keyPrefix() (qx: in production, qxdev: elsewhere), keyPattern(), ownsKey()
   api.ts          { ok, data } / { ok: false, error } replies, AppError, zod body parsing
   http.ts         browser-side fetch helpers (401 sends the person back to the gate)
   session.ts      sign, verify the cookie (no Redis, so proxy.ts can use it)
@@ -151,7 +151,22 @@ public/
 
 ## Redis keys
 
-All values JSON unless noted. Prefix everything with `qx:` so reset can scan safely.
+All values JSON unless noted.
+
+**One prefix per environment.** Production (the `main` branch) and the dev preview (the `dev` branch) share one Upstash database, so every key starts with the environment's prefix and the two never see each other's data:
+
+| Where it runs | `VERCEL_ENV` | Prefix |
+|---|---|---|
+| Vercel production deployment | `production` | `qx:` |
+| Vercel preview deployment (the `dev` branch) | `preview` | `qxdev:` |
+| A laptop (`npm run dev`, `next start`) | not set | `qxdev:` |
+
+- Only an explicit `VERCEL_ENV` of `production` gets `qx:`. Anything else is `qxdev:`, so a laptop or a preview can never touch real orders or wallets.
+- Keys are built in one place, `key()` in `lib/redis.ts`. No other file writes a key as a string, and Lua scripts receive their keys as arguments built by `key()`.
+- Anything that scans or clears keys (the Phase 10 reset) must use `keyPattern()` (`qx:*` or `qxdev:*`, which never match each other) and check `ownsKey()` before deleting what a scan returns. It must never use `FLUSHDB`, `FLUSHALL` or `KEYS *`.
+- `/api/health` reports `env` and `keyPrefix`, so a deployment can be checked from outside: production must say `qx:`, the dev preview `qxdev:`.
+- The names in the table below are the production names. In the dev preview each one starts with `qxdev:` instead of `qx:`.
+- Data made on the dev preview (orders, wallets, staff IDs, temporary codes) does not exist in production, and the reverse.
 
 | Key | Type | Content |
 |---|---|---|

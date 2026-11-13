@@ -1,5 +1,5 @@
 import { HEALTH_KEY_TTL_SEC } from "@/lib/config";
-import { getRedis, key, RedisNotConfiguredError } from "@/lib/redis";
+import { deployEnv, getRedis, key, keyPrefix, RedisNotConfiguredError } from "@/lib/redis";
 
 // Always runs on the server at request time, never prerendered at build.
 export const dynamic = "force-dynamic";
@@ -31,7 +31,9 @@ export async function GET() {
     }
 
     return Response.json(
-      { ok: true, data: { redis: "ok", roundTripMs } },
+      // The environment and key prefix are not secrets. They let anyone check that production uses "qx:" and a
+      // preview uses "qxdev:" without logging in.
+      { ok: true, data: { redis: "ok", roundTripMs, env: deployEnv(), keyPrefix: keyPrefix() } },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch (err) {

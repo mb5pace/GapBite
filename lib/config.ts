@@ -259,8 +259,13 @@ export const GREETING_HOURS = { afternoonFrom: 12, eveningFrom: 17 } as const;
 /** Every clock the user sees is IST. The server is the only clock. */
 export const TIMEZONE = "Asia/Kolkata";
 
-/** All Redis keys start with this, so Reset can scan safely. */
-export const REDIS_KEY_PREFIX = "qx:";
+/**
+ * Every Redis key starts with the environment's prefix. Production and the dev preview share one Upstash
+ * database, so they must never share keys: a Vercel production deployment uses the first, a preview deployment
+ * and a laptop use the second. lib/redis.ts picks between them; nothing else builds a key.
+ */
+export const REDIS_PREFIX_PRODUCTION = "qx:";
+export const REDIS_PREFIX_DEV = "qxdev:";
 
 /** /api/health writes one key and reads it back. It expires on its own. */
 export const HEALTH_KEY_TTL_SEC = 60;

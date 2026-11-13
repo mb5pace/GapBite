@@ -4,6 +4,10 @@ Everything that changes in QuickX is written here, newest first. The format foll
 
 ## [Unreleased]
 
+### Changed
+- The dev preview now keeps its own orders, wallets, staff IDs and codes, separate from production, so testing on the dev link can never touch real data. Production is unchanged.
+- `/api/health` now also says which environment it is (`production`, `preview` or `local`) and which key prefix it uses, so a deployment can be checked without logging in.
+
 ## [0.8.0] - 2026-11-13
 
 First tagged version. It covers everything built in Phases 0 to 8: ordering from the four cafes and the vending machine, the cafe desk, runner buddies, and what happens when an order is late.
