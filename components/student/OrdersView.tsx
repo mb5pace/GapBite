@@ -4,6 +4,7 @@ import { Receipt } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useState } from "react";
 import useSWR from "swr";
+import { getSource } from "@/data/menu";
 import { ORDERS_COPY, promisedLine } from "@/data/order-copy";
 import { Chip } from "@/components/ui/Chip";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -12,10 +13,9 @@ import { PillLink } from "@/components/ui/PillButton";
 import { SourceGlyph } from "@/components/ui/SourceGlyph";
 import { POLL_MS } from "@/lib/config";
 import { getJson } from "@/lib/http";
-import type { OrderSummary } from "@/lib/order-types";
+import { isTerminal, type OrderSummary } from "@/lib/order-types";
 import { formatDayTime } from "@/lib/time";
 import { StatusBadge, orderPlaceLine } from "./OrderParts";
-import { getSource } from "@/data/menu";
 
 export interface OrdersReply {
   active: OrderSummary[];
@@ -24,8 +24,7 @@ export interface OrdersReply {
 }
 
 function OrderCard({ order, now }: { order: OrderSummary; now: number }) {
-  const active = order.status !== "DELIVERED" && order.status !== "COLLECTED" && order.status !== "CANCELLED" && order.status !== "REJECTED" && order.status !== "FAILED_LATE";
-  const promised = active ? promisedLine({ ...order, promisedAt: order.promisedAt }) : null;
+  const promised = isTerminal(order.status) ? null : promisedLine(order);
   return (
     <li>
       <Link

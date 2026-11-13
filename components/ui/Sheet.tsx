@@ -11,18 +11,28 @@ const FOCUSABLE =
  * Bottom sheet on `parchment` (UI_UX_BIBLE.md section 4): drag handle, 28 px top
  * corners, slides up in 200 ms. It closes on Esc, on a tap on the dim area, or by
  * dragging the handle down. Focus moves into the sheet, stays there, and returns
- * to the button that opened it. No centred modals on mobile.
+ * to the button that opened it. No centred modals on mobile: `placement="center"` is
+ * only for the Cafe and Admin portals, which are laptop screens.
  */
 export function Sheet({
   open,
   onClose,
   title,
   children,
+  placement = "bottom",
+  wide = false,
+  printArea = false,
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
   children: ReactNode;
+  /** bottom: the phone sheet. center: a dialog in the middle of the screen, for the laptop portals. */
+  placement?: "bottom" | "center";
+  /** center only: a wider dialog (the bag slip lays out in two columns). */
+  wide?: boolean;
+  /** When the browser prints, only this dialog is printed (the bag slip). */
+  printArea?: boolean;
 }) {
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -46,6 +56,7 @@ export function Sheet({
   }, [open]);
 
   if (!open || typeof document === "undefined") return null;
+  const center = placement === "center";
 
   function onKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
     if (event.key === "Escape") {
@@ -90,7 +101,10 @@ export function Sheet({
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
+    <div
+      className={`fixed inset-0 z-50 flex justify-center ${center ? "items-center p-6" : "items-end"}`}
+      data-print-area={printArea ? "" : undefined}
+    >
       <div className="absolute inset-0 animate-scrim-in bg-espresso/40" onClick={onClose} aria-hidden="true" />
       <div
         ref={panelRef}
@@ -100,18 +114,24 @@ export function Sheet({
         tabIndex={-1}
         onKeyDown={onKeyDown}
         style={dragY > 0 ? { transform: `translateY(${dragY}px)`, transition: "none" } : undefined}
-        className="relative max-h-[90dvh] w-full max-w-[430px] animate-sheet-in overflow-y-auto rounded-t-sheet bg-parchment px-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-float outline-none"
+        className={
+          center
+            ? `relative max-h-[90dvh] w-full ${wide ? "max-w-[760px]" : "max-w-[560px]"} animate-dialog-in overflow-y-auto rounded-card bg-parchment p-6 shadow-float outline-none`
+            : "relative max-h-[90dvh] w-full max-w-[430px] animate-sheet-in overflow-y-auto rounded-t-sheet bg-parchment px-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-float outline-none"
+        }
       >
-        <div
-          className="mx-auto flex h-8 w-full cursor-grab touch-none items-center justify-center"
-          onPointerDown={onHandleDown}
-          onPointerMove={onHandleMove}
-          onPointerUp={onHandleUp}
-          onPointerCancel={onHandleUp}
-          data-sheet-handle
-        >
-          <span className="h-1.5 w-12 rounded-pill bg-taupe" aria-hidden="true" />
-        </div>
+        {center ? null : (
+          <div
+            className="mx-auto flex h-8 w-full cursor-grab touch-none items-center justify-center"
+            onPointerDown={onHandleDown}
+            onPointerMove={onHandleMove}
+            onPointerUp={onHandleUp}
+            onPointerCancel={onHandleUp}
+            data-sheet-handle
+          >
+            <span className="h-1.5 w-12 rounded-pill bg-taupe" aria-hidden="true" />
+          </div>
+        )}
         <h2 id={titleId} className="font-display text-title font-bold text-maroon">
           {title}
         </h2>

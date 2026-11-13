@@ -1,7 +1,7 @@
 /**
  * Menu rules that decide what can be ordered right now. Pure functions with no
  * Redis and no clock of their own: callers pass the server's time. The browser
- * uses them to grey things out; ordering (Phase 5) uses the same ones on the
+ * uses them to grey things out; ordering uses the same ones on the
  * server, which has the final say. Source: docs/BUSINESS_RULES.md "Other limits".
  */
 import { BREAK_SLOTS } from "@/data/breaks";

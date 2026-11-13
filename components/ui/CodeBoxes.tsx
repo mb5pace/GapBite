@@ -4,7 +4,9 @@ import { useRef, type ClipboardEvent, type KeyboardEvent } from "react";
 import { CODE_DIGITS } from "@/lib/config";
 
 const BOX =
-  "flex h-16 w-14 items-center justify-center rounded-field border-[1.5px] bg-cream font-display text-greeting font-bold text-espresso";
+  "flex items-center justify-center rounded-field border-[1.5px] bg-cream font-display font-bold text-espresso";
+/** md: the buyer's code box and the runner entry. sm: the Collect box on a cafe queue card. */
+const SIZE = { md: "h-16 w-14 text-greeting", sm: "h-12 w-11 text-title" } as const;
 
 /**
  * Four separate rounded boxes (UI_UX_BIBLE.md section 4): Grandstander 32, 1.5 px
@@ -19,6 +21,7 @@ export function CodeBoxes({
   label,
   invalid = false,
   length = CODE_DIGITS,
+  size = "md",
 }: {
   value: string;
   onChange?: (value: string) => void;
@@ -26,6 +29,7 @@ export function CodeBoxes({
   label: string;
   invalid?: boolean;
   length?: number;
+  size?: keyof typeof SIZE;
 }) {
   const refs = useRef<(HTMLInputElement | null)[]>([]);
   const border = invalid ? "border-brick" : "border-espresso";
@@ -33,9 +37,9 @@ export function CodeBoxes({
 
   if (!onChange) {
     return (
-      <div role="group" aria-label={`${label}: ${digits.join(" ")}`} className="flex gap-3">
+      <div role="group" aria-label={`${label}: ${digits.join(" ")}`} className={`flex ${size === "sm" ? "gap-2" : "gap-3"}`}>
         {digits.map((digit, i) => (
-          <span key={i} className={`${BOX} ${border}`} aria-hidden="true">
+          <span key={i} className={`${BOX} ${SIZE[size]} ${border}`} aria-hidden="true">
             {digit}
           </span>
         ))}
@@ -82,7 +86,7 @@ export function CodeBoxes({
   }
 
   return (
-    <div role="group" aria-label={label} className="flex gap-3">
+    <div role="group" aria-label={label} className={`flex ${size === "sm" ? "gap-2" : "gap-3"}`}>
       {digits.map((digit, i) => (
         <input
           key={i}
@@ -99,7 +103,7 @@ export function CodeBoxes({
           onKeyDown={(e) => handleKeyDown(i, e)}
           onPaste={(e) => handlePaste(i, e)}
           onFocus={(e) => e.target.select()}
-          className={`${BOX} ${border} text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon`}
+          className={`${BOX} ${SIZE[size]} ${border} text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon`}
         />
       ))}
     </div>

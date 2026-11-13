@@ -8,7 +8,7 @@ export function Toast({ message }: { message: string | null }) {
     >
       <div className="mx-auto w-full max-w-[430px] px-5">
         {message ? (
-          <p className="rounded-card bg-espresso px-4 py-3 text-secondary font-medium text-cream shadow-float">
+          <p className="rounded-card bg-espresso px-4 py-3 text-secondary font-medium text-cream">
             {message}
           </p>
         ) : null}

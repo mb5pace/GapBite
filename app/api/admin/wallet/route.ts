@@ -2,7 +2,7 @@ import { z } from "zod";
 import { WALLET_COPY } from "@/data/copy";
 import { AppError, handle, ok, parseBody } from "@/lib/api";
 import { requireApiSession } from "@/lib/auth";
-import { ADMIN_ADJUST_MAX, ADMIN_NOTE_MAX, ADMIN_NOTE_MIN } from "@/lib/config";
+import { ADMIN_ADJUST_MAX, ADMIN_NOTE_MAX, ADMIN_NOTE_MIN, INPUT_MAX } from "@/lib/config";
 import { formatRupees } from "@/lib/format";
 import { getUser, normalizeAnyId } from "@/lib/users";
 import { adjust, getLedger } from "@/lib/wallet";
@@ -10,7 +10,7 @@ import { adjust, getLedger } from "@/lib/wallet";
 export const dynamic = "force-dynamic";
 
 const schema = z.object({
-  userId: z.string(WALLET_COPY.admin.noOne).min(1, WALLET_COPY.admin.noOne).max(20, WALLET_COPY.admin.noOne),
+  userId: z.string(WALLET_COPY.admin.noOne).min(1, WALLET_COPY.admin.noOne).max(INPUT_MAX.id, WALLET_COPY.admin.noOne),
   amount: z
     .number(WALLET_COPY.admin.badAmount)
     .int(WALLET_COPY.admin.badAmount)

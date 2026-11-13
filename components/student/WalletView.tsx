@@ -31,27 +31,36 @@ const ICON: Record<LedgerType, ComponentType<{ weight?: "regular"; size?: number
   adjustment: Sliders,
 };
 
+/** One ledger line. A line about an order is a link to that order, so the whole row is the tap target. */
 function LedgerRow({ entry, now }: { entry: LedgerEntry; now: number }) {
   const Icon = ICON[entry.type];
-  return (
-    <li className="flex items-center gap-3 py-3">
+  const inner = (
+    <>
       <span className="flex size-11 shrink-0 items-center justify-center rounded-pill bg-sand text-maroon" aria-hidden="true">
         <Icon weight="regular" size={22} />
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-body font-bold text-espresso">{WALLET_COPY.types[entry.type]}</p>
         <p className="text-secondary text-mocha">
-          {entry.orderId ? (
-            <Link href={`/o/${entry.orderId}`} className="font-medium text-maroon underline underline-offset-2">
-              {entry.orderId}
-            </Link>
-          ) : null}
+          {entry.orderId ? <span className="font-medium tabular-nums text-maroon">{entry.orderId}</span> : null}
           {entry.orderId && entry.note ? " · " : null}
           {entry.note}
         </p>
         <p className="text-caption tabular-nums text-mocha">{formatDayTime(entry.at, now)}</p>
       </div>
       <Money amount={entry.amount} tone="signed" className="font-display text-section font-bold" />
+    </>
+  );
+  const className = "flex items-center gap-3 py-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon";
+  return (
+    <li>
+      {entry.orderId ? (
+        <Link href={`/o/${entry.orderId}`} className={className}>
+          {inner}
+        </Link>
+      ) : (
+        <div className={className}>{inner}</div>
+      )}
     </li>
   );
 }

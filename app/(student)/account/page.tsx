@@ -5,7 +5,7 @@ import { LogoutButton } from "@/components/ui/LogoutButton";
 
 /**
  * Placeholder Account. The profile card and the rows (Wallet, My Profile, ...)
- * are Phase 4 and Phase 9. Log out lives here, where it will stay.
+ * arrive in Phase 9; the Wallet page itself is built. Log out lives here, where it will stay.
  */
 export default function Account() {
   return (

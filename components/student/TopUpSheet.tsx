@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/Input";
 import { Money } from "@/components/ui/Money";
 import { PillButton } from "@/components/ui/PillButton";
 import { Sheet } from "@/components/ui/Sheet";
-import { TOPUP_CHIPS, TOPUP_MAX, TOPUP_PROCESSING_MS } from "@/lib/config";
+import { TOPUP_CHIPS, TOPUP_DEFAULT, TOPUP_MAX, TOPUP_PROCESSING_MS } from "@/lib/config";
 import { formatRupees } from "@/lib/format";
 import { postJson } from "@/lib/http";
 import { isValidTopUp } from "@/lib/wallet-rules";
@@ -23,7 +23,7 @@ type Phase = { kind: "choose" } | { kind: "processing"; amount: number; paying: 
  */
 function TopUpContent({ onClose }: { onClose: () => void }) {
   const { mutate } = useSWRConfig();
-  const [chip, setChip] = useState<number | null>(100);
+  const [chip, setChip] = useState<number | null>(TOPUP_DEFAULT);
   const [custom, setCustom] = useState("");
   const [error, setError] = useState("");
   const [phase, setPhase] = useState<Phase>({ kind: "choose" });

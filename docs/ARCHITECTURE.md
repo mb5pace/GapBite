@@ -46,12 +46,13 @@ app/
     account/page.tsx
     account/[section]/page.tsx  wallet | profile | preferences | notifications | history | refunds | terms | feedback | support
   cafe/
-    layout.tsx
-    page.tsx                    queue
-    vending/page.tsx
-    kiosk/page.tsx
-    menu/page.tsx
-    today/page.tsx
+    layout.tsx                  cafe session check only, so the kiosk can be full screen
+    (desk)/layout.tsx           header (pages, server clock, sound switch, Logout) + the one queue poll
+    (desk)/page.tsx             queue
+    (desk)/vending/page.tsx
+    (desk)/menu/page.tsx
+    (desk)/today/page.tsx
+    kiosk/page.tsx              full screen, no header
   admin/
     layout.tsx
     page.tsx                    codes
@@ -76,12 +77,13 @@ app/
     updates/route.ts            GET list, POST mark-read
     prefs/route.ts
     feedback/route.ts
-    cafe/queue/route.ts         GET (runs sweepLate first)
-    cafe/orders/[id]/route.ts   POST action: accept|reject|start|ready|staff|collect
-    cafe/alerts/route.ts        POST seen
-    cafe/stock/route.ts
-    cafe/availability/route.ts
-    cafe/kiosk/route.ts         POST code -> dispense
+    cafe/queue/route.ts         GET (runs sweepLate first). Cards have no code, buyer or prices
+    cafe/orders/[id]/route.ts   GET bag slip (with QR path); POST action: accept|reject|start|ready|staff|collect
+    cafe/staff/route.ts         GET existing staff IDs, for Send with staff
+    cafe/alerts/route.ts        POST seen (Phase 8)
+    cafe/stock/route.ts         GET; POST adjust one slot or refill all
+    cafe/availability/route.ts  GET; POST switch one item on or off (qx:unavailable)
+    cafe/kiosk/route.ts         POST code -> the slots to release; locks for a minute after 5 wrong codes
     cafe/today/route.ts
     admin/codes/route.ts        GET, POST generate|revoke|end
     admin/staff/route.ts
@@ -105,8 +107,12 @@ lib/
   me.ts           the shell's live numbers: name, balance, dots, session time
   order-types.ts  Order, status list, which steps each kind of order shows (pure)
   order-rules.ts  pricing from the menu, fee and walk lookups, break-slot cutoff, promised-time estimate (pure)
-  orders.ts       place (one Lua script), read, list, cancel and refund; later transitions and guards
-  late.ts         sweepLate
+  orders.ts       place (one Lua script), read, list, cancel and refund (the refund script is reused by reject)
+  cafe.ts         what the cafe desk does: queue, accept, reject, start, ready, collect by code, send with staff, bag slip, kiosk (one Lua script moves an order and tells the buyer)
+  cafe-today.ts   Today totals from the order records
+  qr.ts           the QR module path for a bag slip (no colours: the browser fills it with the text colour)
+  chime.ts        the new-order sound, made with the Web Audio API (browser only)
+  late.ts         sweepLate: called first in every queue poll, an empty stub until Phase 8
   updates.ts      Updates feed: push, unread count, mark read
   ids.ts          staff ids now; order ids and 4-digit codes with ordering
   format.ts       rupees (₹1,25,000), initials
@@ -119,14 +125,13 @@ lib/
   search.ts       menu search across all five sources (pure)
   time.ts         IST formatting, promised time math
 data/
-  menu.ts  locations.ts  breaks.ts  copy.ts (shared UI strings)  order-copy.ts (order words, headlines, Update texts)
+  menu.ts  locations.ts  breaks.ts  copy.ts (shared UI strings)  order-copy.ts (order words, headlines, Update texts)  cafe-copy.ts (Cafe portal and kiosk words, reject reasons)
 components/
-  ui/             PillButton (+ PillLink), IconButton, Chip, Card, ArchCard, ItemTile, SourceGlyph, Stepper, Sheet, Input, CodeBoxes, Banner, Badge, EmptyState, Countdown, Money, LogoutButton
-                  (Toggle waits for Phase 9, where Notifications uses it)
+  ui/             PillButton (+ PillLink), IconButton, Chip, Card, ArchCard, ItemTile, SourceGlyph, Stepper, Sheet (bottom sheet, or centred dialog on the laptop portals), Input, CodeBoxes, Banner, Badge, EmptyState, Countdown, Money, LogoutButton, Toggle, PortalNav
   kit/            KitGallery, the admin-only /kit page
   student/        Header, BottomBar, WalletChip, SessionChip (Phase 2); SourceTile, CartBar, OrderStrip (later)
   runner/         ScanButton, RunnerSheet (scan, preview, accept, handover)
-  cafe/           QueueColumn, OrderCard, BagSlip, AlertCard
+  cafe/           QueueProvider (one poll, new-order highlight and chime, server clock), CafeHeader, QueueView, OrderCard, RejectDialog, StaffDialog, BagSlipDialog, VendingStockView, MenuAvailabilityView, TodayView, KioskView (AlertCard waits for Phase 8)
   admin/          CodeTable, ...
 public/
   illustrations/  (see bible)
@@ -160,6 +165,7 @@ All values JSON unless noted. Prefix everything with `qx:` so reset can scan saf
 | `qx:stock` | hash | slot -> count |
 | `qx:unavailable` | set | item ids off today |
 | `qx:codes:temp` | hash | code -> record (ACCESS.md) |
+| `qx:kiosk:wrong` | integer, TTL 60 | wrong codes typed at the kiosk (5 locks it for the rest of the minute) |
 | `qx:ratelimit:<ip>` | integer, TTL 600 | wrong code tries |
 | `qx:feedback` | list | feedback entries |
 

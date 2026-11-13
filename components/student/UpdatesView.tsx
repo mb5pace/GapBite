@@ -6,7 +6,7 @@ import { useEffect, type ComponentType, type ReactNode } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { UPDATES_COPY } from "@/data/order-copy";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { POLL_MS } from "@/lib/config";
+import { MARK_READ_DELAY_MS, POLL_MS } from "@/lib/config";
 import { getJson, postJson } from "@/lib/http";
 import { formatClock, formatDayTime, istMidnight } from "@/lib/time";
 import type { UpdateKind, UpdateView } from "@/lib/updates";
@@ -22,9 +22,6 @@ const ICON: Record<UpdateKind, ComponentType<{ weight?: "regular"; size?: number
   wallet: Wallet,
   alert: WarningCircle,
 };
-
-/** How long unread dots stay visible after you open the tab, before everything counts as read. */
-const MARK_READ_DELAY_MS = 2000;
 
 function Row({ update, now, today }: { update: UpdateView; now: number; today: boolean }) {
   const Icon = ICON[update.kind];

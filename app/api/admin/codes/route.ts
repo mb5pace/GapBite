@@ -2,7 +2,7 @@ import { z } from "zod";
 import { COPY } from "@/data/copy";
 import { AppError, handle, ok, parseBody } from "@/lib/api";
 import { requireApiSession } from "@/lib/auth";
-import { ACCESS_CODE_LENGTH } from "@/lib/config";
+import { ACCESS_CODE_LENGTH, INPUT_MAX } from "@/lib/config";
 import {
   adminSnapshot,
   endTempSession,
@@ -25,9 +25,9 @@ export async function GET() {
 
 const schema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("generate") }),
-  z.object({ action: z.literal("revoke"), code: z.string().min(1).max(16) }),
-  z.object({ action: z.literal("end"), code: z.string().min(1).max(16) }),
-  z.object({ action: z.literal("reveal"), index: z.number().int().min(0).max(99) }),
+  z.object({ action: z.literal("revoke"), code: z.string().min(1).max(INPUT_MAX.accessCode) }),
+  z.object({ action: z.literal("end"), code: z.string().min(1).max(INPUT_MAX.accessCode) }),
+  z.object({ action: z.literal("reveal"), index: z.number().int().min(0).max(INPUT_MAX.codeIndex) }),
 ]);
 
 /**

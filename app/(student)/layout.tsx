@@ -11,8 +11,8 @@ import { greetingNow } from "@/lib/time";
 /**
  * The student shell: a persistent header and the floating bottom bar around
  * every student page, in a 430 px column on cream (UI_UX_BIBLE.md section 7).
- * The wallet balance and the two tab-bar dots are live from /api/me. The dots
- * stay off until Updates and orders exist (Phase 5).
+ * The wallet balance and the two tab-bar dots (unread Updates, an order in
+ * progress) are live from /api/me.
  */
 export default async function StudentLayout({ children }: { children: ReactNode }) {
   const session = await requirePageSession("student", { user: true });

@@ -110,7 +110,3 @@ export function portalHome(session: Pick<Session, "portal" | "userId">): string 
   return session.userId ? "/home" : "/identify";
 }
 
-/** Milliseconds until the session expires, measured on the server. */
-export function msUntilExpiry(session: Pick<Session, "exp">): number {
-  return Math.max(0, session.exp * 1000 - Date.now());
-}

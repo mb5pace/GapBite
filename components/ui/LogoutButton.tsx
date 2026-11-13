@@ -18,7 +18,7 @@ export function LogoutButton() {
   }
 
   return (
-    <PillButton variant="outline" size="md" onClick={logout} disabled={busy}>
+    <PillButton variant="outline" size="md" className="whitespace-nowrap" onClick={logout} disabled={busy}>
       <SignOut weight="regular" size={18} aria-hidden="true" />
       {COPY.student.logout}
     </PillButton>

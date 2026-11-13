@@ -5,7 +5,7 @@ import useSWR from "swr";
 import { getSource } from "@/data/menu";
 import { promisedLine } from "@/data/order-copy";
 import { SourceGlyph } from "@/components/ui/SourceGlyph";
-import { POLL_MS } from "@/lib/config";
+import { HOME_STRIP_MAX, POLL_MS } from "@/lib/config";
 import { getJson } from "@/lib/http";
 import { stepsFor, type OrderSummary } from "@/lib/order-types";
 import type { OrdersReply } from "./OrdersView";
@@ -39,7 +39,7 @@ export function ActiveOrderStrip() {
 
   return (
     <ul className="flex flex-col gap-3" aria-label="Orders in progress">
-      {active.slice(0, 2).map((order) => (
+      {active.slice(0, HOME_STRIP_MAX).map((order) => (
         <li key={order.id}>
           <Link
             href={`/o/${order.id}`}

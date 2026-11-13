@@ -2,6 +2,7 @@ import { z } from "zod";
 import { COPY } from "@/data/copy";
 import { handle, ok, parseBody } from "@/lib/api";
 import { requireApiSession } from "@/lib/auth";
+import { INPUT_MAX } from "@/lib/config";
 import { createStaff, listStaff } from "@/lib/users";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +16,7 @@ export async function GET() {
 }
 
 const schema = z.object({
-  name: z.string().max(60, COPY.admin.staff.badName),
+  name: z.string().max(INPUT_MAX.name, COPY.admin.staff.badName),
 });
 
 /** POST { name } -> creates the next staff ID and returns it with the updated list. */

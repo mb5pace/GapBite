@@ -17,11 +17,6 @@ export function walletStatus(balance: number): WalletStatus {
   return "ok";
 }
 
-/** Can this balance place an order or accept a run at all? */
-export function canUseWallet(balance: number): boolean {
-  return balance >= WALLET_MIN_TO_USE;
-}
-
 /**
  * Rupees to add before an order of `total` can be placed: the balance must be at
  * least ₹50 and at least the total. 0 means it can be placed now.

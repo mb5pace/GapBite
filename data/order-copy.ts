@@ -108,6 +108,36 @@ export function cancelledUpdate(order: Pick<Order, "id" | "total">): { title: st
   };
 }
 
+/** Buyer Updates for what the cafe does. The wording is FLOWS.md sections 2, 3a and 3c. */
+export function acceptedUpdate(order: Pick<Order, "sourceId">): { title: string; body: string } {
+  return { title: "Order accepted", body: `${getSource(order.sourceId).name} accepted your order.` };
+}
+
+export function preparingUpdate(): { title: string; body: string } {
+  return { title: "Preparing", body: "Your order is being prepared." };
+}
+
+export function readyUpdate(order: Pick<Order, "sourceId" | "mode">): { title: string; body: string } {
+  if (order.mode === "delivery") return { title: "Order ready", body: "Your order is ready." };
+  const where = order.sourceId === "vending" ? "the vending machine" : `the ${getSource(order.sourceId).name} counter`;
+  return { title: "Order ready", body: `Ready at ${where}.` };
+}
+
+export function collectedUpdate(): { title: string; body: string } {
+  return { title: "Order collected", body: "Collected. Enjoy!" };
+}
+
+export function staffPickedUpUpdate(): { title: string; body: string } {
+  return { title: "On the way", body: "Picked up by QuickX staff." };
+}
+
+export function rejectedUpdate(order: Pick<Order, "id" | "sourceId" | "total">, reasonText: string): { title: string; body: string } {
+  return {
+    title: "Order rejected",
+    body: `${getSource(order.sourceId).name} could not make order ${order.id} because ${reasonText}. ${formatRupees(order.total)} has been refunded to your wallet.`,
+  };
+}
+
 export function topUpUpdate(amount: number, balance: number): { title: string; body: string } {
   return { title: "Wallet topped up", body: `${formatRupees(amount)} added to your wallet. Balance ${formatRupees(balance)}.` };
 }

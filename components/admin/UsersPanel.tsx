@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Input } from "@/components/ui/Input";
 import { Money } from "@/components/ui/Money";
 import { PillButton } from "@/components/ui/PillButton";
-import { ADMIN_ADJUST_MAX, ADMIN_NOTE_MAX, ADMIN_NOTE_MIN, POLL_MS } from "@/lib/config";
+import { ADMIN_ADJUST_MAX, ADMIN_ADJUST_PRESETS, ADMIN_NOTE_MAX, ADMIN_NOTE_MIN, POLL_MS, SEARCH_DELAY_MS } from "@/lib/config";
 import { formatRupees } from "@/lib/format";
 import { getJson, postJson } from "@/lib/http";
 import { formatDayTime } from "@/lib/time";
@@ -32,9 +32,6 @@ interface DetailReply {
   ledger: LedgerEntry[];
   now: number;
 }
-
-const SEARCH_DELAY_MS = 250;
-const PRESETS = [100, 300, 500] as const;
 
 /** "-50", "−50", "+300" and "300" all become a number; anything else is NaN. */
 function parseAmount(text: string): number {
@@ -94,7 +91,7 @@ function Adjust({ person, onDone }: { person: DetailReply["user"]; onDone: () =>
             name="adjust-amount"
           />
           <div className="flex flex-wrap gap-2 px-2">
-            {PRESETS.map((value) => (
+            {ADMIN_ADJUST_PRESETS.map((value) => (
               <Chip key={value} selected={amount === value} onClick={() => setAmountText(String(value))}>
                 +{formatRupees(value)}
               </Chip>

@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
 /**
  * GET -> one order, including its 4-digit code. Only the buyer can read it; anyone
  * else gets the same "not found" as for an order that does not exist, so nobody
- * can learn which order IDs are real. (The cafe, the runner and Admin get their
- * own code-free views in later phases.)
+ * can learn which order IDs are real. (The cafe desk has its own code-free view
+ * under /api/cafe; the runner and Admin get theirs in later phases.)
  */
 export async function GET(_req: Request, ctx: RouteContext<"/api/orders/[id]">) {
   return handle(async () => {

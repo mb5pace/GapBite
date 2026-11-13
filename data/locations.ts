@@ -78,8 +78,6 @@ export const BUILDINGS: readonly Building[] = [
   },
 ];
 
-export const BUILDING_IDS: readonly BuildingId[] = BUILDINGS.map((b) => b.id);
-
 export function getBuilding(id: BuildingId): Building {
   const building = BUILDINGS.find((b) => b.id === id);
   if (!building) throw new Error(`Unknown building: ${id}`);

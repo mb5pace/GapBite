@@ -45,11 +45,32 @@ Build in this order. One phase per session or per sitting. At the end of each ph
 - [x] Updates feed and unread dot
 
 ## Phase 6 — Cafe portal
-- [ ] Queue columns with polling and sweepLate
-- [ ] Accept/reject/start/ready, bag slip with QR + print
-- [ ] Pickup collect by code
-- [ ] Send with staff (staff accounts already exist, see Phase 1)
-- [ ] Vending stock, kiosk, menu availability, Today
+- [x] Queue columns with polling and sweepLate
+- [x] Accept/reject/start/ready, bag slip with QR + print
+- [x] Pickup collect by code
+- [x] Send with staff (staff accounts already exist, see Phase 1)
+- [x] Vending stock, kiosk, menu availability, Today
+
+### Phase 6 check (quality pass before commit)
+What was checked, and what it found and fixed.
+- **Build:** `npm run build`, `npx tsc --noEmit` and `npm run lint` are clean. No formatter is set up in the repo (no Prettier or Biome), so none was run and none was added.
+- **Code read** (every file under `app/`, `components/`, `lib/`, `data/`):
+  - Removed leftovers that are real now: six "opens in the next phase" strings, `cafe.placeholder`, and the unused exports `msUntilExpiry`, `canUseWallet`, `BUILDING_IDS`, `SOURCE_IDS`.
+  - Replaced one `as never` cast with a proper narrowing.
+  - Moved numbers into `lib/config.ts`: three UI timings (`SEARCH_DELAY_MS`, `CLOCK_TICK_MS`, `MARK_READ_DELAY_MS`), the Home strip length, the Admin adjust presets, the default top-up chip and the input length limits (`INPUT_MAX`).
+  - The cafe screens reuse `itemsBySource` and `VENDING_SLOTS` instead of filtering the menu again.
+  - No `console.log`, no hex colour outside `globals.css`, no price or item name written in code, no `process.env` outside `lib/`.
+  - Stale comments from earlier phases updated.
+- **Client code never reaches the server:** an import-graph check over all 58 client components found none that reaches `lib/redis.ts`, `node:crypto`, `jose` or `next/headers`, directly or through another file.
+- **Security:**
+  - All 23 API routes check their portal session on the server (cafe routes cafe, admin routes admin, the rest student); a script confirmed it for every handler, and a test confirmed 401 without a session and 403 for a student or admin session on all 10 cafe routes.
+  - No cafe response carries a 4-digit code, buyer ID, name or price. Only the buyer's own order routes return `code`.
+  - **Found and fixed:** an unexpected Redis error was logged with its full message, and an Upstash message ends with the command it ran, including Lua arguments (typed access codes, an order's 4-digit code). `handle()` now logs only the name and the reason (`logSafeMessage`).
+  - No env value in the client bundles, rendered pages, the login reply or the server logs. The session cookie is HttpOnly and SameSite=Lax and holds only portal, code type and expiry (plus the code for a temp session). The kit gallery no longer ships a sample permanent code.
+  - Every wallet and ownership change is one Lua script (place, refund, move money, advance). Redis writes outside Lua are user and staff creation, rate-limit counters, pool codes, stock set-up and refill, and the availability set: none holds money or order ownership.
+- **UI** (bible sections 9 and 10): a browser audit read computed styles on 51 screens (student at 360 px, cafe at 1280 and 820, Admin at 1280, sheets and dialogs open). Palette tokens only, two fonts, no gradients, blur or emoji, shadows only on the bottom bar and sheets, WCAG AA contrast, 44 px tap targets, accessible names, no sideways scroll. **Found and fixed:** a shadow on the toast; Checkout's "Change items" link and the Wallet ledger's order links were under 44 px (a ledger row about an order is now one link); the cafe queue had no page heading; the kit gallery showed status colours as text; the kiosk was cut off at 1280×800 (now two columns); the cafe header broke its buttons onto two lines on a tablet. Loading, empty and error states exist on every cafe screen (skeletons, "Nothing cooking." and the like, a banner when the queue cannot be reached).
+- **Flows** (stand-in Redis, wallet, ledger, stock and Updates compared after every step): pickup, delivery sent with staff, vending through the kiosk, buyer cancel while PLACED, cafe reject. All pass, including two laptops tapping the same button at once (one wins) and cancel against reject (one refund).
+- **Totals:** unit tests 110; API suites 480 (integration 135, wallet 71, orders 109, cafe 125, flows 40); browser suites 479 (access 52, shell 65, browse and cart 73, wallet 62, ordering 88, cafe 111, and 28 for `docs/ACCESS_GUIDE.md` followed step by step), plus the 51-screen style audit.
 
 ## Phase 7 — Runner
 - [ ] Scan button + runner sheet (camera + manual entry)
@@ -75,13 +96,19 @@ Build in this order. One phase per session or per sitting. At the end of each ph
 ## Open questions
 (Add questions here when a doc is silent. Keep the simplest behaviour until answered.)
 
-Raised in Phase 5 (the docs were silent, simplest behaviour kept until answered):
-- Checkout opens on "Deliver to my building" with GICT selected, because Preferences (Phase 9) cannot remember a default yet (`DEFAULT_MODE`, `DEFAULT_BUILDING` in `lib/config.ts`). Should pickup be the default instead?
-- The time shown before the cafe accepts is an estimate: ASAP delivery = now + prep + walk + 2 min, ASAP pickup = now + prep. FLOWS says the promise is set at accept time, so Phase 6 will reset ASAP promises when the cafe accepts. A break slot keeps the slot time.
-- Order IDs are random `QX-1000` to `QX-9999` (9,000 of them) and orders are never deleted. Plenty for a demo day. Admin › Demo reset (Phase 10) should clear orders so the IDs free up.
-- A double tap on Pay, or a retry after a bad network, places one order: each Pay press carries a token that is remembered for 5 minutes (`IDEMPOTENCY_TTL_SEC`).
-- The Orders tab shows your latest 60 orders (`ORDERS_LIST_MAX`). The dot on the Orders tab means "an order is in progress"; it goes out when the last one is finished.
-- Updates older than today are listed under "Earlier" with "Yesterday 14:30" or "12 Nov 14:30".
+Raised in Phase 6 (the docs were silent, simplest behaviour kept until answered):
+- The source filter tabs sit above the columns, not in the header: with the pages, the clock, the sound switch and Logout there is no room for six tabs on one row at 1280 px. The header has Queue, Vending, Menu and Today.
+- FLOWS has four columns and a "Start preparing" button but no Accepted column, so an accepted order waits in Preparing with an "Accepted" label and a Start preparing button. Mark ready comes after that.
+- Reject reasons are four: "An item ran out", "Kitchen is closed", "Too many orders", "Something else". The buyer reads: "<Source> could not make order QX-… because <reason>. ₹X has been refunded to your wallet."
+- Send with staff tells the buyer exactly "Picked up by QuickX staff." (FLOWS wording). It does not add "On the way to GICT" as the runner version does.
+- A vending pickup is collected only at the kiosk. Its Ready card says "Waiting for the buyer at the vending kiosk." and has no Collect box. If two ready vending pickups share a code, the older one is dispensed first.
+- The kiosk locks for a minute after 5 wrong codes (`KIOSK_RATE_LIMIT`) so nobody can walk up and guess. While locked even the right code is refused, as at the gate.
+- The amber "due" border, the 3-minute "no runner yet" highlight and the red failed-order cards are Phase 8 in this plan, so they are not built. The promised-time countdown stops at 0:00.
+- Staff delivery stops at "Out for delivery" until Phase 7 adds the handover code entry that marks an order DELIVERED.
+- Browsers only allow sound after one tap on the page, so the desk shows "Click once on this page so the browser allows sound." beside the sound switch until then.
+- Today: "orders placed" counts orders placed since IST midnight. Revenue is the food subtotal of finished orders. Delivery fees kept = the whole fee for a staff delivery, the fee minus the runner's earning for a runner delivery. Refunds count cancelled, rejected and failed orders.
+- The Toggle (planned for Phase 9) was needed now for "Available today", so it is built and in the kit. `Sheet` has a centred variant for laptop dialogs.
+- The full-screen kiosk has a "Back to the cafe desk" link and a Full screen button, since it has no header.
 
 Waiting on the team:
 - Real break times for the semester (placeholder list in `data/breaks.ts`).
@@ -144,3 +171,11 @@ Phase 4 (wallet), accepted by the team
 - Home banners: under ₹50 "Top up to order ...", ₹50 to ₹99 "Keep at least ₹100 ...", nothing at ₹100 or more. The wallet chip shows an amber dot under ₹50. A negative balance shows a proper minus (−₹30).
 - Admin › Users lists everyone who has identified themselves (newest first, up to 50), searchable by part of an AU number, staff ID or name, and refreshes every 5 s so wallets can be watched live. Quick-fill buttons +₹100, +₹300, +₹500 are a demo convenience.
 - Late-delivery penalties, order payments, refunds and runner earnings will use the same `moveMoney` function in `lib/wallet.ts`. A penalty passes no floor, so it can go negative.
+
+Phase 5 (ordering), accepted by the team
+- Checkout opens on "Deliver to my building" with GICT selected until Preferences (Phase 9) can remember a default. Confirmed by the team.
+- The time shown before the cafe accepts is an estimate (ASAP delivery = now + prep + walk + 2 min, ASAP pickup = now + prep). Confirmed by the team: the cafe resets an ASAP promise when it accepts (accept time + prep + walk + 2 min for delivery, accept time + prep for pickup), in Phase 6. A break slot keeps the slot time.
+- Order IDs are random `QX-1000` to `QX-9999` (9,000 of them) and orders are never deleted. Plenty for a demo day. Admin › Demo reset (Phase 10) should clear orders so the IDs free up.
+- A double tap on Pay, or a retry after a bad network, places one order: each Pay press carries a token that is remembered for 5 minutes (`IDEMPOTENCY_TTL_SEC`).
+- The Orders tab shows your latest 60 orders (`ORDERS_LIST_MAX`). The dot on the Orders tab means "an order is in progress"; it goes out when the last one is finished.
+- Updates older than today are listed under "Earlier" with "Yesterday 14:30" or "12 Nov 14:30".

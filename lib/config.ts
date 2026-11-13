@@ -26,6 +26,8 @@ export const WALLET_SUGGESTED = 100;
 
 /** Mock UPI top-up. */
 export const TOPUP_CHIPS = [50, 100, 200, 500] as const;
+/** The chip that is selected when the top-up sheet opens. */
+export const TOPUP_DEFAULT = 100;
 export const TOPUP_MIN = 10;
 export const TOPUP_MAX = 2000;
 /** Fake "processing" step before a top-up succeeds. */
@@ -34,6 +36,8 @@ export const TOPUP_PROCESSING_MS = 1500;
 /** One Admin wallet adjustment can move at most this many rupees either way (catches typos). */
 export const ADMIN_ADJUST_MAX = 10000;
 /** The note on an Admin adjustment is required, this many characters. */
+/** Quick amounts on the Adjust sheet, added or taken with one tap. */
+export const ADMIN_ADJUST_PRESETS = [100, 300, 500] as const;
 export const ADMIN_NOTE_MIN = 3;
 export const ADMIN_NOTE_MAX = 120;
 /** Admin › Users lists at most this many people at once. */
@@ -182,6 +186,60 @@ export const IDEMPOTENCY_TTL_SEC = 300;
 export const ORDER_ID_RETRIES = 40;
 /** The Orders tab lists at most this many of your latest orders. */
 export const ORDERS_LIST_MAX = 60;
+// ---------------------------------------------------------------------------
+// Cafe portal (docs/FLOWS.md section 2 and docs/SCREENS.md "Cafe portal")
+// ---------------------------------------------------------------------------
+
+/** A new order in the queue stays highlighted this long. */
+export const NEW_ORDER_HIGHLIGHT_MS = 5000;
+/** The queue and the Today totals read at most this many orders. */
+export const CAFE_ORDERS_MAX = 500;
+/** What a bag slip QR says. The runner scan in Phase 7 reads the order ID after this prefix. */
+export const SLIP_QR_PREFIX = "QX:ORDER:";
+/** QR modules of white space around the code, so a camera can find its edges. */
+export const QR_QUIET_MODULES = 4;
+/** The soft chime for a new order: two short notes (Hz), each this long, at a low volume (0 to 1). */
+export const CHIME = { notesHz: [880, 1175], noteMs: 160, volume: 0.08 } as const;
+/** The kiosk locks for a minute after this many wrong codes, so nobody can walk up and guess. */
+export const KIOSK_RATE_LIMIT = { maxWrongTries: 5, windowSec: 60 } as const;
+/** Kiosk: each slot stays lit this long while the machine "releases" it. */
+export const KIOSK_SLOT_STEP_MS = 1200;
+/** Kiosk: "Collect below" stays this long, then the keypad comes back. */
+export const KIOSK_RESET_MS = 6000;
+
+/** The server log keeps at most this many characters of an error message. */
+export const LOG_MESSAGE_MAX = 200;
+/** Admin › Users waits this long after the last key press before it searches. */
+export const SEARCH_DELAY_MS = 250;
+/** Home's "Next break" strip re-checks the time this often. */
+export const CLOCK_TICK_MS = 15_000;
+/** After the Updates tab opens, unread dots stay this long before everything counts as read. */
+export const MARK_READ_DELAY_MS = 2000;
+/** Home shows at most this many orders in progress; the Orders tab has the rest. */
+export const HOME_STRIP_MAX = 2;
+/**
+ * How long a field may be before the server refuses it. These are sanity limits for what
+ * arrives from the browser, not business rules; the real format checks are the patterns above.
+ */
+export const INPUT_MAX = {
+  /** An AU number, a staff ID or a user ID. */
+  id: 32,
+  /** A menu item ID. */
+  itemId: 40,
+  /** A first name as typed, before it is tidied to FIRST_NAME_MIN to FIRST_NAME_MAX. */
+  name: 40,
+  /** The token one checkout screen sends so a double tap places one order. */
+  requestId: 64,
+  /** An access code to revoke or end. */
+  accessCode: 16,
+  /** Which permanent code Admin asks to reveal (an empty slot answers "no code there"). */
+  codeIndex: 99,
+  /** Different items in one order (the 10-unit limit is MAX_UNITS_PER_ORDER). */
+  orderLines: 30,
+} as const;
+/** The shortest request token we accept. */
+export const REQUEST_ID_MIN = 8;
+
 /** Greeting changes at these IST hours: before noon morning, then afternoon, then evening. */
 export const GREETING_HOURS = { afternoonFrom: 12, eveningFrom: 17 } as const;
 

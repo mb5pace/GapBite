@@ -3,7 +3,7 @@
 import { ShoppingBag } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useSWRConfig } from "swr";
 import { BUILDINGS, getBuilding, type BuildingId } from "@/data/locations";
 import { getSource } from "@/data/menu";
@@ -53,7 +53,7 @@ export function CheckoutView() {
   const [error, setError] = useState("");
   const [topUpOpen, setTopUpOpen] = useState(false);
   // One id per visit to this screen: tapping Pay twice, or retrying after a bad connection, places one order.
-  const requestId = useRef<string>(crypto.randomUUID());
+  const [requestId] = useState(() => crypto.randomUUID());
 
   const priced = priceLines(cart.cart.lines);
 
@@ -105,7 +105,7 @@ export function CheckoutView() {
     setBusy(true);
     setError("");
     const res = await postJson<PlaceResult>("/api/orders", {
-      requestId: requestId.current,
+      requestId,
       mode,
       ...(mode === "delivery" ? { buildingId } : {}),
       when,
@@ -141,7 +141,7 @@ export function CheckoutView() {
               ))}
             </ul>
           </div>
-          <Link href="/cart" className="shrink-0 py-1 text-secondary font-medium text-maroon underline underline-offset-2">
+          <Link href="/cart" className="inline-flex min-h-11 shrink-0 items-center text-secondary font-medium text-maroon underline underline-offset-2">
             {CHECKOUT_COPY.editCart}
           </Link>
         </div>

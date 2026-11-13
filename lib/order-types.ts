@@ -120,3 +120,58 @@ export function stepsFor(order: Pick<Order, "sourceId" | "mode">): OrderStatus[]
     ? ["PLACED", ...middle, "PICKED_UP", "DELIVERED"]
     : ["PLACED", ...middle, "COLLECTED"];
 }
+
+/**
+ * What the cafe desk sees of an order. No code, no buyer, no prices: the desk
+ * needs what to make and where it goes. (The counter asks the buyer for the code.)
+ */
+export interface CafeCard {
+  id: string;
+  sourceId: SourceId;
+  status: OrderStatus;
+  mode: OrderMode;
+  buildingId?: BuildingId;
+  when: string;
+  items: { name: string; qty: number }[];
+  promisedAt?: number;
+  createdAt: number;
+  /** When it became READY, for how long a bag has been waiting. */
+  readyAt?: number;
+  holder?: Holder;
+}
+
+export function toCafeCard(order: Order): CafeCard {
+  const ready = [...order.events].reverse().find((event) => event.status === "READY");
+  return {
+    id: order.id,
+    sourceId: order.sourceId,
+    status: order.status,
+    mode: order.mode,
+    buildingId: order.buildingId,
+    when: order.when,
+    items: order.items.map((line) => ({ name: line.name, qty: line.qty })),
+    promisedAt: order.promisedAt,
+    createdAt: order.createdAt,
+    readyAt: ready?.at,
+    holder: order.holder,
+  };
+}
+
+export type QueueColumnId = "new" | "preparing" | "ready" | "out";
+
+/** Which column of the cafe queue an order sits in. Accepted orders wait under Preparing for "Start preparing". */
+export function columnOf(status: OrderStatus): QueueColumnId | null {
+  switch (status) {
+    case "PLACED":
+      return "new";
+    case "ACCEPTED":
+    case "PREPARING":
+      return "preparing";
+    case "READY":
+      return "ready";
+    case "PICKED_UP":
+      return "out";
+    default:
+      return null;
+  }
+}

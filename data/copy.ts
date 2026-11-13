@@ -122,21 +122,14 @@ export const COPY = {
     },
     /** One line for each page that is not built yet. */
     stubs: {
-      home: "Ordering opens in the next phase.",
       discover: "Help, FAQ and feedback will live here.",
-      orders: "Your orders will show up here.",
-      updates: "Nothing yet. Your order updates show up here.",
       account: "Wallet, profile and history will live here.",
-      checkout: "Checkout opens in the next phase.",
-      backToCart: "Back to cart",
       section: "This part of Account opens in a later release.",
-      goHome: "Go to Home",
     },
   },
 
   cafe: {
     title: "QuickX · UC Cafe Desk",
-    placeholder: "The order queue is not built yet.",
   },
 
   admin: {

@@ -6,6 +6,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { COPY } from "@/data/copy";
+import { LOG_MESSAGE_MAX } from "./config";
 import { RedisNotConfiguredError } from "./redis";
 import { SessionSecretError } from "./session";
 
@@ -20,6 +21,17 @@ export class AppError extends Error {
 }
 
 const NO_STORE = { "Cache-Control": "no-store" } as const;
+
+/**
+ * What goes in the server log for an unexpected error: its name and message, and nothing else.
+ * An Upstash error ends with ", command was: [...]", and that part holds the script's arguments:
+ * typed access codes, order data with the buyer's 4-digit code. It is cut off before logging.
+ */
+export function logSafeMessage(err: unknown): string {
+  if (!(err instanceof Error)) return "unknown";
+  const message = err.message.split(", command was:")[0].slice(0, LOG_MESSAGE_MAX);
+  return `${err.name}: ${message}`;
+}
 
 export function ok<T>(data: T): NextResponse {
   return NextResponse.json({ ok: true, data }, { headers: NO_STORE });
@@ -53,7 +65,7 @@ export async function handle(run: () => Promise<Response>): Promise<Response> {
     if (err instanceof SessionSecretError) return fail(500, COPY.gate.notSetUp);
     if (err instanceof RedisNotConfiguredError) return fail(503, COPY.gate.notSetUp);
     // Log the name and message only. Never log request bodies, cookies or env values.
-    console.error("API error:", err instanceof Error ? `${err.name}: ${err.message}` : "unknown");
+    console.error("API error:", logSafeMessage(err));
     return fail(503, COPY.gate.cannotCheck);
   }
 }

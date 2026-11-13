@@ -41,6 +41,11 @@ export function formatMsLeft(ms: number): string {
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
+/** The server's clock, for server components, so they never read it themselves. */
+export function serverNow(): number {
+  return Date.now();
+}
+
 /** The greeting for right now. Server components call this so they never read the clock themselves. */
 export function greetingNow(): string {
   return greetingFor(Date.now());

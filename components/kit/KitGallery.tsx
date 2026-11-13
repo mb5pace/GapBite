@@ -27,6 +27,7 @@ import { Money } from "@/components/ui/Money";
 import { PillButton } from "@/components/ui/PillButton";
 import { Sheet } from "@/components/ui/Sheet";
 import { Stepper, type StepperStep } from "@/components/ui/Stepper";
+import { Toggle } from "@/components/ui/Toggle";
 import { BottomBar } from "@/components/student/BottomBar";
 import { Header } from "@/components/student/Header";
 import { BREAK_SLOTS } from "@/data/breaks";
@@ -34,18 +35,18 @@ import { MENU_ITEMS, getItem, getSource } from "@/data/menu";
 import { WALLET_SUGGESTED } from "@/lib/config";
 
 const SWATCHES = [
-  { token: "cream", bg: "bg-cream", text: "text-espresso", use: "App background" },
-  { token: "parchment", bg: "bg-parchment", text: "text-espresso", use: "Cards, bottom bar, sheets" },
-  { token: "sand", bg: "bg-sand", text: "text-espresso", use: "Inputs, inactive chips, tiles" },
-  { token: "blush", bg: "bg-blush", text: "text-maroon", use: "Selected chip, highlights" },
-  { token: "maroon", bg: "bg-maroon", text: "text-cream", use: "Primary, active tab, headings" },
-  { token: "espresso", bg: "bg-espresso", text: "text-cream", use: "Body text, icons" },
-  { token: "mocha", bg: "bg-mocha", text: "text-cream", use: "Secondary text" },
-  { token: "taupe", bg: "bg-taupe", text: "text-cream", use: "Tertiary text 14 px and up, borders" },
-  { token: "sun", bg: "bg-sun", text: "text-maroon", use: "Gate panel, earn highlight" },
-  { token: "olive", bg: "bg-olive", text: "text-cream", use: "Delivered, money in" },
-  { token: "amber", bg: "bg-amber", text: "text-cream", use: "Due now, low balance" },
-  { token: "brick", bg: "bg-brick", text: "text-cream", use: "Failed, money out, errors" },
+  { token: "cream", bg: "bg-cream", use: "App background" },
+  { token: "parchment", bg: "bg-parchment", use: "Cards, bottom bar, sheets" },
+  { token: "sand", bg: "bg-sand", use: "Inputs, inactive chips, tiles" },
+  { token: "blush", bg: "bg-blush", use: "Selected chip, highlights" },
+  { token: "maroon", bg: "bg-maroon", use: "Primary, active tab, headings" },
+  { token: "espresso", bg: "bg-espresso", use: "Body text, icons" },
+  { token: "mocha", bg: "bg-mocha", use: "Secondary text" },
+  { token: "taupe", bg: "bg-taupe", use: "Tertiary text 14 px and up, borders" },
+  { token: "sun", bg: "bg-sun", use: "Gate panel, earn highlight" },
+  { token: "olive", bg: "bg-olive", use: "Delivered, money in" },
+  { token: "amber", bg: "bg-amber", use: "Due now, low balance" },
+  { token: "brick", bg: "bg-brick", use: "Failed, money out, errors" },
 ] as const;
 
 const ICON = { weight: "regular", size: 20, "aria-hidden": true } as const;
@@ -87,6 +88,8 @@ export function KitGallery() {
   const [chip, setChip] = useState("asap");
   const [slot, setSlot] = useState("11:50");
   const [sheet, setSheet] = useState(false);
+  const [dialog, setDialog] = useState(false);
+  const [available, setAvailable] = useState(true);
   const [code, setCode] = useState("48");
   const [entered, setEntered] = useState("");
   const [added, setAdded] = useState(0);
@@ -108,9 +111,10 @@ export function KitGallery() {
       <Section title="Colour" note="Twelve tokens, defined once in globals.css. Status colours are for text, borders and small dots only.">
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {SWATCHES.map((s) => (
-            <li key={s.token} className={`flex h-24 flex-col justify-between rounded-card p-3 ${s.bg} ${s.text}`}>
-              <span className="font-display text-section font-bold">{s.token}</span>
-              <span className="text-caption">{s.use}</span>
+            <li key={s.token} className="flex flex-col gap-2">
+              <span className={`h-16 rounded-card ${s.bg}`} aria-hidden="true" />
+              <span className="font-display text-section font-bold text-espresso">{s.token}</span>
+              <span className="text-caption text-mocha">{s.use}</span>
             </li>
           ))}
         </ul>
@@ -247,7 +251,7 @@ export function KitGallery() {
         <div className="grid max-w-3xl gap-6 md:grid-cols-2">
           <Input label="Your AU number" placeholder="AU2340101" hint="AU followed by 7 digits, like AU2340101." />
           <Input label="Your first name" defaultValue="Z" error="Enter your first name: 2 to 20 characters." />
-          <Input variant="code" label="Enter your QuickX access code" placeholder="K7Q-M2X" defaultValue="K7QM2X" />
+          <Input variant="code" label="Enter your QuickX access code" placeholder="K7Q-M2X" />
         </div>
         <Card className="max-w-md">
           <EmptyState icon={<Users weight="regular" size={40} />} action={<PillButton variant="secondary">Add staff</PillButton>}>
@@ -256,10 +260,25 @@ export function KitGallery() {
         </Card>
       </Section>
 
-      <Section title="Sheet" note="Slides up in 200 ms. Close with Esc, the dim area, or by dragging the handle down 80 px.">
-        <div>
-          <PillButton variant="secondary" onClick={() => setSheet(true)}>Open a sheet</PillButton>
+      <Section title="Switch" note="On/off, for the Cafe portal's Available today. The tap area is 44 px; the track is maroon when on.">
+        <div className="flex items-center gap-4 rounded-card bg-parchment p-4">
+          <Toggle checked={available} onChange={setAvailable} label="Tea, available today" />
+          <span className="text-body text-espresso">{available ? "Available today" : "Off today"}</span>
+          <Toggle checked={false} onChange={() => undefined} label="Disabled example" disabled />
         </div>
+      </Section>
+
+      <Section title="Sheet" note="Slides up in 200 ms. Close with Esc, the dim area, or by dragging the handle down 80 px. On the laptop portals the same component opens as a centred dialog.">
+        <div className="flex gap-3">
+          <PillButton variant="secondary" onClick={() => setSheet(true)}>Open a sheet</PillButton>
+          <PillButton variant="secondary" onClick={() => setDialog(true)}>Open a laptop dialog</PillButton>
+        </div>
+        <Sheet open={dialog} onClose={() => setDialog(false)} title="Why can you not make this order?" placement="center">
+          <p className="text-body text-mocha">The buyer gets this reason and their money back.</p>
+          <div className="mt-6">
+            <PillButton size="md" variant="secondary" onClick={() => setDialog(false)}>Keep order</PillButton>
+          </div>
+        </Sheet>
         <Sheet open={sheet} onClose={() => setSheet(false)} title="Top up your wallet">
           <p className="text-body text-espresso">Pick an amount. This is only the kit, nothing is charged.</p>
           <div className="mt-4 flex flex-wrap gap-2">

@@ -3,11 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import { getJson } from "@/lib/http";
-import { POLL_MS } from "@/lib/config";
+import { CLOCK_TICK_MS, POLL_MS } from "@/lib/config";
 import type { MenuState } from "@/lib/menu-rules";
 
 const MENU_URL = "/api/menu";
-const CLOCK_TICK_MS = 15_000;
 
 /**
  * What can be ordered right now. The student layout seeds the first value from

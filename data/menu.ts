@@ -160,8 +160,6 @@ export const MENU_ITEMS: readonly MenuItem[] = [
   ...vending,
 ];
 
-export const SOURCE_IDS: readonly SourceId[] = SOURCES.map((s) => s.id);
-
 export function getSource(id: SourceId): Source {
   const source = SOURCES.find((s) => s.id === id);
   if (!source) throw new Error(`Unknown source: ${id}`);
