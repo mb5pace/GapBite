@@ -80,6 +80,13 @@ export const COPY = {
       updates: "Updates",
       account: "Account",
     },
+    discoverTopics: {
+      introduction: "Introduction",
+      help: "Help",
+      "smart-vending": "Smart Vending",
+      feedback: "Feedback",
+      faq: "FAQ",
+    },
     accountSections: {
       wallet: "Wallet",
       profile: "My Profile",
@@ -100,6 +107,7 @@ export const COPY = {
       bestseller: "Bestseller",
       open: "Open",
       noResults: "Nothing matches that. Try poha, cold coffee or Paper Boat.",
+      forPickup: "pickup",
       noMoreBreaks: "No more breaks today. You can still order as soon as possible.",
     },
     menu: {
@@ -124,11 +132,6 @@ export const COPY = {
       overStock: "Not enough left",
     },
     /** One line for each page that is not built yet. */
-    stubs: {
-      discover: "Help, FAQ and feedback will live here.",
-      account: "Wallet, profile and history will live here.",
-      section: "This part of Account opens in a later release.",
-    },
   },
 
   cafe: {

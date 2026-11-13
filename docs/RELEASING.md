@@ -13,6 +13,15 @@ Both environments share one Upstash database. **From v0.9.0** every Redis key st
 
 The preview deployment needs the same settings as production (names only; values stay in Vercel): the Redis connection, the cafe and admin passwords, the permanent codes and the session secret. Check **Vercel › the project › Settings › Environment Variables** and make sure each is ticked for **Preview** as well as **Production**.
 
+## 1a. One-time setup for the dev link (in Vercel, by the team)
+
+A preview deployment only works for the team if two things are set. Neither is in git.
+
+1. **The four settings that are Production-only today.** `QX_PERMANENT_CODES`, `QX_SESSION_SECRET`, `QX_ADMIN_PASSWORD` and `QX_CAFE_PASSWORD` must also be set for **Preview** (Settings › Environment Variables › each one › tick Preview, or add it again for Preview). Without them nobody can get past the gate on the dev link. You can give Preview the same values as Production or different ones (different is safer: a leaked dev password then opens nothing real). The Redis settings (`KV_*`) are already set for Preview.
+2. **Deployment Protection.** The project has Vercel Authentication on for preview URLs, so anyone who opens the dev link is asked to log in to Vercel. Students' phones cannot. Either turn Vercel Authentication off for Preview (Settings › Deployment Protection; QuickX has its own access-code gate and the dev data is kept apart from production), or give the team Vercel accounts on the project.
+
+The stable dev link is `https://gapbite-git-dev-boards-team.vercel.app`. Each push also gets its own one-off link; always use the stable one.
+
 ## 2. Day to day
 
 1. All work is committed and pushed to `dev`. Never push to `main`.
@@ -33,6 +42,8 @@ When the team says **release vX.Y.Z**:
    1. Check that production is Ready and `/api/health` says `"ok":true`.
    2. Tag the merge commit on `main`: `git tag -a vX.Y.Z <merge-commit> -m "QuickX vX.Y.Z"` and `git push origin vX.Y.Z`.
    3. Create the GitHub Release: `gh release create vX.Y.Z --title "QuickX vX.Y.Z" --notes-file <the changelog section>`.
+
+   **Cloud sessions cannot do 2 and 3.** A Claude Code cloud session cannot push tags, create tags through the API, or create Releases (the environment refuses all three, and `gh release create` also needs GraphQL, which is blocked). When that happens the session says so and the team does it on GitHub instead: **Releases › Draft a new release › Choose a tag › type `vX.Y.Z` › Create new tag on publish**, target **main** (the merge commit), title **QuickX vX.Y.Z**, and paste the changelog section as the description. That creates the tag and the Release in one step. Opening the pull request may need the REST route too: `gh api repos/mb5pace/GapBite/pulls -f title="Release vX.Y.Z" -f head=dev -f base=main -F body=@<the changelog section>` if `gh pr create` is refused.
    4. Bring `dev` level with `main`: `git checkout dev && git merge --ff-only origin/main` (a merge commit if the pull request was squashed, so `dev` contains the release), then `git push origin dev`.
 
 The first release, v0.8.0, was done once directly on `main` to start this workflow.
