@@ -29,6 +29,7 @@ import {
 } from "./config";
 import { activeKey, doneKey, getOrder, listOrdersFor, liveKey, orderKey, runsByKey, runsLiveKey } from "./orders";
 import { toRunCard, type Order, type OrderSummary, type RunCard, type RunPreview } from "./order-types";
+import { readyBagsFrom, type ReadyBag } from "./ready-bags";
 import { getRedis, key } from "./redis";
 import { makeUpdate, unreadKey, updatesKey } from "./updates";
 import { LUA_MOVE_MONEY, getBalance } from "./wallet";
@@ -397,4 +398,13 @@ export async function confirmHandover(user: RunUser, orderId: string, code: stri
     }
   }
   return { earned: Number(result[1]), balance: Number(result[2] ?? 0) };
+}
+
+/** The "Ready to deliver" list for this student or staff member: see lib/ready-bags.ts for what it never includes. */
+export async function listReadyBags(user: RunUser, now: number): Promise<ReadyBag[]> {
+  const redis = getRedis();
+  const ids = await redis.zrange<string[]>(activeKey(), 0, -1);
+  if (ids.length === 0) return [];
+  const orders = await redis.mget<(Order | null)[]>(...ids.map((id) => orderKey(String(id))));
+  return readyBagsFrom(orders, { id: user.id, role: user.role }, now);
 }

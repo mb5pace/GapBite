@@ -267,6 +267,14 @@ export function runnerEarnedUpdate(amount: number): { title: string; body: strin
 /** The runner sheet: scanning, preview, accepted, handover. */
 export const RUN_COPY = {
   scanLabel: "Scan a bag",
+  scanLabelWithCount: (n: number) => `Scan a bag, ${n} ready to deliver`,
+  readyTitle: (n: number) => `Ready to deliver (${n})`,
+  readyNone: "No bags are waiting for a runner right now.",
+  readyItems: (n: number) => `${n} ${n === 1 ? "item" : "items"}`,
+  readyFor: (min: number) => (min < 1 ? "ready just now" : `ready ${min} min`),
+  staffDelivery: "Staff delivery",
+  readyHint: (source: string) => `Scan this bag at the ${source} counter to take it.`,
+  readyTopUp: (min: string) => `Top up to at least ${min} to run.`,
   scanTitle: "Scan a bag",
   scanHint: "Point the camera at the QR code on the bag slip.",
   typeInstead: "Type order ID instead",

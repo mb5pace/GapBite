@@ -158,6 +158,8 @@ export const POLL_MS = {
   admin: 5000,
   /** Home: each place's status and "Ready in about N min" (/api/status). Paused while the tab is hidden. */
   status: 15000,
+  /** The Scan button's count and the runner sheet's "Ready to deliver" list (/api/runs/ready). Paused while the tab is hidden. */
+  ready: 10000,
 } as const;
 
 // ---------------------------------------------------------------------------

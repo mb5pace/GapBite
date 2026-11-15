@@ -15,6 +15,7 @@ import { parseOrderRef } from "@/lib/order-ref";
 import type { RunCard, RunPreview } from "@/lib/order-types";
 import { formatClock } from "@/lib/time";
 import { QrScanner } from "./QrScanner";
+import { ReadyList } from "./ReadyList";
 import { useMe } from "@/components/student/useMe";
 
 export type RunnerMode = { kind: "closed" } | { kind: "scan" } | { kind: "handover"; run: RunCard };
@@ -90,6 +91,7 @@ function ScanFlow({ onClose }: { onClose: () => void }) {
         <PillButton variant="secondary" size="md" full onClick={() => typeInstead()}>
           {RUN_COPY.typeInstead}
         </PillButton>
+        <ReadyList />
       </div>
     );
   }
@@ -125,6 +127,7 @@ function ScanFlow({ onClose }: { onClose: () => void }) {
         <PillButton type="button" variant="secondary" size="md" full onClick={again}>
           {RUN_COPY.useCamera}
         </PillButton>
+        <ReadyList />
       </form>
     );
   }
