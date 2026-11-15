@@ -26,6 +26,7 @@ import {
   SERVICE_DEFAULT_MESSAGE,
   SERVICE_MESSAGE_MAX,
 } from "./config";
+import { readyPhrase } from "./ready-estimate";
 import { istDateKey, istMidnight, istMinutesOfDay, istWeekday, slotEpoch } from "./time";
 
 export interface SourceConfig extends SourceHours {
@@ -324,6 +325,17 @@ export function sourceLabel(cfg: HoursConfig, service: ServiceState, sourceId: S
   if (closure?.kind === "before-open") return { text: `Opens at ${closure.opensAt}`, open: false, tone: "amber" };
   if (closure?.kind === "after-close") return { text: "Closed for today", open: false, tone: "brick" };
   return { text: "Open now", open: true, tone: "olive" };
+}
+
+/**
+ * The one line under a cafe's name on its menu page: "Open 12:00–19:00 · Ready in about 10 min" while it takes orders, or the
+ * reason it does not ("Global Bistro opens at 12:00.", "Cafe Delice is closed today (Diwali).", "... is not taking orders right now.").
+ */
+export function sourceInfoLine(cfg: HoursConfig, service: ServiceState, sourceId: SourceId, nowMs: number, readyMin: number | null | undefined): string {
+  const block = sourceBlockNow(cfg, service, sourceId, nowMs);
+  if (block) return block.message;
+  const { open, close } = cfg.sources[sourceId];
+  return readyMin === null || readyMin === undefined ? `Open ${open}–${close}` : `Open ${open}–${close} · ${readyPhrase(readyMin)}`;
 }
 
 /**

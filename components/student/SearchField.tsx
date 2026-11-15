@@ -5,12 +5,22 @@ import { useId } from "react";
 import { COPY } from "@/data/copy";
 
 /** The Home search box: a pill on sand with a magnifier, and a clear button once something is typed. */
-export function SearchField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+export function SearchField({
+  value,
+  onChange,
+  label = COPY.student.home.searchLabel,
+  placeholder = COPY.student.home.searchPlaceholder,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  label?: string;
+  placeholder?: string;
+}) {
   const id = useId();
   return (
     <div role="search" className="relative">
       <label htmlFor={id} className="sr-only">
-        {COPY.student.home.searchLabel}
+        {label}
       </label>
       <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-mocha" aria-hidden="true">
         <MagnifyingGlass weight="regular" size={22} />
@@ -20,7 +30,7 @@ export function SearchField({ value, onChange }: { value: string; onChange: (val
         type="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={COPY.student.home.searchPlaceholder}
+        placeholder={placeholder}
         autoComplete="off"
         autoCorrect="off"
         spellCheck={false}

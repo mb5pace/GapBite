@@ -43,6 +43,15 @@ export function itemStatus(item: MenuItem, state: MenuState): ItemStatus {
   return "ok";
 }
 
+/**
+ * Goes under "Unavailable" on a cafe's menu: the cafe switched it off, it is outside its own time window, or it is sold
+ * out. An item whose whole place is closed or paused is not unavailable in this sense: the menu stays readable.
+ */
+export function isUnavailableItem(item: MenuItem, state: MenuState): boolean {
+  const status = itemStatus(item, state);
+  return status === "unavailable" || status === "window" || status === "sold-out";
+}
+
 /** The short reason shown on a row that cannot be added right now ("Breakfast, until 11:00", "Opens at 12:00"), or null. */
 export function itemNote(item: MenuItem, state: MenuState): string | null {
   const status = itemStatus(item, state);

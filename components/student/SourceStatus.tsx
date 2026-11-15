@@ -23,11 +23,11 @@ export function SourceBadge({ sourceId }: { sourceId: SourceId }) {
 
 /**
  * When a place is closed or paused: a small sheet on arrival with the reason and when it opens, and the same words in
- * a line above the menu once the sheet is closed. The menu can still be browsed; the Add buttons are off. Nothing shows
+ * a line above the menu once the sheet is closed (a cafe menu says it in its header instead, `line={false}`). The menu can still be browsed; the Add buttons are off. Nothing shows
  * while the place is taking orders, and nothing while the whole service is off (the banner at the top says that).
  * If the place opens while the sheet is up, the sheet goes away on the next refresh.
  */
-export function ClosedSource({ sourceId }: { sourceId: SourceId }) {
+export function ClosedSource({ sourceId, line = true }: { sourceId: SourceId; line?: boolean }) {
   const { menu } = useCart();
   const info = closedInfo(menu.hours, menu.service, sourceId, menu.now);
   const [dismissed, setDismissed] = useState(false);
@@ -36,11 +36,13 @@ export function ClosedSource({ sourceId }: { sourceId: SourceId }) {
 
   return (
     <>
-      <div data-closed-line="">
-        <Banner>
-          {info.reason} {paused ? COPY.student.closed.pausedLineAbove : COPY.student.closed.lineAbove}
-        </Banner>
-      </div>
+      {line ? (
+        <div data-closed-line="">
+          <Banner>
+            {info.reason} {paused ? COPY.student.closed.pausedLineAbove : COPY.student.closed.lineAbove}
+          </Banner>
+        </div>
+      ) : null}
       <Sheet open={!dismissed} onClose={() => setDismissed(true)} title={info.title}>
         <p className="text-body text-espresso">{info.reason}</p>
         {info.opens ? <p className="mt-2 text-body font-medium text-espresso">{info.opens}</p> : null}

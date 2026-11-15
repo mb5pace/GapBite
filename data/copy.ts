@@ -137,6 +137,10 @@ export const COPY = {
       unavailableNow: "Unavailable now",
     },
     menu: {
+      searchIn: (cafe: string) => `Search in ${cafe}`,
+      categories: "Categories",
+      prep: (min: number) => `Prep ${min} min`,
+      noMatch: "Nothing on this menu matches that.",
       notToday: "Not today",
       soldOut: "Sold out",
       readyNow: "Ready now",

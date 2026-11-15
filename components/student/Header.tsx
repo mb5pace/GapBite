@@ -47,15 +47,15 @@ export function Header({
   const { title, back } = routeFor(pathname ?? livePath);
 
   return (
-    <header className="sticky top-0 z-30 bg-cream px-5 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
+    <header data-app-header="" className="sticky top-0 z-30 bg-cream px-5 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
       <div className="flex min-h-12 items-center justify-between gap-3">
         <div className="min-w-0">
           {title === null ? (
             <div className="flex items-start gap-2">
-              <MapPin weight="regular" size={22} className="mt-0.5 shrink-0 text-maroon" aria-hidden="true" />
+              <MapPin weight="regular" size={20} className="mt-0.5 shrink-0 text-maroon" aria-hidden="true" />
               <div className="min-w-0">
-                <p className="truncate text-body font-semibold leading-tight text-espresso">{COPY.student.home.locationName}</p>
-                <p className="truncate text-secondary text-mocha">{COPY.student.home.locationPlace}</p>
+                <p className="text-secondary font-semibold leading-tight text-espresso">{COPY.student.home.locationName}</p>
+                <p className="text-secondary leading-tight text-mocha">{COPY.student.home.locationPlace}</p>
               </div>
             </div>
           ) : back ? (
