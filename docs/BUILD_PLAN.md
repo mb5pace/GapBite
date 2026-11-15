@@ -90,10 +90,42 @@ What was checked, and what it found and fixed.
 - [x] Discover pages and FAQ
 
 ## Phase 10 — Demo polish
+(The demo tools, the quality pass and the real-device test are carried into v1.0.0 Phase C below.)
 - [ ] Admin demo tools (seed, reset). (Live orders was pulled forward to Phase 7.) Seed still creates `QX-STF-01 Ramesh`, but through the same `qx:staff:seq` counter and only if that ID does not exist yet, because staff can now be added by hand
 - [ ] Every screen checked against bible §9 and §10
 - [ ] Test on two real phones + laptop at the same time over the deployed URL
 - [ ] Walk through DEMO_SCRIPT.md twice end to end
+
+## v1.0.0
+
+Three sessions, in order. Everything is built on the `dev` branch and tested on the dev preview link (Redis prefix `qxdev:`). Main is production and only changes through a release, which the team does itself.
+
+### Phase A: rules, data and foundations
+- [ ] **1. One professional font.** Plus Jakarta Sans (400, 500, 600, 700, 800) for all text, headings and numbers, `tabular-nums` kept on prices, balances and countdowns. Grandstander stays only for the QuickX wordmark on the gate. UI_UX_BIBLE section 2 updated. Every screen checked at 360 px.
+- [ ] **2. Menu data.** Required `category` on every item, new item Matar Paneer Paratha (`ti-matar-paneer-paratha`, ₹60, prep 6), and the old `morning` tag and 11:30 rule removed everywhere (config, server, UI text, docs, tests). MENU.md updated.
+- [ ] **3. Opening hours, item windows, holidays.** Defaults in `data/hours.ts`, live values in one Redis hash, pure rules shared by browser and server. The ordering rule (a to f) is enforced in place-order on the server with plain refusal messages. Break slot chips and the Home "Next break" strip respect hours and item windows. Orders already placed are never affected.
+- [ ] **4. Pause switches.** Per source "Taking orders / Paused" (Cafe portal). Service-wide "QuickX available / not available" with an editable message, only from the new Admin › Service page, with a banner on every student screen. Neither touches active orders.
+- [ ] **5. Cafe "Hours and items" page.** Per source hours, open days and pause; holidays; per-item available-from / until and the "Available today" switch (moved here). Validation, instant effect for students.
+- [ ] **6. Closed states for students.** Home tile labels, a dismissible once-per-session notice, a sheet when a closed or paused source is opened (Add disabled), "Unavailable now" at the bottom of a menu, and the cart flagging items that became unavailable.
+- [ ] **7. Loading view.** CookingPot icon with CSS steam and "Your food is on the stove…", used by the student, Cafe and Admin route groups, reduced motion respected, no artificial delay.
+- [ ] **8. Docs, changelog, tests.** BUSINESS_RULES, MENU, SCREENS, ARCHITECTURE, UI_UX_BIBLE and CHANGELOG (Unreleased) updated. Tests for Sunday and holiday closed, Global Bistro before and after 12:00, breakfast cutoffs, paused source, service off, active orders unaffected, and hours edited in the Cafe portal changing what students can order on the next poll. All earlier suites pass. build, tsc and lint clean.
+
+### Phase B: student redesign (later session)
+- [ ] **Home in SmartQ style.** Location line "Ahmedabad University · UC" with a pin, search, a square cafe tile grid with Open now / Opens at HH:MM / Paused and "Ready in about X min" from that cafe's queue, Popular at UC.
+- [ ] **Order progress line on Home.** Four parts tied to the real status (delivery: Placed, Preparing, On the way, Delivered; pickup: Placed, Preparing, Ready at counter, Collected) with the Phosphor `PersonSimpleWalk` icon standing on the current part and a gentle walking bob, reduced motion respected, "+1 more" for a second order.
+- [ ] **Menu pages in SmartQ style.** Category tabs including Unavailable, search, cards with a veg dot, description, price, a "Prep N min" badge, the photo on the right if there is one, an outlined Add button.
+- [ ] **Order Detail.** A large QR plus the 4-digit code and "Show this screen to collect your order" for pickup and vending.
+- [ ] **Orders tab like the SmartQ Past screen.** Search, underlined Active / Past tabs, cards with status badge, date and time, order ID, items with prices, Share feedback and Order again, an end-of-list line.
+- [ ] **Scan button number badge.** A read-only list of ready delivery bags grouped by building (cafe, building, earning, waiting time). Tapping a row only says "Scan this bag at the <source> counter to take it"; nothing can be claimed remotely.
+- [ ] **Add to home screen.** Web manifest, icons, cream splash, standalone display.
+- [ ] **Visual polish pass** at 360 px.
+
+### Phase C: Cafe portal as a kitchen display, demo tools, release (later session)
+- [ ] **Cafe portal redesigned as a POS / kitchen display.** Fixed left sidebar (Queue, Vending, Hours and items, Today); top bar with live status counts, per-source open / paused switches and the clock; tickets styled as kitchen order slips with large item lines and big action buttons; ticket colour by age (normal, amber, red); "Scan buyer QR" for pickups; printable kitchen slip; large touch targets.
+- [ ] **Phase 10 demo tools.** Seed, reset (only the current environment's key prefix), and a late-test order.
+- [ ] **Final quality pass** and a real two-phone plus laptop test.
+- [ ] **DEMO_SCRIPT.md** updated.
+- [ ] **Release v1.0.0** (done by the team, not by the build session).
 
 ## Open questions
 (Add questions here when a doc is silent. Keep the simplest behaviour until answered.)
