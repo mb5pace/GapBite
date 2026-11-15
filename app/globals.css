@@ -216,6 +216,12 @@ select:autofill {
   opacity: 1;
 }
 
+/* The item a search result pointed at is highlighted for a moment when the menu opens on it. */
+[id^="item-"][data-flash] {
+  background-color: var(--color-blush);
+  border-radius: var(--radius-field);
+}
+
 /* Motion is functional only, and off for people who ask for less. */
 @media (prefers-reduced-motion: reduce) {
   *,

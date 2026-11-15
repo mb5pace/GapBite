@@ -1,7 +1,7 @@
 /**
  * Menu search across all five sources. Plain substring matching on the static
  * menu data: every word typed must appear somewhere in the item's name,
- * description, source name or vending slot. Safe in the browser and on the server.
+ * description, category, cafe name or vending slot. Safe in the browser and on the server.
  */
 import { MENU_ITEMS, SOURCES, getSource, type MenuItem, type Source } from "@/data/menu";
 
@@ -29,7 +29,7 @@ export function searchMenu(query: string): SearchGroup[] {
   for (const source of SOURCES) {
     const items = MENU_ITEMS.filter((item) => {
       if (item.sourceId !== source.id) return false;
-      const haystack = normalise(`${item.name} ${item.description ?? ""} ${getSource(item.sourceId).name} ${item.slot ?? ""}`);
+      const haystack = normalise(`${item.name} ${item.description ?? ""} ${item.category} ${getSource(item.sourceId).name} ${item.slot ?? ""}`);
       return words.every((word) => haystack.includes(word));
     });
     if (items.length > 0) groups.push({ source, items });

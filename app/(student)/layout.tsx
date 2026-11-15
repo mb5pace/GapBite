@@ -9,7 +9,6 @@ import { UpdateSound } from "@/components/student/UpdateSound";
 import { requirePageSession } from "@/lib/auth";
 import { getMeNow } from "@/lib/me";
 import { getMenuStateNow } from "@/lib/menu";
-import { greetingNow } from "@/lib/time";
 
 /**
  * The student shell: a persistent header and the floating bottom bar around
@@ -27,7 +26,7 @@ export default async function StudentLayout({ children }: { children: ReactNode 
       <RunnerProvider>
         <UpdateSound />
         <div className="mx-auto min-h-dvh w-full max-w-[430px]">
-          <LiveHeader greeting={greetingNow()} tempMsLeft={me.sessionMsLeft} />
+          <LiveHeader tempMsLeft={me.sessionMsLeft} />
           <ServiceBanner />
           <main className="px-5 pb-[calc(7rem+env(safe-area-inset-bottom))] pt-2">
             {children}

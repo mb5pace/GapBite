@@ -7,6 +7,7 @@ import { MenuItemRow } from "./MenuItemRow";
 import { ClosedSource, SourceBadge } from "./SourceStatus";
 import { useCart } from "./CartProvider";
 import { useMenuState } from "./menu-state";
+import { useScrollToItem } from "./useScrollToItem";
 
 /**
  * A cafe's menu: tagline, what the place is doing right now, and every item with its add control. Items outside their
@@ -16,6 +17,7 @@ export function SourceMenu({ sourceId }: { sourceId: SourceId }) {
   const source = getSource(sourceId);
   const { menu } = useCart();
   useMenuState(); // refreshes "Not today", hours and windows when you arrive
+  useScrollToItem(); // a search result opens its item
 
   const items = itemsBySource(sourceId);
   const outsideWindow = items.filter((item) => itemStatus(item, menu) === "window");

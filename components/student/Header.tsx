@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft } from "@phosphor-icons/react";
+import { ArrowLeft, MapPin } from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { COPY } from "@/data/copy";
@@ -30,21 +30,15 @@ export function routeFor(pathname: string): { title: string | null; back?: strin
 }
 
 /**
- * Persistent student header (docs/SCREENS.md): greeting or page title on the
- * left, Scan and the wallet chip on the right. A temp-session countdown shows on
+ * Persistent student header (docs/SCREENS.md): on Home the campus and the place (Ahmedabad University, University
+ * Centre), on other pages the title or a Back arrow, on the left; Scan and the wallet chip on the right. A temp-session countdown shows on
  * its own row only in the last 3 minutes. `pathname` is only for the /kit gallery.
  */
 export function Header({
-  greeting,
-  name,
-  isStaff,
   balance,
   tempMsLeft,
   pathname,
 }: {
-  greeting: string;
-  name: string;
-  isStaff: boolean;
   balance: number;
   tempMsLeft: number | null;
   pathname?: string;
@@ -57,17 +51,13 @@ export function Header({
       <div className="flex min-h-12 items-center justify-between gap-3">
         <div className="min-w-0">
           {title === null ? (
-            <>
-              <p className="text-secondary text-mocha">{greeting}</p>
-              <h1 className="flex items-center gap-2 font-display text-greeting font-extrabold text-maroon">
-                <span className="line-clamp-2 break-words">{name}</span>
-                {isStaff ? (
-                  <span className="shrink-0 rounded-pill bg-blush px-2 py-0.5 font-sans text-caption font-bold text-maroon">
-                    {COPY.student.staffBadge}
-                  </span>
-                ) : null}
-              </h1>
-            </>
+            <div className="flex items-start gap-2">
+              <MapPin weight="regular" size={22} className="mt-0.5 shrink-0 text-maroon" aria-hidden="true" />
+              <div className="min-w-0">
+                <p className="truncate text-body font-semibold leading-tight text-espresso">{COPY.student.home.locationName}</p>
+                <p className="truncate text-secondary text-mocha">{COPY.student.home.locationPlace}</p>
+              </div>
+            </div>
           ) : back ? (
             <Link
               href={back}

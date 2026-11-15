@@ -328,18 +328,18 @@ export function KitGallery() {
       <Section title="Student shell" note="The real header and floating bottom bar, in a 390 px frame. Dots on Orders and Updates are real states: an order in progress, unread updates.">
         <div className="flex flex-wrap items-start gap-6">
           <Phone>
-            <Header greeting="Good morning" name="Riya" isStaff={false} balance={240} tempMsLeft={null} pathname="/home" />
+            <Header balance={240} tempMsLeft={null} pathname="/home" />
             <div className="h-24 px-5 text-secondary text-mocha">Page content</div>
             <div className="px-5 pb-3"><BottomBar floating={false} unread activeOrder pathname="/home" /></div>
           </Phone>
           <Phone>
-            <Header greeting="Good afternoon" name="Ramesh" isStaff balance={30} tempMsLeft={null} pathname="/home" />
-            <div className="h-24 px-5 text-secondary text-mocha">Staff badge, low balance dot</div>
+            <Header balance={30} tempMsLeft={null} pathname="/home" />
+            <div className="h-24 px-5 text-secondary text-mocha">Low balance dot</div>
             <div className="px-5 pb-3"><BottomBar floating={false} unread={false} activeOrder={false} pathname="/updates" /></div>
           </Phone>
           <Phone>
-            <Header greeting="" name="" isStaff={false} balance={1250} tempMsLeft={null} pathname="/orders" />
-            <div className="h-24 px-5 text-secondary text-mocha">Page title instead of the greeting</div>
+            <Header balance={1250} tempMsLeft={null} pathname="/orders" />
+            <div className="h-24 px-5 text-secondary text-mocha">Page title instead of the campus line</div>
             <div className="px-5 pb-3"><BottomBar floating={false} unread={false} activeOrder pathname="/orders" /></div>
           </Phone>
         </div>

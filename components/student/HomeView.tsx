@@ -1,74 +1,54 @@
 "use client";
 
-import { MagnifyingGlass } from "@phosphor-icons/react";
 import { useMemo, useState } from "react";
 import { COPY } from "@/data/copy";
 import { MENU_ITEMS, SOURCES } from "@/data/menu";
 import { ArchCard } from "@/components/ui/ArchCard";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { ItemTile } from "@/components/ui/ItemTile";
-import { PillButton } from "@/components/ui/PillButton";
-import { SourceGlyph } from "@/components/ui/SourceGlyph";
-
 import { searchMenu } from "@/lib/search";
+import { greetingFor } from "@/lib/time";
 import { useCart } from "./CartProvider";
-import { MenuItemRow } from "./MenuItemRow";
 import { ActiveOrderStrip } from "./ActiveOrderStrip";
 import { ClosedNotice } from "./ClosedNotice";
 import { NextBreakStrip } from "./NextBreakStrip";
 import { itemStateText } from "./itemState";
 import { SearchField } from "./SearchField";
+import { SearchResults } from "./SearchResults";
+import { ServiceBanner } from "./ServiceBanner";
 import { SourceTile } from "./SourceTile";
+import { useMe } from "./useMe";
 import { WalletBanner } from "./WalletBanner";
 
 const POPULAR = MENU_ITEMS.filter((item) => item.tags.includes("bestseller"));
 
-/** Home: search, the five sources, the next break, and what is popular at UC. */
+/** Home: the greeting and search, what needs attention, the five places, the next break, and what is popular at UC. */
 export function HomeView() {
   const cart = useCart();
+  const me = useMe();
   const [query, setQuery] = useState("");
   const groups = useMemo(() => searchMenu(query), [query]);
   const searching = query.trim() !== "";
 
   return (
     <div className="flex flex-col gap-6 pt-2">
-      <WalletBanner />
+      <div className="flex flex-col gap-4">
+        <header>
+          <h1 className="flex items-center gap-2 font-display text-title font-bold leading-tight text-maroon">
+            <span className="line-clamp-2 break-words">{COPY.student.home.greeting(greetingFor(cart.menu.now), me.user.name)}</span>
+            {me.user.role === "staff" ? (
+              <span className="shrink-0 rounded-pill bg-blush px-2 py-0.5 font-sans text-caption font-bold text-maroon">{COPY.student.staffBadge}</span>
+            ) : null}
+          </h1>
+        </header>
+        <SearchField value={query} onChange={setQuery} />
+        <ServiceBanner placement="home" />
+        <WalletBanner />
+        <ClosedNotice />
+      </div>
       <ActiveOrderStrip />
-      <ClosedNotice />
-      <SearchField value={query} onChange={setQuery} />
 
       {searching ? (
-        groups.length === 0 ? (
-          <EmptyState
-            icon={<MagnifyingGlass weight="regular" size={40} />}
-            action={
-              <PillButton variant="secondary" onClick={() => setQuery("")}>
-                {COPY.student.home.searchClear}
-              </PillButton>
-            }
-          >
-            {COPY.student.home.noResults}
-          </EmptyState>
-        ) : (
-          <div className="flex flex-col gap-6" aria-live="polite">
-            {groups.map(({ source, items }) => (
-              <section key={source.id} aria-labelledby={`results-${source.id}`}>
-                <h2
-                  id={`results-${source.id}`}
-                  className="flex items-center gap-2 font-display text-section font-bold text-maroon"
-                >
-                  <SourceGlyph sourceId={source.id} size={20} />
-                  {source.name}
-                </h2>
-                <ul className="divide-y divide-sand">
-                  {items.map((item) => (
-                    <MenuItemRow key={item.id} item={item} />
-                  ))}
-                </ul>
-              </section>
-            ))}
-          </div>
-        )
+        <SearchResults groups={groups} onClear={() => setQuery("")} />
       ) : (
         <>
           <section aria-labelledby="order-from">

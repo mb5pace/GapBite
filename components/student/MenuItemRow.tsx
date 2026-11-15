@@ -25,7 +25,7 @@ export function MenuItemRow({ item }: { item: MenuItem }) {
   const reasonUnder = status === "window" ? state : null;
 
   return (
-    <li className="flex items-center gap-3 py-3">
+    <li id={`item-${item.id}`} className="flex scroll-mt-40 items-center gap-3 py-3">
       <ItemTile itemId={item.id} name={item.name} sourceId={item.sourceId} size="sm" />
       <div className="min-w-0 flex-1">
         <h3 className="text-body font-bold text-espresso">{item.name}</h3>
