@@ -105,10 +105,19 @@ export const COPY = {
       orderFrom: "Order from",
       popular: "Popular at UC",
       bestseller: "Bestseller",
-      open: "Open",
       noResults: "Nothing matches that. Try poha, cold coffee or Paper Boat.",
       forPickup: "pickup",
       noMoreBreaks: "No more breaks today. You can still order as soon as possible.",
+    },
+    /** A place that is closed or paused (docs/SCREENS.md "Closed states"). */
+    closed: {
+      browse: "Browse the menu",
+      browseHint: "You can still look through the menu. Adding is off until it opens.",
+      lineAbove: "Adding is off until it opens.",
+      pausedLineAbove: "Adding is off for now.",
+      dismiss: "Dismiss",
+      noticeLabel: "Closed places",
+      unavailableNow: "Unavailable now",
     },
     menu: {
       notToday: "Not today",

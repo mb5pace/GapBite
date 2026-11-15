@@ -2,26 +2,49 @@
 
 import { COPY } from "@/data/copy";
 import { getSource, itemsBySource, type SourceId } from "@/data/menu";
-import { Badge } from "@/components/ui/Badge";
+import { itemStatus } from "@/lib/menu-rules";
 import { MenuItemRow } from "./MenuItemRow";
+import { ClosedSource, SourceBadge } from "./SourceStatus";
+import { useCart } from "./CartProvider";
 import { useMenuState } from "./menu-state";
 
-/** A cafe's menu: tagline, open state, and every item with its add control. */
+/**
+ * A cafe's menu: tagline, what the place is doing right now, and every item with its add control. Items outside their
+ * own time window (breakfast after 11:00) are listed at the bottom under "Unavailable now", each with its reason.
+ */
 export function SourceMenu({ sourceId }: { sourceId: SourceId }) {
   const source = getSource(sourceId);
-  useMenuState(); // refreshes "Not today" and the 11:30 cutoff when you arrive
+  const { menu } = useCart();
+  useMenuState(); // refreshes "Not today", hours and windows when you arrive
+
+  const items = itemsBySource(sourceId);
+  const outsideWindow = items.filter((item) => itemStatus(item, menu) === "window");
+  const rest = items.filter((item) => itemStatus(item, menu) !== "window");
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-body text-mocha">{source.tagline}</p>
-        <Badge tone="olive">{COPY.student.home.open}</Badge>
+        <p className="min-w-0 text-body text-mocha">{source.tagline}</p>
+        <SourceBadge sourceId={sourceId} />
       </div>
+      <ClosedSource sourceId={sourceId} />
       <ul className="divide-y divide-sand">
-        {itemsBySource(sourceId).map((item) => (
+        {rest.map((item) => (
           <MenuItemRow key={item.id} item={item} />
         ))}
       </ul>
+      {outsideWindow.length > 0 ? (
+        <section aria-labelledby="unavailable-now" className="mt-4" data-unavailable-now="">
+          <h2 id="unavailable-now" className="font-display text-section font-bold text-maroon">
+            {COPY.student.closed.unavailableNow}
+          </h2>
+          <ul className="divide-y divide-sand">
+            {outsideWindow.map((item) => (
+              <MenuItemRow key={item.id} item={item} />
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </div>
   );
 }

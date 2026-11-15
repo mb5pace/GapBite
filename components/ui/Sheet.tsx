@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { SHEET_DISMISS_DRAG_PX } from "@/lib/config";
+import { useHydrated } from "./useHydrated";
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -41,6 +42,10 @@ export function Sheet({
   // has re-rendered, and the release must still see how far the finger travelled.
   const dragDistance = useRef(0);
   const [dragY, setDragY] = useState(0);
+  // A sheet that is open on the very first render (a closed cafe, say) must not add a portal the server never sent, or the
+  // browser reports a mismatch. It appears one render later, which is not visible.
+  const hydrated = useHydrated();
+  const shown = open && hydrated;
 
   // Escape closes, and Tab brings focus back in, wherever focus is. It can be nowhere: when the button
   // that had it is replaced (a failed lookup, a new step), the browser drops focus on the page.
@@ -49,7 +54,7 @@ export function Sheet({
     onCloseRef.current = onClose;
   });
   useEffect(() => {
-    if (!open) return;
+    if (!shown) return;
     function onDocumentKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         onCloseRef.current();
@@ -64,11 +69,11 @@ export function Sheet({
     }
     document.addEventListener("keydown", onDocumentKeyDown);
     return () => document.removeEventListener("keydown", onDocumentKeyDown);
-  }, [open]);
+  }, [shown]);
 
   // Lock page scroll, move focus in, and give it back on close.
   useEffect(() => {
-    if (!open) return;
+    if (!shown) return;
     const opener = document.activeElement as HTMLElement | null;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -77,9 +82,9 @@ export function Sheet({
       document.body.style.overflow = previousOverflow;
       opener?.focus();
     };
-  }, [open]);
+  }, [shown]);
 
-  if (!open || typeof document === "undefined") return null;
+  if (!shown) return null;
   const center = placement === "center";
 
   function onKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {

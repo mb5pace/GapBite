@@ -6,6 +6,7 @@ import { Money } from "@/components/ui/Money";
 import { itemStatus } from "@/lib/menu-rules";
 import { formatRupees } from "@/lib/format";
 import { useCart } from "./CartProvider";
+import { ClosedSource } from "./SourceStatus";
 import { useMenuState } from "./menu-state";
 
 const SHELVES = ["A", "B", "C"] as const;
@@ -65,6 +66,7 @@ export function VendingMachine() {
   return (
     <div className="flex flex-col gap-4">
       <p className="text-body text-mocha">{COPY.student.menu.vendingLine}</p>
+      <ClosedSource sourceId="vending" />
       <div className="flex flex-col gap-4 rounded-card bg-parchment p-3">
         {SHELVES.map((shelf) => (
           <section key={shelf} aria-label={`Shelf ${shelf}`} className="flex flex-col gap-2">

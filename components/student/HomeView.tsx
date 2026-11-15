@@ -14,6 +14,7 @@ import { searchMenu } from "@/lib/search";
 import { useCart } from "./CartProvider";
 import { MenuItemRow } from "./MenuItemRow";
 import { ActiveOrderStrip } from "./ActiveOrderStrip";
+import { ClosedNotice } from "./ClosedNotice";
 import { NextBreakStrip } from "./NextBreakStrip";
 import { itemStateText } from "./itemState";
 import { SearchField } from "./SearchField";
@@ -33,6 +34,7 @@ export function HomeView() {
     <div className="flex flex-col gap-6 pt-2">
       <WalletBanner />
       <ActiveOrderStrip />
+      <ClosedNotice />
       <SearchField value={query} onChange={setQuery} />
 
       {searching ? (

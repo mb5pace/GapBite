@@ -18,6 +18,7 @@ import {
 } from "@/data/hours";
 import { SOURCES, getItem, getSource, type MenuItem, type SourceId } from "@/data/menu";
 import {
+  CLOSED_NOTICE_MAX_LINES,
   HOLIDAY_NOTE_MAX,
   HOLIDAYS_MAX,
   HOURS_STEP_MIN,
@@ -362,6 +363,47 @@ export function nothingOpenMessage(cfg: HoursConfig, service: ServiceState, nowM
     if (next && (!first || next.atMs < first.atMs)) first = { name: source.name, ...next };
   }
   return first ? `Nothing is open right now. ${first.name} opens ${first.words}.` : "Nothing is open right now.";
+}
+
+/**
+ * One line for each place that is closed or paused right now ("Global Bistro opens at 12:00."), in menu order, at most
+ * CLOSED_NOTICE_MAX_LINES. Empty while every place is taking orders, and empty while the whole service is off (the
+ * service banner already says so).
+ */
+export function closedNoticeLines(cfg: HoursConfig, service: ServiceState, nowMs: number): string[] {
+  if (!service.available) return [];
+  const lines: string[] = [];
+  for (const source of SOURCES) {
+    const block = sourceBlockNow(cfg, service, source.id, nowMs);
+    if (block) lines.push(block.message);
+  }
+  return lines.slice(0, CLOSED_NOTICE_MAX_LINES);
+}
+
+/** What the sheet on a closed place says: a title, the reason, and (when there is one) when it opens next. */
+export interface ClosedInfo {
+  title: string;
+  reason: string;
+  /** "Opens tomorrow at 08:00." Null when there is no time to give (paused, or it opens later today and the reason says when). */
+  opens: string | null;
+}
+
+/** The sheet for a place that cannot take orders right now, or null when it can (or when the whole service is off, which has its own banner). */
+export function closedInfo(cfg: HoursConfig, service: ServiceState, sourceId: SourceId, nowMs: number): ClosedInfo | null {
+  const block = sourceBlockNow(cfg, service, sourceId, nowMs);
+  if (!block || block.code === "service") return null;
+  const name = getSource(sourceId).name;
+  const next = nextOpening(cfg, sourceId, nowMs);
+  switch (block.code) {
+    case "paused":
+      return { title: `${name} is paused`, reason: "New orders are switched off for now. Check back in a little while.", opens: null };
+    case "before-open":
+      return { title: `${name} is not open yet`, reason: block.message, opens: null };
+    case "after-close":
+      return { title: `${name} has closed for today`, reason: block.message, opens: next ? `Opens ${next}.` : null };
+    default:
+      return { title: `${name} is closed today`, reason: block.message, opens: next ? `Opens ${next}.` : null };
+  }
 }
 
 // ---------------------------------------------------------------------------
