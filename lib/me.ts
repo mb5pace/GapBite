@@ -4,6 +4,8 @@
  * the same thing for polling. Server-side only; the type is safe to import anywhere.
  */
 import { countLiveOrders } from "./orders";
+import { getService } from "./hours";
+import type { ServiceState } from "./hours-rules";
 import { getPrefs } from "./prefs";
 import type { Prefs } from "./prefs-rules";
 import { countRuns } from "./runs";
@@ -24,19 +26,22 @@ export interface MeData {
   sessionMsLeft: number | null;
   /** Saved preferences (defaults until the user saves some). */
   prefs: Prefs;
+  /** The service-wide switch. While it is off every student screen shows the message (Admin › Service). */
+  service: ServiceState;
   /** Server time, epoch ms. */
   now: number;
 }
 
 export async function getMe(session: Session, now: number): Promise<MeData | null> {
   if (!session.userId) return null;
-  const [user, balance, unread, live, runs, prefs] = await Promise.all([
+  const [user, balance, unread, live, runs, prefs, service] = await Promise.all([
     getUser(session.userId),
     getBalance(session.userId),
     getUnread(session.userId),
     countLiveOrders(session.userId),
     countRuns(session.userId),
     getPrefs(session.userId),
+    getService(),
   ]);
   if (!user) return null;
   return {
@@ -46,6 +51,7 @@ export async function getMe(session: Session, now: number): Promise<MeData | nul
     activeOrder: live > 0 || runs > 0,
     sessionMsLeft: session.codeType === "temp" ? Math.max(0, session.exp * 1000 - now) : null,
     prefs,
+    service,
     now,
   };
 }
