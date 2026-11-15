@@ -135,7 +135,6 @@ export const CAFE_COPY = {
     available: "Available today",
     off: "Off today",
     pick: "Items from",
-    morningOnly: "Morning only",
     switchLabel: (name: string) => `${name}, available today`,
   },
   today: {

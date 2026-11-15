@@ -93,5 +93,5 @@ Because a penalty can be larger than the runner's balance, the runner's wallet c
 
 1. One source per cart. Adding from another source asks: "Start a new cart from Cafe Delice? Your Truly Indian cart will be cleared."
 2. Maximum 10 units per order.
-3. Morning items cannot be ordered after 11:30.
+3. Whether something can be ordered right now depends on opening hours, holidays, pauses and per-item time windows. There is no separate morning rule and no 11:30 cutoff any more. See "Opening hours, holidays and pauses" below.
 4. Order IDs look like `QX-4821` (4 random digits, unique). Handover and collect codes are 4 digits and different from the order ID.

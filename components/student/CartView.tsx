@@ -10,7 +10,6 @@ import { Money } from "@/components/ui/Money";
 import { PillButton, PillLink } from "@/components/ui/PillButton";
 import { QtyStepper } from "@/components/ui/QtyStepper";
 import { SourceGlyph } from "@/components/ui/SourceGlyph";
-import { MORNING_CUTOFF } from "@/lib/config";
 import { maxQtyFor, type MenuState } from "@/lib/menu-rules";
 import type { LineIssue } from "@/lib/cart";
 import { useCart } from "./CartProvider";
@@ -18,8 +17,6 @@ import { useMenuState } from "./menu-state";
 
 function issueText(issue: LineIssue, left: number): string {
   switch (issue) {
-    case "morning-closed":
-      return `Morning only. Morning items stop at ${MORNING_CUTOFF.hour}:${String(MORNING_CUTOFF.minute).padStart(2, "0")}.`;
     case "unavailable":
       return "Not available today.";
     case "sold-out":

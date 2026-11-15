@@ -27,7 +27,7 @@ export function ArchCard({
   price: number;
   /** Shows the round "+" button when given. */
   onAdd?: () => void;
-  /** When the item cannot be ordered right now ("Not today", "Morning only", "Sold out"), shown instead of the "+". */
+  /** When the item cannot be ordered right now ("Not today", "Sold out"), shown instead of the "+". */
   status?: string;
   /** Units of this item already in the cart. */
   inCart?: number;

@@ -76,8 +76,6 @@ export const PICKUP_STALE_MIN = 30;
 // ---------------------------------------------------------------------------
 
 export const MAX_UNITS_PER_ORDER = 10;
-/** Items tagged "morning" cannot be ordered at or after this IST time. */
-export const MORNING_CUTOFF = { hour: 11, minute: 30 } as const;
 
 export const ORDER_ID_PREFIX = "QX-";
 export const ORDER_ID_DIGITS = 4;

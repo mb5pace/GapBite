@@ -26,7 +26,6 @@ import {
   WALLET_MIN_TO_USE,
 } from "./config";
 import { formatRupees } from "./format";
-import { isMorningClosed } from "./menu-rules";
 import { parseOrderRef } from "./order-ref";
 import { estimatePromisedAt, feeFor, priceLines, slotAvailable, walkFor } from "./order-rules";
 import { summarize, TERMINAL_STATUSES, type Order, type OrderMode, type OrderStatus, type OrderSummary } from "./order-types";
@@ -163,12 +162,6 @@ export async function placeOrder(
   if (input.mode === "delivery" && !input.buildingId) throw new AppError(400, ORDER_COPY.needBuilding);
   const buildingId = input.mode === "delivery" ? input.buildingId : undefined;
   if (buildingId && !isBuildingId(buildingId)) throw new AppError(400, ORDER_COPY.needBuilding);
-
-  // Morning items stop at 11:30, server time.
-  if (isMorningClosed(now)) {
-    const late = priced.items.find((line) => getItem(line.itemId)?.tags.includes("morning"));
-    if (late) throw new AppError(409, refusalMessage("morning-closed", late.name));
-  }
 
   const prepMin = priced.prepMin;
   const walkMin = walkFor(input.mode, buildingId);

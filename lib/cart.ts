@@ -21,7 +21,7 @@ export interface CartState {
 
 export const EMPTY_CART: CartState = { sourceId: null, lines: [] };
 
-export type RefusalReason = "limit" | "stock" | "unavailable" | "morning-closed" | "sold-out";
+export type RefusalReason = "limit" | "stock" | "unavailable" | "sold-out";
 
 export type AddOutcome =
   | { kind: "added"; cart: CartState }
@@ -97,7 +97,7 @@ export function startNewCart(item: MenuItem, menu: MenuState): AddOutcome {
 
 export type LineIssue = ItemStatus | "over-stock";
 
-/** Lines that can no longer be ordered as they are, for example a morning item after 11:30. */
+/** Lines that can no longer be ordered as they are, for example an item the cafe switched off after it went into the cart. */
 export function cartIssues(cart: CartState, menu: MenuState): Record<string, LineIssue> {
   const issues: Record<string, LineIssue> = {};
   for (const line of cart.lines) {

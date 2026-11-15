@@ -60,7 +60,7 @@ export function useCart(): CartContextValue {
 /**
  * The cart for the whole student portal: kept in memory and in sessionStorage,
  * checked against the same rules the server will use (one source, 10 units,
- * stock, morning cutoff, unavailable items). The server prices and re-checks
+ * stock, unavailable items). The server prices and re-checks
  * everything at checkout, so none of this is trusted for money.
  */
 function CartScope({ userId, children }: { userId: string; children: ReactNode }) {

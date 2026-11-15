@@ -9,12 +9,11 @@ import { getBuilding, type BuildingId } from "@/data/locations";
 import type { MenuItem } from "@/data/menu";
 import {
   MAX_UNITS_PER_ORDER,
-  MORNING_CUTOFF,
   SLOT_LEAD_BUFFER_MIN,
 } from "./config";
-import { istMinutesOfDay, slotEpoch } from "./time";
+import { slotEpoch } from "./time";
 
-export type ItemStatus = "ok" | "morning-closed" | "unavailable" | "sold-out";
+export type ItemStatus = "ok" | "unavailable" | "sold-out";
 
 export interface MenuState {
   /** Server time, epoch ms, when this was read. */
@@ -25,15 +24,9 @@ export interface MenuState {
   stock: Record<string, number>;
 }
 
-/** True from 11:30 IST: items tagged "morning" cannot be ordered any more. */
-export function isMorningClosed(nowMs: number): boolean {
-  return istMinutesOfDay(nowMs) >= MORNING_CUTOFF.hour * 60 + MORNING_CUTOFF.minute;
-}
-
 /** Why an item can or cannot be added to a cart. */
 export function itemStatus(item: MenuItem, state: MenuState): ItemStatus {
   if (state.unavailable.includes(item.id)) return "unavailable";
-  if (item.tags.includes("morning") && isMorningClosed(state.now)) return "morning-closed";
   if (item.slot !== undefined && (state.stock[item.slot] ?? item.startStock ?? 0) <= 0) return "sold-out";
   return "ok";
 }

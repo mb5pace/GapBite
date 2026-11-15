@@ -68,7 +68,6 @@ export function MenuAvailabilityView() {
                 <p className="text-secondary text-mocha">
                   <Money amount={item.price} />
                   {item.slot ? ` · Slot ${item.slot}` : ""}
-                  {item.tags.includes("morning") ? ` · ${copy.morningOnly}` : ""}
                 </p>
               </div>
               <span className="flex shrink-0 items-center gap-3">

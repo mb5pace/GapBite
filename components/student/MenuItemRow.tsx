@@ -15,7 +15,6 @@ export function prepLabel(prepMin: number): string {
 }
 
 const STATUS_TEXT = {
-  "morning-closed": COPY.student.menu.morningOnly,
   unavailable: COPY.student.menu.notToday,
   "sold-out": COPY.student.menu.soldOut,
 } as const;

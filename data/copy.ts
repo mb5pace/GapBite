@@ -1,4 +1,4 @@
-import { ADMIN_ADJUST_MAX, ADMIN_NOTE_MAX, ADMIN_NOTE_MIN, MAX_UNITS_PER_ORDER, MORNING_CUTOFF, TOPUP_MAX, TOPUP_MIN, WALLET_MIN_TO_USE, WALLET_SUGGESTED } from "@/lib/config";
+import { ADMIN_ADJUST_MAX, ADMIN_NOTE_MAX, ADMIN_NOTE_MIN, MAX_UNITS_PER_ORDER, TOPUP_MAX, TOPUP_MIN, WALLET_MIN_TO_USE, WALLET_SUGGESTED } from "@/lib/config";
 import { formatRupees } from "@/lib/format";
 
 /**
@@ -111,7 +111,6 @@ export const COPY = {
       noMoreBreaks: "No more breaks today. You can still order as soon as possible.",
     },
     menu: {
-      morningOnly: "Morning only",
       notToday: "Not today",
       soldOut: "Sold out",
       readyNow: "Ready now",
@@ -203,7 +202,7 @@ export const WALLET_COPY = {
 
 /** Why an item could not be added to the cart, in one plain sentence. */
 export function refusalMessage(
-  reason: "limit" | "stock" | "unavailable" | "morning-closed" | "sold-out",
+  reason: "limit" | "stock" | "unavailable" | "sold-out",
   itemName: string,
   left = 0,
 ): string {
@@ -214,8 +213,6 @@ export function refusalMessage(
       return `Only ${left} ${itemName} left.`;
     case "unavailable":
       return `${itemName} is not available today.`;
-    case "morning-closed":
-      return `${itemName} is a morning item. Morning items stop at ${MORNING_CUTOFF.hour}:${String(MORNING_CUTOFF.minute).padStart(2, "0")}.`;
     case "sold-out":
       return `${itemName} is sold out.`;
   }
