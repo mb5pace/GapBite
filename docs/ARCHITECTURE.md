@@ -71,6 +71,7 @@ app/
     auth/identify/route.ts      POST AU/staff id + name
     auth/logout/route.ts
     me/route.ts                 GET user, wallet, prefs, unread count, session time left, the service switch
+    status/route.ts             GET every place's status and "Ready in about N min" (student session). Kept 5 s on the server
     menu/route.ts               GET availability + vending stock + opening hours, pauses, item windows, holidays + the service switch (the menu itself is static data)
     orders/route.ts             GET mine (orders + runs), POST create
     orders/[id]/route.ts        GET one (buyer, holder, cafe, admin only)
@@ -143,6 +144,10 @@ lib/
   photos.ts       which item photos exist (list made at build time in next.config.ts)
   menu-rules.ts   item status (switched off, closed, outside its window, sold out), the reason on a row, max quantity, next break (pure)
   hours-rules.ts  opening hours, open days, pauses, holidays, item windows and the service switch as one pure module: reading what is stored over the defaults, "is it open", the ordering rule (a to f) in checkOrder and slotBlock, the Home tile label, when a place next opens, the closed-place sheet and notice lines, and the checks on what the Cafe types. The browser and the server use these same functions
+  ready-estimate.ts the "Ready in about N min" formula, the median prep time and the words (pure)
+  source-status.ts  /api/status: each place's status label and estimate, counting ACCEPTED and PREPARING orders from `orders:active` (5 s in-memory cache)
+  order-progress.ts the four-segment progress line: which stage, how full, never past 90% before a status change (pure)
+  menu-sections.ts  a menu page's sections and tabs: categories in data order, then Unavailable only if needed (pure)
   hours.ts        reads and writes the hours (hash `hours`, one field per setting so two edits never overwrite each other) and the service switch (hash `service`); place-order calls the ordering rule from here
   menu.ts         unavailable switches + vending stock read from Redis
   stock.ts        vending stock, created from startStock on first read
@@ -157,7 +162,7 @@ components/
   kit/            KitGallery, the admin-only /kit page
   account/        AccountView (profile card + rows), LogoutRow (confirm sheet), ProfileView, PreferencesView, NotificationsView, HistoryView, RefundsView, TermsView, SupportView, FeedbackForm (also used by Discover)
   discover/       DiscoverList, DiscoverPages (Introduction, Help, Smart Vending, FAQ)
-  student/        Header, BottomBar, WalletChip, SessionChip (Phase 2); SourceTile (with its live status), SourceStatus (badge and the closed-place sheet), ClosedNotice, ServiceBanner, CartBar, OrderStrip
+  student/        Header, BottomBar, WalletChip, SessionChip (Phase 2); SourceTile (with its live status), SourceStatus (badge and the closed-place sheet), StatusLine (status words, dot, estimate), ClosedNotice, ServiceBanner, SearchResults and ItemAddControl (Home search rows), OrderProgress (the four-segment line) and ActiveOrderStrip, CategoryTabs (sticky tabs with scroll-spy), ItemCard (menu item card), CartBar
   runner/         RunnerProvider (the one sheet for the student app), RunnerSheet (scan, preview, accept, handover), QrScanner (camera, decoder served from /scanner), ScanButton
   cafe/           QueueProvider (one poll, new-order highlight and chime, server clock), CafeHeader, QueueView, OrderCard, RejectDialog, StaffDialog, BagSlipDialog, VendingStockView, HoursView (PlaceHoursCard, HolidaysSection, ItemsSection, PillField), TodayView, KioskView (AlertCard waits for Phase 8)
   admin/          CodesPanel, CodeTable, PermanentCodes, ShowCode, StaffPanel, UsersPanel, LiveOrdersPanel, ServicePanel, CopyButton, AdminNav

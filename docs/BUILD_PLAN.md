@@ -111,9 +111,9 @@ Three sessions, in order. Everything is built on the `dev` branch and tested on 
 - [x] **8. Docs, changelog, tests.** BUSINESS_RULES, MENU, SCREENS, ARCHITECTURE, UI_UX_BIBLE and CHANGELOG (Unreleased) updated. Tests for Sunday and holiday closed, Global Bistro before and after 12:00, breakfast cutoffs, paused source, service off, active orders unaffected, and hours edited in the Cafe portal changing what students can order on the next poll. All earlier suites pass. build, tsc and lint clean.
 
 ### Phase B: student redesign (later session)
-- [ ] **Home in SmartQ style.** Location line "Ahmedabad University · UC" with a pin, search, a square cafe tile grid with Open now / Opens at HH:MM / Paused and "Ready in about X min" from that cafe's queue, Popular at UC.
-- [ ] **Order progress line on Home.** Four parts tied to the real status (delivery: Placed, Preparing, On the way, Delivered; pickup: Placed, Preparing, Ready at counter, Collected) with the Phosphor `PersonSimpleWalk` icon standing on the current part and a gentle walking bob, reduced motion respected, "+1 more" for a second order.
-- [ ] **Menu pages in SmartQ style.** Category tabs including Unavailable, search, cards with a veg dot, description, price, a "Prep N min" badge, the photo on the right if there is one, an outlined Add button.
+- [x] **Home in SmartQ style.** Location line "Ahmedabad University · UC" with a pin, search, a square cafe tile grid with Open now / Opens at HH:MM / Paused and "Ready in about X min" from that cafe's queue, Popular at UC.
+- [x] **Order progress line on Home.** Four parts tied to the real status (delivery: Placed, Preparing, On the way, Delivered; pickup: Placed, Preparing, Ready at counter, Collected) with the Phosphor `PersonSimpleWalk` icon standing on the current part and a gentle walking bob, reduced motion respected, "+1 more" for a second order.
+- [x] **Menu pages in SmartQ style.** Category tabs including Unavailable, search, cards with a veg dot, description, price, a "Prep N min" badge, the photo on the right if there is one, an outlined Add button.
 - [ ] **Order Detail.** A large QR plus the 4-digit code and "Show this screen to collect your order" for pickup and vending.
 - [ ] **Orders tab like the SmartQ Past screen.** Search, underlined Active / Past tabs, cards with status badge, date and time, order ID, items with prices, Share feedback and Order again, an end-of-list line.
 - [ ] **Scan button number badge.** A read-only list of ready delivery bags grouped by building (cafe, building, earning, waiting time). Tapping a row only says "Scan this bag at the <source> counter to take it"; nothing can be claimed remotely.
@@ -129,6 +129,16 @@ Three sessions, in order. Everything is built on the `dev` branch and tested on 
 
 ## Open questions
 (Add questions here when a doc is silent. Keep the simplest behaviour until answered.)
+
+Raised in v1.0.0 Phase B1 (the brief was silent, simplest behaviour kept until answered):
+- **Vending tile** is full width at 2:1, not 1:1 (a 1:1 tile that wide would fill the screen). Its status line says "Open now · Ready now" because its prep time is 0.
+- **Ready estimate** rounds up to a multiple of 5, so a result that is already a multiple of 5 stays as it is (10 stays 10). The tile's words (Open now, Closed today, Paused) come from the live hours, refreshed every 4 seconds with the rest of the app; only the "Ready in about N min" part waits for the 15-second `/api/status` answer, so a tile never contradicts its Add buttons.
+- **Progress line stages.** A segment is full once its stage is reached (Placed is full the moment the order exists). Only Preparing and On the way fill over time, and they stop at 90%. A delivery that is Ready but has no runner shows Preparing full and On the way empty. Home shows one card (the order due first) and "+N more", so the old two-card strip is gone.
+- **Unavailable tab** holds only item-level reasons (switched off, outside its own time, sold out). When a whole cafe is closed or paused, its items stay in their categories (the menu is still worth reading) with Add off, and the header line says why.
+- **No veg field.** Every item at UC is vegetarian (docs/MENU.md), so the veg mark is on every item and the menu data has no new field.
+- **Add button** is 36 px high with a 44 px tap area (a 44 px pill would cover most of a 96 px picture).
+- **Home header** wraps "Ahmedabad University" onto two lines on a 360 px phone rather than cutting it, because the Scan button and the wallet chip need their room.
+- **Search** keeps matching the cafe name, so typing "delice" lists every Cafe Delice dish, and the order progress card stays visible above the results.
 
 Raised in v1.0.0 Phase A (the brief or the docs were silent, simplest behaviour kept until answered):
 - **Home notice and "once per session".** The notice stays away once it is dismissed, for the rest of that browser session (until the tab is closed). If it is never dismissed it shows again each time Home opens. It is not shown again just because a different place closes later in the same session.

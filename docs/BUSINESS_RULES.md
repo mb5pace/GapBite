@@ -118,6 +118,14 @@ The **target time** is when the order should reach the buyer: the ASAP promised-
 
 **Break slots.** A break in Checkout is greyed out ("Closed" or "Not then") when the place is closed at that time or an item in the cart is outside its window then, with the plain reason underneath. The Home "Next break" strip skips such breaks and, when none is left, says why ("Global Bistro opens at 12:00.", "Nothing is open right now. Truly Indian opens tomorrow at 08:00.").
 
+## Ready estimate
+
+The "Ready in about N min" on a cafe tile and at the top of its menu page. It is an estimate, not a promise (a promise is the promised time on an order).
+
+> N = (median prep time of that place's items + `QUEUE_MIN_PER_ORDER` × the number of that place's orders that are ACCEPTED or PREPARING), rounded up to a multiple of `READY_EST_STEP_MIN`, and never more than `READY_EST_CAP`.
+
+`QUEUE_MIN_PER_ORDER` is 2, `READY_EST_STEP_MIN` is 5 and `READY_EST_CAP` is 30, all in `lib/config.ts`. The median is of the `prepMin` of every item the place sells. A place whose items need no cooking (the vending machine, prep 0) with nothing queued is 0, which is shown as "Ready now". It is shown only while the place is taking orders. The server works out all five at once (`/api/status`) and keeps the answer for 5 seconds; students ask every 15 seconds, and not while the tab is hidden.
+
 ## Cancellations
 
 1. Buyer can cancel only while status is `PLACED` (before the cafe accepts): full refund.

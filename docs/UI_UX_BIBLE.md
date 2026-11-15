@@ -26,6 +26,20 @@ Status colours, muted to sit in the same family (use for text, borders and small
 | `amber` | `#B7791F` | Due now, unclaimed, low balance |
 | `brick` | `#A3261C` | Failed late, rejected, money out, errors |
 
+### Source colours, only for cafe tiles and menu headers
+
+One colour for each place, used as the background of its tile on Home and of the header card on its menu page, with text in `cream`. Nowhere else. Contrast of `cream` (`#FFFCDF`) on each:
+
+| Token | Hex | Place | `cream` on it |
+|---|---|---|---|
+| `src-truly-indian` | `#4B2220` | Truly Indian (same as `maroon`) | 13.1:1 |
+| `src-global-bistro` | `#6D4142` | Global Bistro (same as `mocha`) | 8.2:1 |
+| `src-cafe-delice` | `#8F6A3E` | Cafe Delice | 4.7:1 |
+| `src-greens-grains` | `#4F5E2A` | Greens and Grains | 6.8:1 |
+| `src-vending` | `#371110` | UC Vending Machine (same as `espresso`) | 16.2:1 |
+
+All pass AA (4.5:1) for normal text. The status words under a tile are on `cream`, never on these colours. The status dots (`olive`, `amber`, `brick`, `taupe`) are small and always sit next to their words.
+
 Text on `cream`/`parchment` is `espresso` or `maroon`. Text on `maroon` is `cream`. Check WCAG AA contrast for any new pairing.
 
 `taupe` does not reach AA as text (4.3:1 on `cream`, 3.9:1 on `parchment`, 3.6:1 on `sand`). Use it only for placeholder text, disabled controls (which WCAG exempts), borders and handles. Hints, captions and any other secondary or tertiary text use `mocha` (7:1 or better). Checked ratios: espresso on cream 16.2, maroon on cream 13.1, maroon on sun 9.0, mocha on cream 8.2, brick on cream 7.1, olive on cream 5.6; amber on parchment 3.1 is fine for icons and dots only, never for text.
@@ -80,6 +94,10 @@ Text on `cream`/`parchment` is `espresso` or `maroon`. Text on `maroon` is `crea
 16. **Face rating (Phase 9):** five 56 px circles, worst to best (Phosphor smileys). The chosen one is filled on `blush`. It is one radio group with arrow-key support.
 17. **Text area (Phase 9):** like the Input: `sand`, no border, a visible label, a hint, an error line and a character counter when there is a limit.
 18. **Loading view (v1.0.0):** shown only while something is actually loading, never as a delay. The Phosphor `CookingPot` in `maroon`, 56 px, with three thin `taupe` steam lines that rise about 20 px and fade in a 3-second loop (CSS only, staggered), and "Your food is on the stove…" under it in `mocha` body text, on `cream`. The icon's own three vent marks are cut off so the moving steam is the only steam. The student, Cafe and Admin route groups use it between pages with their header (and the student bottom bar) kept in place; the gate and Identify cover the window with it from the moment a code is accepted until the first page arrives. With reduced motion the steam stands still. No mascot, no illustration, no wording borrowed from another app.
+19. **Cafe tile (B1):** a square (1:1, 20 radius) in the place's source colour, a 30 px Phosphor icon in `cream` top left (CookingPot, Hamburger, Coffee, Leaf; Storefront for vending), and the place's name bottom left as a wordmark: Plus Jakarta Sans 800 at the title size, `cream`, no logo from anywhere. The vending tile spans the full width at 2:1. Under it: the name (600, sentence case) and one status line with a 8 px dot.
+20. **Order progress line (B1):** four equal segments, 4 px gaps, 8 px high, `sand` track and `maroon` fill, each stage's label under it in the caption size (the current one 600 in `espresso`, the rest `mocha`). A 20 px Phosphor `PersonSimpleWalk` in `maroon` sits at the end of the fill and bobs 2 px up and down every 600 ms; it stands still with reduced motion. The fill follows the real status only.
+21. **Category tabs (B1):** sticky under the header, text only, 24 px apart, the open one `maroon` 700 with a 3 px `maroon` underline, the rest `mocha` 500. Horizontal scroll, no scrollbar.
+22. **Menu item card (B1):** a 96 px picture (16 radius) on the right with an outlined pill **Add** (1.5 px `maroon` border, `cream` fill, `maroon` text, 36 px high with a 44 px tap area) overlapping its bottom edge; on the left the veg mark (a 16 px `olive` square outline with an 8 px `olive` dot), the name 600, the description in `mocha`, the price 700 with tabular figures, and a `sand` pill "Prep 6 min" with a Phosphor `Timer`. In the Unavailable section the text is `taupe`, a `sand` chip carries the reason in `espresso`, and Add is `taupe` and off.
 
 ## 5. Illustrations and imagery
 
@@ -92,7 +110,7 @@ Text on `cream`/`parchment` is `espresso` or `maroon`. Text on `maroon` is `crea
 
 ## 6. Motion
 
-Short and functional only: 150–200 ms ease-out for sheets, tab changes and button press (scale 0.97). Stepper node fills when status changes. Respect `prefers-reduced-motion`. The loading view's steam is the one looping animation (3 s, CSS only) and it stops entirely under reduced motion. No parallax, no floating shapes, no typing effects, no confetti except one small burst allowed on "Delivered" for the runner.
+Short and functional only: 150–200 ms ease-out for sheets, tab changes and button press (scale 0.97). Stepper node fills when status changes. Respect `prefers-reduced-motion`. The loading view's steam (3 s) and the little walker on the Home progress line (600 ms bob, 2 px) are the only looping animations, both CSS only, and both stop under reduced motion. No parallax, no floating shapes, no typing effects, no confetti except one small burst allowed on "Delivered" for the runner.
 
 ## 7. Layout per portal
 

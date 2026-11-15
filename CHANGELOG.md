@@ -5,6 +5,10 @@ Everything that changes in QuickX is written here, newest first. The format foll
 ## [Unreleased]
 
 ### Added
+- **Home, redesigned.** The header shows the campus (a map pin, "Ahmedabad University", "University Centre (UC)") with Scan and your wallet on the right, then "Good evening, <name>" and a full-width search "Search dishes or cafes". Search covers dish names, descriptions, categories and cafe names across all five places; results are grouped by cafe, tapping one opens that dish on its menu, and a closed or unavailable dish says why. The service banner, wallet banners and closed-cafe notice sit right under the search.
+- **Cafes at UC.** A grid of square tiles, each in its cafe's own colour with an icon and the name as lettering, and the vending machine across the bottom. Under each: the name and one line, such as "Open now · Ready in about 10 min", "Opens at 12:00", "Closed today (Diwali)" or "Paused". The "ready in" time counts the cafe's usual prep time plus 2 minutes for each order it is already making (rounded up to 5, at most 30) and refreshes every 15 seconds while the app is open.
+- **Order progress on Home.** Your order in progress shows as four steps (Placed, Preparing, On the way, Delivered; or Ready at counter and Collected for pickup) with a little walker at the end of the fill. It only moves as the order really does: Preparing and On the way fill with elapsed time but stop at 90% until the cafe or runner updates the order. With two orders it shows the one due first and "+1 more".
+- **Menu pages, redesigned.** Each cafe's page opens with its hours and "Ready in about N min" (or why it is closed), a search inside the cafe, and sticky category tabs that follow your scrolling. Dishes are cards with a veg mark, price, prep time and a picture with an Add button over its edge. Anything switched off, outside its time or sold out sits under an "Unavailable" tab with its reason. The vending machine keeps its machine look, with Drinks and Snacks tabs.
 - **Opening hours.** Every place now has opening and closing times and open days. Truly Indian, Cafe Delice, Greens and Grains and the vending machine take orders 08:00 to 19:00, Global Bistro 12:00 to 19:00, Monday to Saturday. An order outside those hours is refused with a plain sentence ("Global Bistro opens at 12:00."), and the server, not the phone, decides.
 - **Item times.** An item can have its own available-from and available-until time. The six breakfast items (Thepla, Poha, Upma and the three parathas) are available until 11:00. Kanda Poha at 10:30 for as soon as possible goes through; for the 11:50 break, or at 11:05, it is refused.
 - **Holidays.** The Cafe can add a date with a note ("Diwali"); every place is closed that day.
@@ -16,6 +20,7 @@ Everything that changes in QuickX is written here, newest first. The format foll
 - Every menu item now has a category, ready for the menu redesign.
 
 ### Changed
+- On Home the Closed and Paused labels are now red, "Opens at 12:00" amber and "Open now" green.
 - QuickX now uses one font, Plus Jakarta Sans, for everything. Only the QuickX logo on the gate keeps its chunky letters. Screens were checked at 360 px, and long page titles such as "Checkout" no longer break mid-word.
 - Break slots in Checkout grey out ("Closed" or "Not then") when the place is shut or an item is outside its time then, and the Next break strip on Home skips them and says why when nothing is left.
 - In the Cafe header, "Menu" is now "Hours and items".
