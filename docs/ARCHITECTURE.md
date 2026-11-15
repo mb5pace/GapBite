@@ -53,7 +53,9 @@ app/
     (desk)/layout.tsx           header (pages, server clock, sound switch, Logout) + the one queue poll
     (desk)/page.tsx             queue
     (desk)/vending/page.tsx
-    (desk)/menu/page.tsx
+    (desk)/hours/page.tsx       Hours and items: opening hours, open days, Taking orders / Paused, holidays, item windows, Available today
+    (desk)/menu/page.tsx        redirects to /cafe/hours (the old Menu availability address)
+    (desk)/loading.tsx          the loading view between Cafe pages (the same file exists for (student)/ and admin/, and app/loading.tsx is the full-screen one)
     (desk)/today/page.tsx
     kiosk/page.tsx              full screen, no header
   admin/
@@ -62,13 +64,14 @@ app/
     staff/page.tsx
     users/page.tsx
     orders/page.tsx             Live orders (every order in progress, Copy order ID, Reveal code)
+    service/page.tsx            Service: the switch for the whole service and the message students read while it is off
     demo/page.tsx
   api/
     auth/login/route.ts         POST code -> sets cookie, returns portal
     auth/identify/route.ts      POST AU/staff id + name
     auth/logout/route.ts
-    me/route.ts                 GET user, wallet, prefs, unread count, session time left
-    menu/route.ts               GET menu + availability + vending stock
+    me/route.ts                 GET user, wallet, prefs, unread count, session time left, the service switch
+    menu/route.ts               GET availability + vending stock + opening hours, pauses, item windows, holidays + the service switch (the menu itself is static data)
     orders/route.ts             GET mine (orders + runs), POST create
     orders/[id]/route.ts        GET one (buyer, holder, cafe, admin only)
     orders/[id]/cancel/route.ts
@@ -91,12 +94,14 @@ app/
     cafe/alerts/route.ts        POST seen | returned | collect (+ 4-digit code) on one alert card
     cafe/stock/route.ts         GET; POST adjust one slot or refill all
     cafe/availability/route.ts  GET; POST switch one item on or off (qx:unavailable)
+    cafe/hours/route.ts         GET hours and the service switch (read only); PUT one change: source (open, close, days) | paused | item (window) | item-reset | holiday-add | holiday-remove. Cafe session
     cafe/kiosk/route.ts         POST code -> the slots to release; locks for a minute after 5 wrong codes
     cafe/today/route.ts
     admin/codes/route.ts        GET, POST generate|revoke|end
     admin/staff/route.ts
     admin/users/route.ts
     admin/wallet/route.ts       POST adjust
+    admin/service/route.ts      GET; PUT { available, message }: the service-wide switch. Admin session only, the Cafe cannot reach it
     admin/live/route.ts         GET every order in progress (never a code); POST reveal one order's code (admin session, demo tool)
     admin/demo/route.ts         POST seed|reset
 proxy.ts          (Next.js 16 name for middleware.ts)
@@ -136,7 +141,9 @@ lib/
   ids.ts          staff ids now; order ids and 4-digit codes with ordering
   format.ts       rupees (₹1,25,000), initials
   photos.ts       which item photos exist (list made at build time in next.config.ts)
-  menu-rules.ts   morning cutoff, item status, max quantity, next break (pure)
+  menu-rules.ts   item status (switched off, closed, outside its window, sold out), the reason on a row, max quantity, next break (pure)
+  hours-rules.ts  opening hours, open days, pauses, holidays, item windows and the service switch as one pure module: reading what is stored over the defaults, "is it open", the ordering rule (a to f) in checkOrder and slotBlock, the Home tile label, when a place next opens, the closed-place sheet and notice lines, and the checks on what the Cafe types. The browser and the server use these same functions
+  hours.ts        reads and writes the hours (hash `hours`, one field per setting so two edits never overwrite each other) and the service switch (hash `service`); place-order calls the ordering rule from here
   menu.ts         unavailable switches + vending stock read from Redis
   stock.ts        vending stock, created from startStock on first read
   cart.ts         cart rules on plain data: one source, 10 units, stock (pure)
@@ -144,16 +151,16 @@ lib/
   search.ts       menu search across all five sources (pure)
   time.ts         IST formatting, promised time math
 data/
-  menu.ts  locations.ts  breaks.ts  copy.ts (shared UI strings)  order-copy.ts (order words, headlines, Update texts)  cafe-copy.ts (Cafe portal and kiosk words, reject reasons)  account-copy.ts (Account words)  discover-copy.ts (Discover pages and the FAQ; every number in it is read from lib/config.ts)
+  menu.ts  hours.ts (default opening hours, open days, breakfast windows, holidays)  locations.ts  breaks.ts  copy.ts (shared UI strings)  order-copy.ts (order words, headlines, Update texts)  cafe-copy.ts (Cafe portal and kiosk words, reject reasons)  account-copy.ts (Account words)  discover-copy.ts (Discover pages and the FAQ; every number in it is read from lib/config.ts)
 components/
-  ui/             PillButton (+ PillLink), IconButton, Chip, Card, ArchCard, ItemTile, SourceGlyph, Stepper, Sheet (bottom sheet, or centred dialog on the laptop portals), Input, Textarea, CodeBoxes, Banner, Badge, EmptyState, Countdown, Money, LogoutButton, Toggle, PortalNav, NavRow (link or button row), Accordion, FaceRating, VersionLine
+  ui/             PillButton (+ PillLink), IconButton, Chip, Card, ArchCard, ItemTile, SourceGlyph, Stepper, Sheet (bottom sheet, or centred dialog on the laptop portals), Input, Textarea, CodeBoxes, Banner, Badge, EmptyState, Countdown, Money, LogoutButton, Toggle, PortalNav, NavRow (link or button row), Accordion, FaceRating, VersionLine, LoadingView (cooking pot and steam), useHydrated
   kit/            KitGallery, the admin-only /kit page
   account/        AccountView (profile card + rows), LogoutRow (confirm sheet), ProfileView, PreferencesView, NotificationsView, HistoryView, RefundsView, TermsView, SupportView, FeedbackForm (also used by Discover)
   discover/       DiscoverList, DiscoverPages (Introduction, Help, Smart Vending, FAQ)
-  student/        Header, BottomBar, WalletChip, SessionChip (Phase 2); SourceTile, CartBar, OrderStrip (later)
+  student/        Header, BottomBar, WalletChip, SessionChip (Phase 2); SourceTile (with its live status), SourceStatus (badge and the closed-place sheet), ClosedNotice, ServiceBanner, CartBar, OrderStrip
   runner/         RunnerProvider (the one sheet for the student app), RunnerSheet (scan, preview, accept, handover), QrScanner (camera, decoder served from /scanner), ScanButton
-  cafe/           QueueProvider (one poll, new-order highlight and chime, server clock), CafeHeader, QueueView, OrderCard, RejectDialog, StaffDialog, BagSlipDialog, VendingStockView, MenuAvailabilityView, TodayView, KioskView (AlertCard waits for Phase 8)
-  admin/          CodesPanel, CodeTable, PermanentCodes, ShowCode, StaffPanel, UsersPanel, LiveOrdersPanel, CopyButton, AdminNav
+  cafe/           QueueProvider (one poll, new-order highlight and chime, server clock), CafeHeader, QueueView, OrderCard, RejectDialog, StaffDialog, BagSlipDialog, VendingStockView, HoursView (PlaceHoursCard, HolidaysSection, ItemsSection, PillField), TodayView, KioskView (AlertCard waits for Phase 8)
+  admin/          CodesPanel, CodeTable, PermanentCodes, ShowCode, StaffPanel, UsersPanel, LiveOrdersPanel, ServicePanel, CopyButton, AdminNav
 public/
   illustrations/  (see bible)
   food/           optional real photos <item-id>.jpg
@@ -204,6 +211,8 @@ All values JSON unless noted.
 | `qx:alerts` | hash | orderId -> alert (failed, staff-return, no-show) until a staff member acts on it |
 | `qx:stock` | hash | slot -> count |
 | `qx:unavailable` | set | item ids off today |
+| `qx:hours` | hash | one field per setting, read tolerantly over the defaults in `data/hours.ts` (a bad or missing field falls back): `s:<sourceId>` = `{ open, close, days }`; `p:<sourceId>` = paused (true / false); `i:<itemId>` = an item's window `{ from?, until? }` (an empty one means "no limit" and overrides the default); `h:<YYYY-MM-DD>` = a holiday's note |
+| `qx:service` | hash | `available` (true / false) and `message`. Written only from Admin › Service; every order and every student screen reads it |
 | `qx:codes:temp` | hash | code -> record (ACCESS.md) |
 | `qx:kiosk:wrong` | integer, TTL 60 | wrong codes typed at the kiosk (5 locks it for the rest of the minute) |
 | `qx:ratelimit:<ip>` | integer, TTL 600 | wrong code tries |

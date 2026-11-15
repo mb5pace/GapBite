@@ -16,12 +16,13 @@ Production site: **https://quickx-gapbite.vercel.app**
 | Cafe queue | https://quickx-gapbite.vercel.app/cafe | cafe session |
 | Cafe vending stock | https://quickx-gapbite.vercel.app/cafe/vending | cafe session |
 | Cafe kiosk (full screen) | https://quickx-gapbite.vercel.app/cafe/kiosk | cafe session |
-| Cafe menu availability | https://quickx-gapbite.vercel.app/cafe/menu | cafe session |
+| Cafe hours and items (hours, open days, pause, holidays, item times, Available today). The old `/cafe/menu` address redirects here | https://quickx-gapbite.vercel.app/cafe/hours | cafe session |
 | Cafe today totals | https://quickx-gapbite.vercel.app/cafe/today | cafe session |
 | Admin codes | https://quickx-gapbite.vercel.app/admin | admin session |
 | Admin staff | https://quickx-gapbite.vercel.app/admin/staff | admin session |
 | Admin users and wallets | https://quickx-gapbite.vercel.app/admin/users | admin session |
 | Admin live orders (every order in progress, refreshed every 5 seconds, Copy order ID, Reveal code) | https://quickx-gapbite.vercel.app/admin/orders | admin session |
+| Admin service (switch the whole service off, with a message) | https://quickx-gapbite.vercel.app/admin/service | admin session |
 | UI kit (every component) | https://quickx-gapbite.vercel.app/kit | admin session |
 | Health check | https://quickx-gapbite.vercel.app/api/health | anyone (shows `"ok":true` when the database answers) |
 

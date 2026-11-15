@@ -79,6 +79,7 @@ Text on `cream`/`parchment` is `espresso` or `maroon`. Text on `maroon` is `crea
 15. **Accordion (Phase 9):** the FAQ. `parchment` cards; the title row is the button (at least 56 px) with a caret that turns when open and `aria-expanded`, so the state is not shown by colour alone. Any number can be open.
 16. **Face rating (Phase 9):** five 56 px circles, worst to best (Phosphor smileys). The chosen one is filled on `blush`. It is one radio group with arrow-key support.
 17. **Text area (Phase 9):** like the Input: `sand`, no border, a visible label, a hint, an error line and a character counter when there is a limit.
+18. **Loading view (v1.0.0):** shown only while something is actually loading, never as a delay. The Phosphor `CookingPot` in `maroon`, 56 px, with three thin `taupe` steam lines that rise about 20 px and fade in a 3-second loop (CSS only, staggered), and "Your food is on the stove…" under it in `mocha` body text, on `cream`. The icon's own three vent marks are cut off so the moving steam is the only steam. The student, Cafe and Admin route groups use it between pages with their header (and the student bottom bar) kept in place; the root one fills the window for the first load after the gate. With reduced motion the steam stands still. No mascot, no illustration, no wording borrowed from another app.
 
 ## 5. Illustrations and imagery
 
@@ -91,7 +92,7 @@ Text on `cream`/`parchment` is `espresso` or `maroon`. Text on `maroon` is `crea
 
 ## 6. Motion
 
-Short and functional only: 150–200 ms ease-out for sheets, tab changes and button press (scale 0.97). Stepper node fills when status changes. Respect `prefers-reduced-motion`. No parallax, no floating shapes, no typing effects, no confetti except one small burst allowed on "Delivered" for the runner.
+Short and functional only: 150–200 ms ease-out for sheets, tab changes and button press (scale 0.97). Stepper node fills when status changes. Respect `prefers-reduced-motion`. The loading view's steam is the one looping animation (3 s, CSS only) and it stops entirely under reduced motion. No parallax, no floating shapes, no typing effects, no confetti except one small burst allowed on "Delivered" for the runner.
 
 ## 7. Layout per portal
 

@@ -9,7 +9,7 @@ function Wisp({ delay }: { delay: string }) {
     <svg
       viewBox="0 0 6 18"
       aria-hidden="true"
-      className={`h-[18px] w-1.5 animate-steam text-taupe opacity-60 motion-reduce:animate-none ${delay}`}
+      className={`h-[18px] w-1.5 animate-steam text-taupe motion-reduce:animate-none ${delay}`}
     >
       <path d="M3 1C0.5 5 5.5 9 3 13C2.2 14.8 2.4 16 3 17" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
@@ -19,7 +19,8 @@ function Wisp({ delay }: { delay: string }) {
 /**
  * What QuickX shows while something is actually loading: a cooking pot with three thin lines of steam that rise and
  * fade in a slow loop, and one line under it. Drawn from the Phosphor CookingPot icon (its own three vent marks are cut
- * off at the top so the moving steam is the only steam). With "reduce motion" on, the steam is still and faint.
+ * off at the top so the moving steam is the only steam). With "reduce motion" on, the steam is still. The fade is part of the
+ * motion only: there is no see-through colour at rest (UI_UX_BIBLE.md "Colour consistency").
  * `fullScreen` fills the window (the first load after the gate); the default fills the page area inside a portal's
  * header; `compact` is just the pot and the line, for a gallery or a small panel.
  */

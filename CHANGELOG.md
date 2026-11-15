@@ -4,6 +4,25 @@ Everything that changes in QuickX is written here, newest first. The format foll
 
 ## [Unreleased]
 
+### Added
+- **Opening hours.** Every place now has opening and closing times and open days. Truly Indian, Cafe Delice, Greens and Grains and the vending machine take orders 08:00 to 19:00, Global Bistro 12:00 to 19:00, Monday to Saturday. An order outside those hours is refused with a plain sentence ("Global Bistro opens at 12:00."), and the server, not the phone, decides.
+- **Item times.** An item can have its own available-from and available-until time. The six breakfast items (Thepla, Poha, Upma and the three parathas) are available until 11:00. Kanda Poha at 10:30 for as soon as possible goes through; for the 11:50 break, or at 11:05, it is refused.
+- **Holidays.** The Cafe can add a date with a note ("Diwali"); every place is closed that day.
+- **Cafe portal › Hours and items.** One page to set each place's hours and open days, switch a place between Taking orders and Paused, add and remove holidays, set an item's times, and switch an item off for the day. Changes reach students within a few seconds and never touch orders already placed. The old Menu page address still works and goes here.
+- **Admin › Service.** Admin can switch the whole service off with a message. Students see the message on every screen and no new order can be placed anywhere; orders already placed carry on.
+- **Students see what is closed.** Home tiles say Open now, Opens at 12:00, Closed today, Closed today (Diwali), Closed for today or Paused. A small notice on Home lists closed places (one line each, three at most) until it is dismissed. Opening a closed place shows a sheet with the reason and when it opens; the menu can still be read but Add is off. Items outside their time sit at the bottom of the menu under "Unavailable now", and a cart item that became unavailable is flagged until it is removed.
+- **Loading view.** A cooking pot with three lines of steam and "Your food is on the stove…" while a page is loading, in the student app, the Cafe desk and Admin. The steam stands still if the phone is set to reduce motion.
+- **Matar Paneer Paratha with curd** (₹60) in Truly Indian's breakfast.
+- Every menu item now has a category, ready for the menu redesign.
+
+### Changed
+- QuickX now uses one font, Plus Jakarta Sans, for everything. Only the QuickX logo on the gate keeps its chunky letters. Screens were checked at 360 px, and long page titles such as "Checkout" no longer break mid-word.
+- Break slots in Checkout grey out ("Closed" or "Not then") when the place is shut or an item is outside its time then, and the Next break strip on Home skips them and says why when nothing is left.
+- In the Cafe header, "Menu" is now "Hours and items".
+
+### Removed
+- The 11:30 "morning" rule and the "Morning only" label. Breakfast is now an ordinary item time that the Cafe can change.
+
 ## [0.9.0] - 2026-11-13
 
 Account and Discover are built, and the dev preview now keeps its own data. Production keeps working exactly as before: its orders, wallets and staff IDs are untouched.

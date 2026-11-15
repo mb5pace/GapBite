@@ -101,14 +101,14 @@ What was checked, and what it found and fixed.
 Three sessions, in order. Everything is built on the `dev` branch and tested on the dev preview link (Redis prefix `qxdev:`). Main is production and only changes through a release, which the team does itself.
 
 ### Phase A: rules, data and foundations
-- [ ] **1. One professional font.** Plus Jakarta Sans (400, 500, 600, 700, 800) for all text, headings and numbers, `tabular-nums` kept on prices, balances and countdowns. Grandstander stays only for the QuickX wordmark on the gate. UI_UX_BIBLE section 2 updated. Every screen checked at 360 px.
-- [ ] **2. Menu data.** Required `category` on every item, new item Matar Paneer Paratha (`ti-matar-paneer-paratha`, ₹60, prep 6), and the old `morning` tag and 11:30 rule removed everywhere (config, server, UI text, docs, tests). MENU.md updated.
-- [ ] **3. Opening hours, item windows, holidays.** Defaults in `data/hours.ts`, live values in one Redis hash, pure rules shared by browser and server. The ordering rule (a to f) is enforced in place-order on the server with plain refusal messages. Break slot chips and the Home "Next break" strip respect hours and item windows. Orders already placed are never affected.
-- [ ] **4. Pause switches.** Per source "Taking orders / Paused" (Cafe portal). Service-wide "QuickX available / not available" with an editable message, only from the new Admin › Service page, with a banner on every student screen. Neither touches active orders.
-- [ ] **5. Cafe "Hours and items" page.** Per source hours, open days and pause; holidays; per-item available-from / until and the "Available today" switch (moved here). Validation, instant effect for students.
-- [ ] **6. Closed states for students.** Home tile labels, a dismissible once-per-session notice, a sheet when a closed or paused source is opened (Add disabled), "Unavailable now" at the bottom of a menu, and the cart flagging items that became unavailable.
-- [ ] **7. Loading view.** CookingPot icon with CSS steam and "Your food is on the stove…", used by the student, Cafe and Admin route groups, reduced motion respected, no artificial delay.
-- [ ] **8. Docs, changelog, tests.** BUSINESS_RULES, MENU, SCREENS, ARCHITECTURE, UI_UX_BIBLE and CHANGELOG (Unreleased) updated. Tests for Sunday and holiday closed, Global Bistro before and after 12:00, breakfast cutoffs, paused source, service off, active orders unaffected, and hours edited in the Cafe portal changing what students can order on the next poll. All earlier suites pass. build, tsc and lint clean.
+- [x] **1. One professional font.** Plus Jakarta Sans (400, 500, 600, 700, 800) for all text, headings and numbers, `tabular-nums` kept on prices, balances and countdowns. Grandstander stays only for the QuickX wordmark on the gate. UI_UX_BIBLE section 2 updated. Every screen checked at 360 px.
+- [x] **2. Menu data.** Required `category` on every item, new item Matar Paneer Paratha (`ti-matar-paneer-paratha`, ₹60, prep 6), and the old `morning` tag and 11:30 rule removed everywhere (config, server, UI text, docs, tests). MENU.md updated.
+- [x] **3. Opening hours, item windows, holidays.** Defaults in `data/hours.ts`, live values in one Redis hash, pure rules shared by browser and server. The ordering rule (a to f) is enforced in place-order on the server with plain refusal messages. Break slot chips and the Home "Next break" strip respect hours and item windows. Orders already placed are never affected.
+- [x] **4. Pause switches.** Per source "Taking orders / Paused" (Cafe portal). Service-wide "QuickX available / not available" with an editable message, only from the new Admin › Service page, with a banner on every student screen. Neither touches active orders.
+- [x] **5. Cafe "Hours and items" page.** Per source hours, open days and pause; holidays; per-item available-from / until and the "Available today" switch (moved here). Validation, instant effect for students.
+- [x] **6. Closed states for students.** Home tile labels, a dismissible once-per-session notice, a sheet when a closed or paused source is opened (Add disabled), "Unavailable now" at the bottom of a menu, and the cart flagging items that became unavailable.
+- [x] **7. Loading view.** CookingPot icon with CSS steam and "Your food is on the stove…", used by the student, Cafe and Admin route groups, reduced motion respected, no artificial delay.
+- [x] **8. Docs, changelog, tests.** BUSINESS_RULES, MENU, SCREENS, ARCHITECTURE, UI_UX_BIBLE and CHANGELOG (Unreleased) updated. Tests for Sunday and holiday closed, Global Bistro before and after 12:00, breakfast cutoffs, paused source, service off, active orders unaffected, and hours edited in the Cafe portal changing what students can order on the next poll. All earlier suites pass. build, tsc and lint clean.
 
 ### Phase B: student redesign (later session)
 - [ ] **Home in SmartQ style.** Location line "Ahmedabad University · UC" with a pin, search, a square cafe tile grid with Open now / Opens at HH:MM / Paused and "Ready in about X min" from that cafe's queue, Popular at UC.
@@ -129,6 +129,15 @@ Three sessions, in order. Everything is built on the `dev` branch and tested on 
 
 ## Open questions
 (Add questions here when a doc is silent. Keep the simplest behaviour until answered.)
+
+Raised in v1.0.0 Phase A (the brief or the docs were silent, simplest behaviour kept until answered):
+- **Home notice and "once per session".** The notice stays away once it is dismissed, for the rest of that browser session (until the tab is closed). If it is never dismissed it shows again each time Home opens. It is not shown again just because a different place closes later in the same session.
+- **All places closed.** The notice lists the first three closed places in menu order, one line each (the brief says "max three"); it does not summarise. On a Sunday or a holiday the "Next break" strip carries the "Nothing is open right now. Truly Indian opens tomorrow at 08:00." line.
+- **A pause has no end time.** The closed-place sheet for a paused place says "Check back in a little while." and no time. A paused place stays "Paused" outside its hours too.
+- **Clearing a default window.** An item that has a default window (breakfast, until 11:00) and whose two times are both cleared in the Cafe portal means "no limit" and overrides the default. "Back to default" puts the default back.
+- **Holidays in the past** can be added and removed (harmless); the list is not trimmed.
+- **Time fields** are the browser's own time control, so a phone may show 12-hour time ("07:00 PM"). The value stored and sent is always 24-hour "HH:MM" on 5-minute steps.
+- **Vending** follows the same hours and pauses as the cafes (08:00 to 19:00, Monday to Saturday) and has its own card in Hours and items.
 
 Raised in Phase 6 (the docs were silent, simplest behaviour kept until answered):
 - The source filter tabs sit above the columns, not in the header: with the pages, the clock, the sound switch and Logout there is no room for six tabs on one row at 1280 px. The header has Queue, Vending, Menu and Today.
@@ -227,8 +236,8 @@ Phase 3 (browse and cart), accepted by the team
 - Next break strip: prep comes from the slowest item of the source in the cart, or 5 minutes (`DEFAULT_PREP_MIN`) with an empty cart, because there is no order history until Phase 5. The building is GICT (`DEFAULT_BUILDING`) until Preferences exist in Phase 9. If the nearest break can no longer be made, the strip shows the next one that can; after the last one it says "No more breaks today."
 - Category chips on the source menu are skipped: menu items have no category field in MENU.md, and none was invented.
 - Vending cells add one unit per tap. Removing and changing quantity happen in the cart, because a stepper does not fit a 44 px tap target in a three-column grid.
-- The morning rule runs from 11:30 IST to midnight (so 00:00 to 11:29 morning items can be ordered). Server time decides; the phone only counts forward from the last server reading.
-- A cart item that stops being orderable (switched off, morning cutoff, stock below the quantity) stays in the cart, is flagged in red, and Checkout is disabled until it is removed.
+- ~~The morning rule runs from 11:30 IST to midnight.~~ Replaced in v1.0.0 Phase A: there is no morning tag and no 11:30 rule. Breakfast is a normal item window ("Breakfast, until 11:00") set in `data/hours.ts` and editable in the Cafe portal. Server time still decides; the phone only counts forward from the last server reading.
+- A cart item that stops being orderable (switched off, its place closed or paused, outside its time window, stock below the quantity) stays in the cart, is flagged in red, and Checkout is disabled until it is removed.
 - `/checkout` is a placeholder until Phase 5. The header gets a Back button and a title on sub-pages; long titles wrap to two lines.
 - Vending stock is created in Redis (`qx:stock`) from `startStock` the first time anyone reads it, so Phase 5's atomic decrement always finds a number.
 - Cafe "Unavailable today" switches are read from `qx:unavailable` now; the Cafe portal that writes them is Phase 6.

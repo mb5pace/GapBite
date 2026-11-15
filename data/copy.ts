@@ -1,4 +1,14 @@
-import { ADMIN_ADJUST_MAX, ADMIN_NOTE_MAX, ADMIN_NOTE_MIN, MAX_UNITS_PER_ORDER, TOPUP_MAX, TOPUP_MIN, WALLET_MIN_TO_USE, WALLET_SUGGESTED } from "@/lib/config";
+import {
+  ADMIN_ADJUST_MAX,
+  ADMIN_NOTE_MAX,
+  ADMIN_NOTE_MIN,
+  MAX_UNITS_PER_ORDER,
+  SERVICE_MESSAGE_MAX,
+  TOPUP_MAX,
+  TOPUP_MIN,
+  WALLET_MIN_TO_USE,
+  WALLET_SUGGESTED,
+} from "@/lib/config";
 import { formatRupees } from "@/lib/format";
 
 /**
@@ -160,7 +170,7 @@ export const COPY = {
       on: "Taking orders",
       off: "Not taking orders",
       messageLabel: "Message students see",
-      messageHint: "Shown on every student screen while the service is off. Up to 140 characters.",
+      messageHint: `Shown on every student screen while the service is off. Up to ${SERVICE_MESSAGE_MAX} characters.`,
       save: "Save message",
       saving: "Saving",
       saved: "Saved. Students see it on their next refresh, within a few seconds.",
@@ -171,7 +181,7 @@ export const COPY = {
       confirmOff: "Turn it off",
       keepOn: "Keep it on",
       badValue: "That value is not allowed.",
-      tooLong: "Keep the message under 140 characters.",
+      tooLong: `Keep the message under ${SERVICE_MESSAGE_MAX} characters.`,
       failed: "Could not save. Check your connection and try again.",
     },
     staff: {

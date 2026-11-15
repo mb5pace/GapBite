@@ -1,3 +1,5 @@
+import { BREAKFAST_UNTIL } from "./hours";
+
 /**
  * Words for the Cafe portal and the kiosk. Plain and short (UI_UX_BIBLE.md section 8).
  * Pure strings and lists, safe in the browser and on the server.
@@ -167,7 +169,7 @@ export const CAFE_COPY = {
     noHolidays: "No holidays yet.",
     serviceOff: "The whole service is switched off by Admin. Students cannot order anywhere until it is switched back on.",
     itemsTitle: "Items",
-    itemsIntro: "An item can have its own time window. Leave a time empty for no limit. Breakfast items start with a window until 11:00.",
+    itemsIntro: `An item can have its own time window. Leave a time empty for no limit. Breakfast items start with a window until ${BREAKFAST_UNTIL}.`,
     pick: "Items from",
     from: "Available from",
     until: "Available until",
