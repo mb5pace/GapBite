@@ -1,6 +1,6 @@
 # UI/UX BIBLE
 
-The look is taken from the team's reference set (the "KAFE" coffee app shots on Pinterest): warm cream paper, one deep coffee-maroon, chunky friendly headings, pill buttons, a floating rounded tab bar, arch-topped item cards and thin hand-drawn line illustrations. It should feel like a printed cafe menu that came alive, not like a tech startup. Light mode only. Follow this file exactly; if something is not covered, choose the plainest option that fits it and add it here.
+The look is taken from the team's reference set (the "KAFE" coffee app shots on Pinterest): warm cream paper, one deep coffee-maroon, confident bold headings, pill buttons, a floating rounded tab bar, arch-topped item cards and thin hand-drawn line illustrations. It should feel like a printed cafe menu that came alive, not like a tech startup. Light mode only. Follow this file exactly; if something is not covered, choose the plainest option that fits it and add it here.
 
 ## 1. Palette (fixed, sampled from the references)
 
@@ -32,10 +32,23 @@ Text on `cream`/`parchment` is `espresso` or `maroon`. Text on `maroon` is `crea
 
 ## 2. Typography
 
-1. **Display:** Grandstander (Google Fonts), weights 700 and 800. Greetings, screen titles, section titles, prices on item cards, the wordmark, big codes.
-2. **Text:** Figtree (Google Fonts), weights 400, 500, 700. Everything else.
-3. Load both with `next/font/google`. No other fonts.
-4. Scale (mobile): 32 greeting name, 24 screen title, 18 section title, 16 body, 14 secondary, 12 caption. One larger size, 72 display, only for the gate wordmark and the Admin "show code" mode (32 on phones for the code). Line height 1.25 for display (1.1 at 72), 1.5 for text.
+1. **One family: Plus Jakarta Sans** (Google Fonts), weights 400, 500, 600, 700 and 800, for all text, headings and numbers. It reads as professional and calm; the earlier rounded display face read as playful, which is not the tone of a payments-and-orders app. Headings use 700 to 800, body text 400 to 500, buttons and labels 600 to 700.
+2. **The one exception:** the QuickX wordmark on the gate screen keeps its chunky Grandstander (weight 800, loaded for this alone) because it is the logo. It is the class `font-wordmark`. Nothing else uses it, not even the portal headers.
+3. Load with `next/font/google`. No other fonts. Still banned as defaults: Inter, Geist, Space Grotesk, Instrument Serif, Poppins.
+4. **Scale (mobile) and weights.** The sizes are unchanged; the weights are new. Line height 1.25 for headings (1.1 at 72), 1.5 for text.
+
+   | Use | Size | Weight |
+   |---|---|---|
+   | Greeting name, wallet balance | 32 | 800 |
+   | Screen title | 24 | 800 |
+   | Section title, card title | 18 | 700 |
+   | Buttons, chips, labels | 16 or 14 | 600 to 700 |
+   | Body | 16 | 400 to 500 |
+   | Secondary text | 14 | 400 to 500 |
+   | Caption | 12 | 400 to 500 |
+   | Display (gate wordmark, Admin "show code") | 72 (32 on phones for the code) | 800 |
+
+   Plus Jakarta Sans is wider than the faces it replaces, so a screen title that has a Back button sits on its own full-width line under the Back, Scan and wallet row. A title is never allowed to break inside a word.
 5. Sentence case everywhere. No ALL-CAPS labels. Letter-spacing only on the access code and the 4-digit codes (token `tracking-code`).
 6. Numbers that change (countdowns, balances) use `font-variant-numeric: tabular-nums`.
 
@@ -49,20 +62,20 @@ Text on `cream`/`parchment` is `espresso` or `maroon`. Text on `maroon` is `crea
 
 ## 4. Components
 
-1. **Primary pill button:** `maroon` fill, `cream` Grandstander text, height 56, with an optional round `cream` circle holding a `maroon` arrow at the right end (reference "I'm In →"). Full width at the bottom of checkout and sheets.
+1. **Primary pill button:** `maroon` fill, `cream` Plus Jakarta Sans 700 text, height 56, with an optional round `cream` circle holding a `maroon` arrow at the right end (reference "I'm In →"). Full width at the bottom of checkout and sheets.
 2. **Secondary pill:** `sand` fill, `espresso` text; or outline variant with the 1.5 px border.
 3. **Icon button:** 44 px circle, `maroon` fill + `cream` icon (primary, e.g. Scan, notifications) or `sand` fill + `espresso` icon.
 4. **Bottom bar:** floating 12 px above the bottom safe area, 20 px side margins, `parchment`, fully rounded, five 48 px circles. Active = `maroon` circle, `cream` Bold icon. Inactive = `sand` circle, `espresso` Regular icon. Labels hidden; use `aria-label`.
 5. **Chips:** pill, `sand` default, `blush` + `maroon` text when selected. Day/slot chips use the tall capsule (min 64 px high); the selected capsule is filled `maroon` with `cream` text so it stands out in a row, and a slot that is too late is disabled.
 6. **Stepper (order tracker):** vertical, a thick `maroon` rail with round icon nodes like the reference delivery screen; done = filled `maroon`, current = filled with a `sun` ring, upcoming = `sand`. Time on the right.
-7. **Code boxes:** four separate rounded boxes, Grandstander 32, outline 1.5 px.
+7. **Code boxes:** four separate rounded boxes, Plus Jakarta Sans 700 at 32, outline 1.5 px.
 8. **Sheet:** bottom sheet on `parchment`, drag handle, 28 radius. Used for the runner popup, top-up, confirmations. No centred modals on mobile.
-9. **Item tile (no photo):** a `sand` square with 20 radius showing the item's initials (e.g. "CC" for Cold Coffee) in Grandstander `maroon`, plus a tiny source glyph in the corner. Real photos replace it when the team adds them.
+9. **Item tile (no photo):** a `sand` square with 20 radius showing the item's initials (e.g. "CC" for Cold Coffee) in Plus Jakarta Sans 700 `maroon`, plus a tiny source glyph in the corner. Real photos replace it when the team adds them.
 10. **Banner:** `parchment` strip with an icon and one sentence; amber left icon for warnings, never a coloured side stripe.
 11. **Money:** `₹240` with no decimals, Indian digit grouping (`₹1,250`). Credits in `olive` with `+`, debits in `brick` with `−`.
 12. **Empty states:** one line illustration, one sentence, one action.
 13. **Due and alert states (Phase 8):** a card that is due, or a Ready delivery with no runner for 3 minutes, gets a 2 px `amber` ring all round (a full border, never a side stripe) and, where there is room, a small amber warning icon. Alert cards pinned above the cafe queue are `cream` with a 2 px ring: `brick` for a failed order or a bag being brought back, `amber` for a no-show. The colour is the ring and the icon only; the words stay in `espresso`, so contrast is never a problem. Same rule as the Banner: amber is never used as text.
-14. **List row (Phase 9):** the Account and Discover rows: `parchment` card, 44 px `sand` icon circle, Grandstander title, a `mocha` hint line and a caret. At least 64 px tall; the whole row is the tap target. A row that opens a sheet (Log out) is the same row as a button.
+14. **List row (Phase 9):** the Account and Discover rows: `parchment` card, 44 px `sand` icon circle, bold title, a `mocha` hint line and a caret. At least 64 px tall; the whole row is the tap target. A row that opens a sheet (Log out) is the same row as a button.
 15. **Accordion (Phase 9):** the FAQ. `parchment` cards; the title row is the button (at least 56 px) with a caret that turns when open and `aria-expanded`, so the state is not shown by colour alone. Any number can be open.
 16. **Face rating (Phase 9):** five 56 px circles, worst to best (Phosphor smileys). The chosen one is filled on `blush`. It is one radio group with arrow-key support.
 17. **Text area (Phase 9):** like the Input: `sand`, no border, a visible label, a hint, an error line and a character counter when there is a limit.

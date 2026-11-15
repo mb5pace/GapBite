@@ -68,19 +68,16 @@ export function Header({
                 ) : null}
               </h1>
             </>
+          ) : back ? (
+            <Link
+              href={back}
+              aria-label="Back"
+              className="flex size-11 shrink-0 items-center justify-center rounded-pill bg-sand text-espresso transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon"
+            >
+              <ArrowLeft weight="regular" size={22} aria-hidden="true" />
+            </Link>
           ) : (
-            <div className="flex min-w-0 items-center gap-3">
-              {back ? (
-                <Link
-                  href={back}
-                  aria-label="Back"
-                  className="flex size-11 shrink-0 items-center justify-center rounded-pill bg-sand text-espresso transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon"
-                >
-                  <ArrowLeft weight="regular" size={22} aria-hidden="true" />
-                </Link>
-              ) : null}
-              <h1 className="line-clamp-2 break-words font-display text-title font-extrabold leading-tight text-maroon">{title}</h1>
-            </div>
+            <h1 className="line-clamp-2 break-words font-display text-title font-extrabold leading-tight text-maroon">{title}</h1>
           )}
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -88,6 +85,11 @@ export function Header({
           <WalletChip balance={balance} />
         </div>
       </div>
+      {/* With a Back button the title gets its own full-width line below it, so a long title ("Terms and Conditions",
+          "Notifications") never has to break inside a word next to the Scan button and the wallet chip. */}
+      {title !== null && back ? (
+        <h1 className="mt-1 line-clamp-2 break-words font-display text-title font-extrabold leading-tight text-maroon">{title}</h1>
+      ) : null}
       {tempMsLeft !== null ? <SessionChip msLeft={tempMsLeft} /> : null}
     </header>
   );

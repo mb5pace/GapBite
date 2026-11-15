@@ -1,16 +1,17 @@
-import { Figtree, Grandstander } from "next/font/google";
+import { Grandstander, Plus_Jakarta_Sans } from "next/font/google";
 
-// UI_UX_BIBLE.md section 2: Grandstander for display, Figtree for text. No other fonts.
-export const grandstander = Grandstander({
+// UI_UX_BIBLE.md section 2: Plus Jakarta Sans for all text, headings and numbers. Professional, not playful.
+export const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: ["700", "800"],
-  variable: "--font-grandstander",
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-jakarta",
   display: "swap",
 });
 
-export const figtree = Figtree({
+// The one exception: the QuickX wordmark on the gate keeps its chunky look as the logo. Nothing else uses it.
+export const grandstander = Grandstander({
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  variable: "--font-figtree",
+  weight: ["800"],
+  variable: "--font-grandstander",
   display: "swap",
 });

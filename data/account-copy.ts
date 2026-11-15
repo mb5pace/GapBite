@@ -151,7 +151,7 @@ export const ACCOUNT_COPY = {
         title: "Pictures and credits",
         body: [
           "Illustrations: Open Peeps by Pablo Stanley (CC0, openpeeps.com). The drawings are not added yet. Until they are, QuickX uses simple line icons.",
-          "Icons: Phosphor Icons (MIT). Fonts: Grandstander and Figtree (SIL Open Font License). Food photos appear only where the team has taken them.",
+          "Icons: Phosphor Icons (MIT). Fonts: Plus Jakarta Sans, and Grandstander for the QuickX logo only (SIL Open Font License). Food photos appear only where the team has taken them.",
         ],
       },
     ],

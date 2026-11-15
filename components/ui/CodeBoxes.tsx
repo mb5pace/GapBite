@@ -9,7 +9,7 @@ const BOX =
 const SIZE = { md: "h-16 w-14 text-greeting", sm: "h-12 w-11 text-title" } as const;
 
 /**
- * Four separate rounded boxes (UI_UX_BIBLE.md section 4): Grandstander 32, 1.5 px
+ * Four separate rounded boxes (UI_UX_BIBLE.md section 4): Plus Jakarta Sans 32, 1.5 px
  * outline. Without `onChange` it just shows a code (the buyer's handover code).
  * With `onChange` it is the entry field (the runner types the buyer's code): one
  * digit per box, focus moves on as you type, Backspace steps back, a pasted code

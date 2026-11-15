@@ -107,8 +107,11 @@
 
 /* The font variables are set on <html> by next/font, so these must be inline. */
 @theme inline {
-  --font-display: var(--font-grandstander), ui-rounded, system-ui, sans-serif;
-  --font-sans: var(--font-figtree), system-ui, sans-serif;
+  /* One family for everything (UI_UX_BIBLE.md section 2). "display" is the same family at the heading weights. */
+  --font-display: var(--font-jakarta), system-ui, sans-serif;
+  --font-sans: var(--font-jakarta), system-ui, sans-serif;
+  /* The QuickX wordmark on the gate, and nothing else. */
+  --font-wordmark: var(--font-grandstander), ui-rounded, system-ui, sans-serif;
 }
 
 /*

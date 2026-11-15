@@ -126,9 +126,9 @@ export function KitGallery() {
         </ul>
       </Section>
 
-      <Section title="Type" note="Grandstander for display, Figtree for text. 72 is for the gate wordmark and the show-code screen only.">
+      <Section title="Type" note="Plus Jakarta Sans for everything. 72 is for the gate wordmark (the only place the chunky logo type is used) and the show-code screen.">
         <div className="flex flex-col gap-2 rounded-card bg-parchment p-5">
-          <p className="font-display text-display font-extrabold text-maroon">QuickX</p>
+          <p className="font-wordmark text-display font-extrabold text-maroon">QuickX</p>
           <p className="font-display text-greeting font-extrabold text-maroon">Riya, 32 greeting</p>
           <p className="font-display text-title font-extrabold text-maroon">Screen title, 24</p>
           <p className="font-display text-section font-bold text-maroon">Section title, 18</p>

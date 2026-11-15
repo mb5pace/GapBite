@@ -25,7 +25,7 @@ export function SearchField({ value, onChange }: { value: string; onChange: (val
         autoCorrect="off"
         spellCheck={false}
         enterKeyHint="search"
-        className={`h-14 w-full rounded-pill bg-sand pl-12 ${value ? "pr-14" : "pr-5"} text-body text-espresso placeholder:text-taupe focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon [&::-webkit-search-cancel-button]:hidden`}
+        className={`h-14 w-full rounded-pill bg-sand pl-12 ${value ? "pr-14" : "pr-5"} text-body text-ellipsis text-espresso placeholder:text-taupe focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon [&::-webkit-search-cancel-button]:hidden`}
       />
       {value ? (
         <button
