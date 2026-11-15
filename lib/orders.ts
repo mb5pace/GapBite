@@ -26,9 +26,10 @@ import {
   WALLET_MIN_TO_USE,
 } from "./config";
 import { formatRupees } from "./format";
-import { parseOrderRef } from "./order-ref";
+import { collectQrText, parseOrderRef } from "./order-ref";
+import { qrPath, type QrPath } from "./qr";
 import { estimatePromisedAt, feeFor, priceLines, slotAvailable, walkFor } from "./order-rules";
-import { summarize, TERMINAL_STATUSES, type Order, type OrderMode, type OrderStatus, type OrderSummary } from "./order-types";
+import { isTerminal, summarize, TERMINAL_STATUSES, type Order, type OrderMode, type OrderStatus, type OrderSummary } from "./order-types";
 import { getRedis, key } from "./redis";
 import { getHoursConfig, getService } from "./hours";
 import { checkOrder } from "./hours-rules";
@@ -288,10 +289,16 @@ export async function getOrder(id: string): Promise<Order | null> {
   return getRedis().get<Order>(orderKey(normalized));
 }
 
-/** One order for its buyer, with the server's time. Null for anyone else, so a stranger sees what a missing order looks like. */
-export async function getOrderForBuyer(id: string, buyerId: string): Promise<{ order: Order; now: number } | null> {
+/**
+ * One order for its buyer, with the server's time. Null for anyone else, so a stranger sees what a missing order looks like.
+ * A pickup order that can still be collected also gets its collect QR (QX:COLLECT:<id>:<code>), made here and only here:
+ * it carries the code, so no other reply (cafe, runner, Admin, lists) ever has it.
+ */
+export async function getOrderForBuyer(id: string, buyerId: string): Promise<{ order: Order; now: number; qr?: QrPath } | null> {
   const order = await getOrder(id);
-  return order && order.buyerId === buyerId ? { order, now: Date.now() } : null;
+  if (!order || order.buyerId !== buyerId) return null;
+  const qr = order.mode === "pickup" && !isTerminal(order.status) ? qrPath(collectQrText(order.id, order.code)) : undefined;
+  return { order, now: Date.now(), ...(qr ? { qr } : {}) };
 }
 
 /** The buyer's own orders, newest first, split into in progress and finished. Summaries only: no codes. */

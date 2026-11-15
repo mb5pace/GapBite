@@ -209,6 +209,11 @@ export const NEW_ORDER_HIGHLIGHT_MS = 5000;
 export const CAFE_ORDERS_MAX = 500;
 /** What a bag slip QR says. The runner scan in Phase 7 reads the order ID after this prefix. */
 export const SLIP_QR_PREFIX = "QX:ORDER:";
+/**
+ * What the QR on a pickup order's detail page says: QX:COLLECT:<orderId>:<code> (docs/FLOWS.md "Collect QR"). It
+ * carries the 4-digit code, so it is made only for the buyer's own order and never sent anywhere else.
+ */
+export const COLLECT_QR_PREFIX = "QX:COLLECT:";
 /** QR modules of white space around the code, so a camera can find its edges. */
 export const QR_QUIET_MODULES = 4;
 /** The soft chime for a new order: two short notes (Hz), each this long, at a low volume (0 to 1). */

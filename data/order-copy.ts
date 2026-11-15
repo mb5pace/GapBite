@@ -116,6 +116,12 @@ export function progressLine(
   }
 }
 
+/** The order detail card for a pickup: what to do with this screen. */
+export const COLLECT_COPY = {
+  showScreen: "Show this screen to collect your order",
+  qrLabel: (orderId: string) => `QR code to collect ${orderId}`,
+};
+
 export const ORDER_COPY = {
   // Checkout and placing
   emptyCart: "Your cart is empty. Pick something from UC first.",
