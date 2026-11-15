@@ -82,6 +82,42 @@ After a failure or no-show the handover code stops working, except as row 1 says
 
 Because a penalty can be larger than the runner's balance, the runner's wallet can go negative (see Wallet rule 7).
 
+## Opening hours, holidays and pauses
+
+Whether a student can order right now is decided by the places' opening hours, holidays, pauses, per-item time windows and one service-wide switch. There is no "morning" tag and no 11:30 rule. Every time is IST, on 5-minute steps, and the server's clock decides. The defaults are in `data/hours.ts`; the live values are one Redis hash (`hours`) that the Cafe portal edits (Hours and items), and the service switch is a second hash (`service`) that only Admin › Service edits. A change applies to students on their next poll.
+
+**Defaults.**
+
+| Place | Open | Days |
+|---|---|---|
+| Truly Indian, Cafe Delice, Greens and Grains, UC Vending Machine | 08:00 to 19:00 | Monday to Saturday |
+| Global Bistro | 12:00 to 19:00 | Monday to Saturday |
+
+Sunday is closed for every place. A window is half-open: "08:00 to 19:00" accepts orders from 08:00:00 to 18:59:59, and "until 11:00" stops at 11:00:00.
+
+**Item windows.** Any item may have an available-from and/or an available-until time (the Cafe sets them per item). A missing from means "from the place's opening", a missing until means "until it closes". The six breakfast items (Methi Thepla, Kanda Poha, Upma, Aloo Paratha, Paneer Paratha, Matar Paneer Paratha) default to "until 11:00" and read "Breakfast, until 11:00". The Cafe can change a window, or clear it ("no limit").
+
+**Holidays.** A list of dates (YYYY-MM-DD) with a short note ("Diwali"). On a holiday every place is closed, whatever the day of the week. The list starts empty and the Cafe adds and removes dates.
+
+**Pauses.** Each place has a "Taking orders / Paused" switch (Cafe portal). Paused means no new orders for that place, now, with no end time. The whole service has a "QuickX available / not available" switch with a message (default "QuickX is not taking orders right now."), set only from Admin › Service. When it is off every student screen shows the message and no order can be placed.
+
+**The ordering rule.** An order is placed only if all of these hold. The server checks them in place-order, in this order, and the first one that fails refuses the order with its sentence. The screens mirror the same rule and grey things out, but the server has the final say.
+
+| | Rule | Refusal (examples) |
+|---|---|---|
+| a | The QuickX service is available | the Admin message |
+| b | The place is not paused | "Truly Indian is not taking orders right now." |
+| c | Today is an open day for the place and not a holiday | "Cafe Delice is closed today." / "Cafe Delice is closed today (Diwali)." |
+| d | The current time is within the place's hours | "Global Bistro opens at 12:00." / "Cafe Delice has closed for today." |
+| e | The target time is within the place's hours | "Cafe Delice closes at 19:00, so this order would not be ready in time." |
+| f | For every item, the current time and the target time are both inside that item's window | "Kanda Poha is breakfast only, until 11:00." / "Tea is available from 12:00." |
+
+The **target time** is when the order should reach the buyer: the ASAP promised-time estimate, or the chosen break slot. So Kanda Poha at 10:30 for as soon as possible (arriving about 10:40) is allowed, at 10:50 for the 11:50 break is refused, and at 11:05 is refused.
+
+**Orders already placed are never affected.** Hours, pauses, holidays and the service switch only stop *new* orders. An order that exists keeps moving through the normal flow (accept, prepare, ready, carry, deliver, late handling), and a retry of the same checkout press that already made an order returns that order even if the place has just closed.
+
+**Break slots.** A break in Checkout is greyed out ("Closed" or "Not then") when the place is closed at that time or an item in the cart is outside its window then, with the plain reason underneath. The Home "Next break" strip skips such breaks and, when none is left, says why ("Global Bistro opens at 12:00.", "Nothing is open right now. Truly Indian opens tomorrow at 08:00.").
+
 ## Cancellations
 
 1. Buyer can cancel only while status is `PLACED` (before the cafe accepts): full refund.

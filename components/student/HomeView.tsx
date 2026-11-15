@@ -9,20 +9,16 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { ItemTile } from "@/components/ui/ItemTile";
 import { PillButton } from "@/components/ui/PillButton";
 import { SourceGlyph } from "@/components/ui/SourceGlyph";
-import { itemStatus } from "@/lib/menu-rules";
+
 import { searchMenu } from "@/lib/search";
 import { useCart } from "./CartProvider";
 import { MenuItemRow } from "./MenuItemRow";
 import { ActiveOrderStrip } from "./ActiveOrderStrip";
 import { NextBreakStrip } from "./NextBreakStrip";
+import { itemStateText } from "./itemState";
 import { SearchField } from "./SearchField";
 import { SourceTile } from "./SourceTile";
 import { WalletBanner } from "./WalletBanner";
-
-const STATUS_TEXT = {
-  unavailable: COPY.student.menu.notToday,
-  "sold-out": COPY.student.menu.soldOut,
-} as const;
 
 const POPULAR = MENU_ITEMS.filter((item) => item.tags.includes("bestseller"));
 
@@ -92,7 +88,7 @@ export function HomeView() {
             </h2>
             <div className="-mx-5 flex gap-4 overflow-x-auto px-5 pb-2 [scrollbar-width:none]">
               {POPULAR.map((item) => {
-                const status = itemStatus(item, cart.menu);
+                const state = itemStateText(item, cart.menu);
                 return (
                   <ArchCard
                     key={item.id}
@@ -100,7 +96,7 @@ export function HomeView() {
                     tag={COPY.student.home.bestseller}
                     price={item.price}
                     media={<ItemTile fill itemId={item.id} name={item.name} sourceId={item.sourceId} />}
-                    status={status === "ok" ? undefined : STATUS_TEXT[status]}
+                    status={state ?? undefined}
                     inCart={cart.qtyOf(item.id)}
                     onAdd={() => cart.add(item.id)}
                   />

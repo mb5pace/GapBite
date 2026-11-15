@@ -283,3 +283,20 @@ export const FEEDBACK_MIN_INTERVAL_SEC = 10;
 /** Order History › Runs: how many of the user's recent runs are read. */
 export const HISTORY_RUNS_KEEP = 50;
 
+// ---------------------------------------------------------------------------
+// Opening hours, holidays and the service switch (v1.0.0 Phase A). The default times themselves are in data/hours.ts.
+// ---------------------------------------------------------------------------
+
+/** Hours and item windows are set on steps of this many minutes (08:00, 08:05, ...). */
+export const HOURS_STEP_MIN = 5;
+/** What students read when Admin switches the whole service off without writing a message. */
+export const SERVICE_DEFAULT_MESSAGE = "QuickX is not taking orders right now.";
+export const SERVICE_MESSAGE_MAX = 140;
+/** A holiday's note ("Diwali"), and how many holidays are kept. */
+export const HOLIDAY_NOTE_MAX = 40;
+export const HOLIDAYS_MAX = 100;
+/** The notice on Home lists at most this many closed or paused places, one line each. */
+export const CLOSED_NOTICE_MAX_LINES = 3;
+/** How far ahead "Opens Monday at 08:00" looks for the next open day. */
+export const NEXT_OPEN_LOOKAHEAD_DAYS = 8;
+

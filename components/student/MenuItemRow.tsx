@@ -9,21 +9,20 @@ import { Money } from "@/components/ui/Money";
 import { QtyStepper } from "@/components/ui/QtyStepper";
 import { itemStatus } from "@/lib/menu-rules";
 import { useCart } from "./CartProvider";
+import { itemStateText } from "./itemState";
 
 export function prepLabel(prepMin: number): string {
   return prepMin <= 0 ? COPY.student.menu.readyNow : `~${prepMin} min`;
 }
-
-const STATUS_TEXT = {
-  unavailable: COPY.student.menu.notToday,
-  "sold-out": COPY.student.menu.soldOut,
-} as const;
 
 /** One menu item: tile, name, one-line description, price, prep time, and the add control for its state. */
 export function MenuItemRow({ item }: { item: MenuItem }) {
   const cart = useCart();
   const status = itemStatus(item, cart.menu);
   const qty = cart.qtyOf(item.id);
+  const state = itemStateText(item, cart.menu);
+  // A time window gets its reason under the item (the row's right side is too small for it). A closed place says so once, in a sheet and a line above the list, not on every row.
+  const reasonUnder = status === "window" ? state : null;
 
   return (
     <li className="flex items-center gap-3 py-3">
@@ -36,11 +35,14 @@ export function MenuItemRow({ item }: { item: MenuItem }) {
           <span aria-hidden="true">·</span>
           <span>{item.slot ? `Slot ${item.slot}` : prepLabel(item.prepMin)}</span>
         </p>
+        {reasonUnder ? <p className="mt-1 text-secondary font-medium text-espresso">{reasonUnder}</p> : null}
       </div>
-      {status !== "ok" ? (
-        <span className="shrink-0 rounded-pill bg-sand px-3 py-1.5 text-secondary font-medium text-mocha">
-          {STATUS_TEXT[status]}
-        </span>
+      {status === "unavailable" || status === "sold-out" ? (
+        <span className="shrink-0 rounded-pill bg-sand px-3 py-1.5 text-secondary font-medium text-mocha">{state}</span>
+      ) : status === "closed" || status === "window" ? (
+        <IconButton label={`Add ${item.name}`} disabled aria-disabled="true" title={state ?? undefined}>
+          <Plus weight="bold" size={20} aria-hidden="true" />
+        </IconButton>
       ) : qty > 0 ? (
         <QtyStepper
           name={item.name}

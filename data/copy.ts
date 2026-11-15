@@ -202,9 +202,11 @@ export const WALLET_COPY = {
 
 /** Why an item could not be added to the cart, in one plain sentence. */
 export function refusalMessage(
-  reason: "limit" | "stock" | "unavailable" | "sold-out",
+  reason: "limit" | "stock" | "unavailable" | "closed" | "window" | "sold-out",
   itemName: string,
   left = 0,
+  /** For closed and window: the full sentence from the hours rules ("Global Bistro opens at 12:00."). */
+  detail?: string,
 ): string {
   switch (reason) {
     case "limit":
@@ -213,6 +215,9 @@ export function refusalMessage(
       return `Only ${left} ${itemName} left.`;
     case "unavailable":
       return `${itemName} is not available today.`;
+    case "closed":
+    case "window":
+      return detail ?? `${itemName} cannot be ordered right now.`;
     case "sold-out":
       return `${itemName} is sold out.`;
   }

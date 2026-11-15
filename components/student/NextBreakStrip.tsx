@@ -4,7 +4,9 @@ import { Clock } from "@phosphor-icons/react";
 import { COPY } from "@/data/copy";
 import { getBuilding } from "@/data/locations";
 import { slowestPrepMin } from "@/data/menu";
+import { SOURCES } from "@/data/menu";
 import { DEFAULT_PREP_MIN } from "@/lib/config";
+import { nothingOpenMessage, slotBlock, sourceBlockNow } from "@/lib/hours-rules";
 import { nextBreak } from "@/lib/menu-rules";
 import { formatClock } from "@/lib/time";
 import { useCart } from "./CartProvider";
@@ -23,7 +25,20 @@ export function NextBreakStrip() {
   const building = getBuilding(prefs.defaultBuilding);
   const pickup = prefs.defaultMode === "pickup";
   const prep = cart.sourceId ? slowestPrepMin(cart.sourceId) : DEFAULT_PREP_MIN;
-  const next = nextBreak(menu.now, prep, pickup ? null : building.id);
+  // Skip breaks the place is closed for or that an item in the cart cannot be ordered for. With nothing in the cart, a
+  // break counts when at least one place is taking orders.
+  const itemIds = cart.lines.map((line) => line.itemId);
+  const usable = (slot: string) =>
+    cart.sourceId
+      ? slotBlock(menu.hours, menu.service, { sourceId: cart.sourceId, itemIds, slot, nowMs: menu.now }) === null
+      : SOURCES.some((s) => slotBlock(menu.hours, menu.service, { sourceId: s.id, itemIds: [], slot, nowMs: menu.now }) === null);
+  const next = nextBreak(menu.now, prep, pickup ? null : building.id, usable);
+  // When no break is left, say why in plain words instead of the generic line.
+  const why = next
+    ? null
+    : cart.sourceId
+      ? (sourceBlockNow(menu.hours, menu.service, cart.sourceId, menu.now)?.message ?? null)
+      : nothingOpenMessage(menu.hours, menu.service, menu.now);
 
   return (
     <div className="flex items-center gap-3 rounded-card bg-parchment p-4">
@@ -38,7 +53,7 @@ export function NextBreakStrip() {
             <span> order by <span className="tabular-nums">{formatClock(next.orderByMs)}</span> for {pickup ? COPY.student.home.forPickup : building.short}</span>
           </>
         ) : (
-          COPY.student.home.noMoreBreaks
+          (why ?? COPY.student.home.noMoreBreaks)
         )}
       </p>
     </div>

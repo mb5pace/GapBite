@@ -21,7 +21,7 @@ export interface CartState {
 
 export const EMPTY_CART: CartState = { sourceId: null, lines: [] };
 
-export type RefusalReason = "limit" | "stock" | "unavailable" | "sold-out";
+export type RefusalReason = "limit" | "stock" | "unavailable" | "closed" | "window" | "sold-out";
 
 export type AddOutcome =
   | { kind: "added"; cart: CartState }

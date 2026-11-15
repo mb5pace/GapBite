@@ -288,6 +288,9 @@ export const CHECKOUT_COPY = {
   whenLabel: "When",
   asap: "As soon as possible",
   tooLate: "Too late",
+  /** A break the place is closed for, or that an item in the cart cannot be ordered for. */
+  closedAt: "Closed",
+  notThen: "Not then",
   breakCaption: "Break",
   billLabel: "Bill",
   subtotal: "Subtotal",

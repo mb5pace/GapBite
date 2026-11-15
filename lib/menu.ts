@@ -6,14 +6,17 @@
  */
 import { getRedis, key } from "./redis";
 import type { MenuState } from "./menu-rules";
+import { getHoursConfig, getService } from "./hours";
 import { getStock } from "./stock";
 
 export async function getMenuState(now: number): Promise<MenuState> {
-  const [unavailable, stock] = await Promise.all([
+  const [unavailable, stock, hours, service] = await Promise.all([
     getRedis().smembers(key("unavailable")),
     getStock(),
+    getHoursConfig(),
+    getService(),
   ]);
-  return { now, unavailable: unavailable.map(String).sort(), stock };
+  return { now, unavailable: unavailable.map(String).sort(), stock, hours, service };
 }
 
 /** Same as getMenuState, reading the server clock itself (for server components). */

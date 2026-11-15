@@ -30,6 +30,8 @@ import { parseOrderRef } from "./order-ref";
 import { estimatePromisedAt, feeFor, priceLines, slotAvailable, walkFor } from "./order-rules";
 import { summarize, TERMINAL_STATUSES, type Order, type OrderMode, type OrderStatus, type OrderSummary } from "./order-types";
 import { getRedis, key } from "./redis";
+import { getHoursConfig, getService } from "./hours";
+import { checkOrder } from "./hours-rules";
 import { ensureStock } from "./stock";
 import { makeUpdate, unreadKey, updatesKey } from "./updates";
 import { topUpNeeded } from "./wallet-rules";
@@ -163,17 +165,28 @@ export async function placeOrder(
   const buildingId = input.mode === "delivery" ? input.buildingId : undefined;
   if (buildingId && !isBuildingId(buildingId)) throw new AppError(400, ORDER_COPY.needBuilding);
 
+  if (input.when !== "asap" && !BREAK_SLOTS.includes(input.when)) throw new AppError(400, ORDER_COPY.badBreak);
+
   const prepMin = priced.prepMin;
   const walkMin = walkFor(input.mode, buildingId);
-  if (input.when !== "asap") {
-    if (!BREAK_SLOTS.includes(input.when)) throw new AppError(400, ORDER_COPY.badBreak);
-    if (!slotAvailable(input.when, now, prepMin, walkMin)) throw new AppError(409, ORDER_COPY.breakTooClose);
+  const promisedAt = estimatePromisedAt({ mode: input.mode, when: input.when, nowMs: now, prepMin, walkMin });
+  const redis = getRedis();
+
+  // Opening hours, holidays, pauses, item windows and the service switch (BUSINESS_RULES "Opening hours, holidays and
+  // pauses", rule a to f). This is where it is enforced; the screens only mirror it. The target is when the order
+  // should reach the buyer: the ASAP estimate, or the chosen break. A retry of an order that was already placed (the
+  // same checkout press) skips this, so a double tap just after closing still returns the order it made.
+  const alreadyPlaced = (await redis.get(idemKey(buyer.id, input.requestId))) !== null;
+  if (!alreadyPlaced) {
+    const [hours, service] = await Promise.all([getHoursConfig(), getService()]);
+    const block = checkOrder(hours, service, { sourceId: priced.sourceId, itemIds: priced.items.map((line) => line.itemId), nowMs: now, targetMs: promisedAt });
+    if (block) throw new AppError(409, block.message);
   }
+
+  if (input.when !== "asap" && !slotAvailable(input.when, now, prepMin, walkMin)) throw new AppError(409, ORDER_COPY.breakTooClose);
 
   const fee = feeFor(input.mode, buildingId);
   const total = priced.subtotal + fee;
-  const promisedAt = estimatePromisedAt({ mode: input.mode, when: input.when, nowMs: now, prepMin, walkMin });
-  const redis = getRedis();
 
   await ensureStock(); // the vending stock hash must exist before the script reads it
   const slotOf = (itemId: string) => getItem(itemId)?.slot ?? "";

@@ -33,7 +33,7 @@ import {
 import { createCartStore } from "@/lib/cart-store";
 import { TOAST_MS } from "@/lib/config";
 import type { MeData } from "@/lib/me";
-import { maxQtyFor, type MenuState } from "@/lib/menu-rules";
+import { itemMessage, maxQtyFor, type MenuState } from "@/lib/menu-rules";
 import { useMenuState } from "./menu-state";
 
 interface CartContextValue {
@@ -87,7 +87,7 @@ function CartScope({ userId, children }: { userId: string; children: ReactNode }
       const outcome = tryAdd(store.getSnapshot(), item, menu);
       if (outcome.kind === "added") store.set(outcome.cart);
       else if (outcome.kind === "switch") setPending({ item, from: outcome.from });
-      else toast(refusalMessage(outcome.reason, item.name, maxQtyFor(item, menu)));
+      else toast(refusalMessage(outcome.reason, item.name, maxQtyFor(item, menu), itemMessage(item, menu) ?? undefined));
     },
     [store, menu, toast],
   );
@@ -98,7 +98,7 @@ function CartScope({ userId, children }: { userId: string; children: ReactNode }
       if (!item) return;
       const result = trySetQty(store.getSnapshot(), item, qty, menu);
       store.set(result.cart);
-      if (result.refused) toast(refusalMessage(result.refused, item.name, maxQtyFor(item, menu)));
+      if (result.refused) toast(refusalMessage(result.refused, item.name, maxQtyFor(item, menu), itemMessage(item, menu) ?? undefined));
     },
     [store, menu, toast],
   );

@@ -10,14 +10,15 @@ const MENU_URL = "/api/menu";
 
 /**
  * What can be ordered right now. The student layout seeds the first value from
- * the server, so there is no loading state. `live` polls every few seconds (the
- * vending page); otherwise it refreshes when you arrive on a page or return to
- * the tab. `now` is the server's time at the last read, moved forward by the
+ * the server, so there is no loading state. It polls every few seconds on every
+ * screen (pass `live: false` to refresh only when you arrive or return to the tab),
+ * so a change in the Cafe portal (hours, a pause, an item window) reaches students
+ * on their next poll. `now` is the server's time at the last read, moved forward by the
  * time that has passed on this device, never by the device's own clock.
  */
 export function useMenuState(options: { live?: boolean } = {}): MenuState {
   const { data } = useSWR<MenuState>(MENU_URL, getJson, {
-    refreshInterval: options.live ? POLL_MS.student : 0,
+    refreshInterval: options.live === false ? 0 : POLL_MS.student,
     revalidateOnFocus: true,
     keepPreviousData: true,
   });
