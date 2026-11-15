@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { COPY } from "@/data/copy";
 import { Input } from "@/components/ui/Input";
+import { LoadingView } from "@/components/ui/LoadingView";
 import { PillButton } from "@/components/ui/PillButton";
 import { FIRST_NAME_MAX } from "@/lib/config";
 import { postJson } from "@/lib/http";
@@ -21,6 +22,8 @@ export function IdentifyForm() {
   const [needsName, setNeedsName] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  // Who they are is accepted and the first page of the app is on its way.
+  const [entering, setEntering] = useState(false);
 
   // When the first-name field appears, put the cursor in it.
   useEffect(() => {
@@ -48,6 +51,7 @@ export function IdentifyForm() {
 
     const res = await postJson<IdentifyReply>("/api/auth/identify", body);
     if (res.ok && res.data?.status === "ok") {
+      setEntering(true);
       router.replace(res.data.next);
       return; // stay busy until the next page loads
     }
@@ -109,6 +113,7 @@ export function IdentifyForm() {
       >
         {mode === "staff" ? COPY.identify.switchToStudent : COPY.identify.switchToStaff}
       </button>
+      {entering ? <LoadingView overlay /> : null}
     </form>
   );
 }

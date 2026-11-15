@@ -138,6 +138,7 @@ Raised in v1.0.0 Phase A (the brief or the docs were silent, simplest behaviour 
 - **Holidays in the past** can be added and removed (harmless); the list is not trimmed.
 - **Time fields** are the browser's own time control, so a phone may show 12-hour time ("07:00 PM"). The value stored and sent is always 24-hour "HH:MM" on 5-minute steps.
 - **Vending** follows the same hours and pauses as the cafes (08:00 to 19:00, Monday to Saturday) and has its own card in Hours and items.
+- **Not-found status inside the student app.** An address that does not exist (an unknown account section, Discover topic or place, or an order that is not yours) shows the same "We could not find that page" screen as before, but its HTTP status is now 200 instead of 404, because the student loading view starts each page's response before the page decides. Nothing about an order is revealed either way, and nobody indexes this app, so it was left as it is. Outside the student portal (`/nothing-here`) it is still a real 404. A loading view at the root was left out on purpose: it would also have turned the "session ended" redirect (307) into a 200.
 
 Raised in Phase 6 (the docs were silent, simplest behaviour kept until answered):
 - The source filter tabs sit above the columns, not in the header: with the pages, the clock, the sound switch and Logout there is no room for six tabs on one row at 1280 px. The header has Queue, Vending, Menu and Today.

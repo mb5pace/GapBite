@@ -55,7 +55,7 @@ app/
     (desk)/vending/page.tsx
     (desk)/hours/page.tsx       Hours and items: opening hours, open days, Taking orders / Paused, holidays, item windows, Available today
     (desk)/menu/page.tsx        redirects to /cafe/hours (the old Menu availability address)
-    (desk)/loading.tsx          the loading view between Cafe pages (the same file exists for (student)/ and admin/, and app/loading.tsx is the full-screen one)
+    (desk)/loading.tsx          the loading view between Cafe pages (the same file exists for (student)/ and admin/). The first load after the gate is the same view as a full-window overlay on the gate and Identify forms. There is deliberately no app/loading.tsx: a loading boundary at the root starts the response before the layouts finish, so an ended-session redirect or notFound() would no longer change the HTTP status (307 / 404 would become 200).. Within the student portal the loading view starts each page's response early, so an address that does not exist (an unknown account section, Discover topic or place, or an order that is not yours) shows the usual "We could not find that page" screen with HTTP status 200 instead of 404 (a "soft 404"); nothing is revealed either way
     (desk)/today/page.tsx
     kiosk/page.tsx              full screen, no header
   admin/

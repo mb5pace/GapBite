@@ -21,10 +21,11 @@ function Wisp({ delay }: { delay: string }) {
  * fade in a slow loop, and one line under it. Drawn from the Phosphor CookingPot icon (its own three vent marks are cut
  * off at the top so the moving steam is the only steam). With "reduce motion" on, the steam is still. The fade is part of the
  * motion only: there is no see-through colour at rest (UI_UX_BIBLE.md "Colour consistency").
- * `fullScreen` fills the window (the first load after the gate); the default fills the page area inside a portal's
+ * `overlay` covers the whole window (the gate and Identify show it once a code is accepted, until the first page of the
+ * app arrives); `fullScreen` is a full-height page of its own; the default fills the page area inside a portal's
  * header; `compact` is just the pot and the line, for a gallery or a small panel.
  */
-export function LoadingView({ fullScreen = false, compact = false }: { fullScreen?: boolean; compact?: boolean }) {
+export function LoadingView({ overlay = false, fullScreen = false, compact = false }: { overlay?: boolean; fullScreen?: boolean; compact?: boolean }) {
   return (
     <div
       role="status"
@@ -32,7 +33,7 @@ export function LoadingView({ fullScreen = false, compact = false }: { fullScree
       data-loading-view=""
       className={[
         "flex flex-col items-center justify-center gap-4 bg-cream px-6 text-center",
-        fullScreen ? "min-h-dvh" : compact ? "py-10" : "min-h-[60dvh]",
+        overlay ? "fixed inset-0 z-50 min-h-dvh" : fullScreen ? "min-h-dvh" : compact ? "py-10" : "min-h-[60dvh]",
       ].join(" ")}
     >
       <div className="relative size-14" aria-hidden="true">

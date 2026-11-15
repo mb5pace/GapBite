@@ -10,7 +10,7 @@ Build only these screens. Each line describes what is on screen, top to bottom. 
 
 **Identify `/identify`** — "Who's ordering?" AU number field, first-name field (first time only), "Continue". Link "I'm QuickX staff". Footer prototype note.
 
-**Loading view** (all portals) — shown only while something is actually loading, never as a delay: a maroon cooking pot (Phosphor `CookingPot`, about 56 px) with three thin steam lines that rise and fade in a slow CSS loop, and "Your food is on the stove…" under it in mocha, on cream. Between pages in the student, Cafe and Admin portals the header (and the student bottom bar) stay and this fills the page area; for the first load after the gate it fills the window. With reduced motion the steam stands still. See UI_UX_BIBLE.md component 18.
+**Loading view** (all portals) — shown only while something is actually loading, never as a delay: a maroon cooking pot (Phosphor `CookingPot`, about 56 px) with three thin steam lines that rise and fade in a slow CSS loop, and "Your food is on the stove…" under it in mocha, on cream. Between pages in the student, Cafe and Admin portals the header (and the student bottom bar) stay and this fills the page area; for the first load after the gate (and after Identify) it covers the whole window from the moment the code is accepted until the first page arrives. With reduced motion the steam stands still. See UI_UX_BIBLE.md component 18.
 
 ---
 
