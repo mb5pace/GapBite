@@ -97,6 +97,14 @@ export interface OrderSummary {
   total: number;
   promisedAt?: number;
   holder?: Holder;
+  /** Minutes from Accepted to Ready, and the walk to the building. They set how fast the progress line fills. */
+  prepMin: number;
+  walkMin: number;
+  /** Epoch ms the cafe accepted it, and the runner picked it up (the first time). */
+  acceptedAt?: number;
+  pickedUpAt?: number;
+  /** Epoch ms the holder tapped "I'm here" at the drop point. */
+  arrivedAt?: number;
   createdAt: number;
   updatedAt: number;
 }
@@ -113,6 +121,11 @@ export function summarize(order: Order): OrderSummary {
     total: order.total,
     promisedAt: order.promisedAt,
     holder: order.holder,
+    prepMin: order.prepMin,
+    walkMin: order.walkMin,
+    acceptedAt: order.events.find((event) => event.status === "ACCEPTED")?.at,
+    pickedUpAt: order.events.find((event) => event.status === "PICKED_UP")?.at,
+    arrivedAt: order.arrivedAt,
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,
   };

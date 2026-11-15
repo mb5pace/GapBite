@@ -238,7 +238,8 @@ export const CLOCK_TICK_MS = 15_000;
 /** After the Updates tab opens, unread dots stay this long before everything counts as read. */
 export const MARK_READ_DELAY_MS = 2000;
 /** Home shows at most this many orders in progress; the Orders tab has the rest. */
-export const HOME_STRIP_MAX = 2;
+/** The progress line on Home never fills the stage an order is in beyond this share until the status really changes. */
+export const PROGRESS_FILL_CAP = 0.9;
 /**
  * How long a field may be before the server refuses it. These are sanity limits for what
  * arrives from the browser, not business rules; the real format checks are the patterns above.

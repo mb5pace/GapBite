@@ -82,6 +82,8 @@
   --animate-dialog-in: dialog-in 150ms ease-out;
   /* The loading view's steam: slow, and it stops entirely for people who ask for less motion. */
   --animate-steam: steam 3s ease-in-out infinite;
+  /* The little walker on the Home progress line: up and down 2 px, every 600 ms. Still under reduced motion. */
+  --animate-bob: bob 600ms ease-in-out infinite;
   @keyframes sheet-in {
     from {
       transform: translateY(100%);
@@ -98,6 +100,15 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+  @keyframes bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-2px);
     }
   }
   @keyframes steam {

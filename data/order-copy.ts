@@ -89,6 +89,33 @@ export function promisedLine(order: Pick<Order, "sourceId" | "mode" | "buildingI
     : `Ready by ${time} at the ${getSource(order.sourceId).name} counter`;
 }
 
+/**
+ * The one line under the progress line on Home: what is happening to the order and when it should arrive.
+ * "On the way to GICT ground floor lobby · by 18:38".
+ */
+export function progressLine(
+  order: Pick<Order, "sourceId" | "mode" | "status" | "buildingId" | "promisedAt" | "arrivedAt">,
+): string {
+  const source = getSource(order.sourceId).name;
+  const by = order.promisedAt !== undefined ? ` · by ${formatClock(order.promisedAt)}` : "";
+  const building = order.buildingId ? getBuilding(order.buildingId) : null;
+  const where = building ? `${building.short} ${building.dropPoint.toLowerCase()}` : "";
+  switch (order.status) {
+    case "PLACED":
+      return `Waiting for ${source} to accept${by}`;
+    case "ACCEPTED":
+    case "PREPARING":
+      return `${source} is making it${by}`;
+    case "READY":
+      if (order.mode === "delivery") return `Ready at ${source}, waiting for a runner${by}`;
+      return order.sourceId === "vending" ? "Ready at the vending machine · enter your code" : `Ready at the ${source} counter · show your code`;
+    case "PICKED_UP":
+      return order.arrivedAt !== undefined ? `Your runner is waiting at ${where}` : `On the way to ${where}${by}`;
+    default:
+      return `${source}${by}`;
+  }
+}
+
 export const ORDER_COPY = {
   // Checkout and placing
   emptyCart: "Your cart is empty. Pick something from UC first.",
