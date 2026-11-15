@@ -135,3 +135,43 @@ export function sanitizeCart(raw: unknown): CartState {
   }
   return cart;
 }
+
+export interface ReorderPlan {
+  /** The cart after the reorder (only use it if something was added). */
+  cart: CartState;
+  added: MenuItem[];
+  /** Items that cannot be ordered right now (switched off, closed, outside their time, sold out) or are not on the menu. */
+  skipped: { itemId: string; name: string }[];
+  /** The source whose cart would be cleared to make room, if the cart holds another cafe's items. */
+  replaces: SourceId | null;
+}
+
+/**
+ * "Order again": the same items into the cart, as many of each as can be added now. Anything that cannot be ordered right
+ * now is skipped (and named). If the cart holds another cafe's items it starts a new cart, and says which one it replaces
+ * so the screen can ask first. The usual limits (10 units, vending stock) still apply.
+ */
+export function planReorder(cart: CartState, lines: readonly { itemId: string; name: string; qty: number }[], menu: MenuState): ReorderPlan {
+  const source = lines.map((line) => getItem(line.itemId)?.sourceId).find((id): id is SourceId => id !== undefined) ?? null;
+  const replaces = source !== null && cart.sourceId !== null && cart.lines.length > 0 && cart.sourceId !== source ? cart.sourceId : null;
+  let next: CartState = replaces ? EMPTY_CART : cart;
+  const added: MenuItem[] = [];
+  const skipped: { itemId: string; name: string }[] = [];
+  for (const line of lines) {
+    const item = getItem(line.itemId);
+    if (!item || item.sourceId !== source || itemStatus(item, menu) !== "ok") {
+      skipped.push({ itemId: line.itemId, name: item?.name ?? line.name });
+      continue;
+    }
+    let put = 0;
+    for (let i = 0; i < line.qty; i++) {
+      const outcome = tryAdd(next, item, menu);
+      if (outcome.kind !== "added") break;
+      next = outcome.cart;
+      put++;
+    }
+    if (put > 0) added.push(item);
+    else skipped.push({ itemId: item.id, name: item.name });
+  }
+  return { cart: next, added, skipped, replaces: added.length > 0 ? replaces : null };
+}

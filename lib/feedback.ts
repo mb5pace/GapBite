@@ -17,6 +17,8 @@ export interface FeedbackEntry {
   rating: number;
   /** Empty when the person only chose a face. */
   text: string;
+  /** Set when it was sent from an order's "Share feedback" (always the sender's own order). */
+  orderId?: string;
 }
 
 export async function submitFeedback(entry: Omit<FeedbackEntry, "at">, now: number): Promise<void> {

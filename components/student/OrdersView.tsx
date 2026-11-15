@@ -1,17 +1,19 @@
 "use client";
 
-import { Receipt, Warning } from "@phosphor-icons/react";
+import { MagnifyingGlass, Receipt, Warning } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { getBuilding } from "@/data/locations";
 import { getSource } from "@/data/menu";
 import { ORDERS_COPY, RUN_COPY, promisedLine } from "@/data/order-copy";
-import { Chip } from "@/components/ui/Chip";
 import { useCountdown } from "@/components/ui/Countdown";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Money } from "@/components/ui/Money";
 import { PillButton, PillLink } from "@/components/ui/PillButton";
+import { Sheet } from "@/components/ui/Sheet";
+import { ACCOUNT_COPY } from "@/data/account-copy";
+import { FeedbackForm } from "@/components/account/FeedbackForm";
 import { useRunner } from "@/components/runner/RunnerProvider";
 import { SourceGlyph } from "@/components/ui/SourceGlyph";
 import { POLL_MS } from "@/lib/config";
@@ -20,6 +22,9 @@ import { getJson, postJson } from "@/lib/http";
 import { isTerminal, type OrderSummary, type RunCard } from "@/lib/order-types";
 import { formatClock, formatDayTime, formatMsLeft } from "@/lib/time";
 import { StatusBadge, orderPlaceLine } from "./OrderParts";
+import { useCart } from "./CartProvider";
+import { OrderListCard } from "./OrderListCard";
+import { SearchField } from "./SearchField";
 
 export interface OrdersReply {
   active: OrderSummary[];
@@ -120,9 +125,18 @@ export function OrderCard({ order, now }: { order: OrderSummary; now: number }) 
   );
 }
 
+/** Does an order match every word typed? Its ID, its cafe and its item names are searched. */
+function matches(order: OrderSummary, query: string): boolean {
+  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return true;
+  const hay = `${order.id} ${getSource(order.sourceId).name} ${order.items.map((line) => line.name).join(" ")}`.toLowerCase();
+  return words.every((word) => hay.includes(word));
+}
+
 /**
- * The Orders tab: Active and Past. "My runs" (orders you are carrying for someone
- * else) is added next to "My orders" when the runner feature arrives in Phase 7.
+ * The Orders tab: a search over the loaded orders, Active and Past tabs with counts, and receipt-style cards. Active
+ * keeps "My runs" (orders you are carrying for someone else) above your own. A finished order can be rated
+ * ("Share feedback", saved with its order ID) or put back in the cart ("Order again").
  */
 export function OrdersView({ initial }: { initial: OrdersReply }) {
   const { data } = useSWR<OrdersReply>("/api/orders", getJson, {
@@ -132,26 +146,37 @@ export function OrdersView({ initial }: { initial: OrdersReply }) {
     keepPreviousData: true,
   });
   const orders = data ?? initial;
+  const cart = useCart();
   const [tab, setTab] = useState<"active" | "past">("active");
-  const list = tab === "active" ? orders.active : orders.past;
-  const runs = tab === "active" ? orders.runs : [];
+  const [query, setQuery] = useState("");
+  const [feedbackFor, setFeedbackFor] = useState<OrderSummary | null>(null);
+  const searching = query.trim() !== "";
+  const list = (tab === "active" ? orders.active : orders.past).filter((order) => matches(order, query));
+  const runs = tab === "active" && !searching ? orders.runs : [];
+  const counts = { active: orders.active.length + orders.runs.length, past: orders.past.length };
 
   return (
     <div className="flex flex-col gap-5 pt-2">
-      <div role="tablist" aria-label="Orders" className="flex gap-2">
-        {(["active", "past"] as const).map((value) => (
-          <Chip
-            key={value}
-            role="tab"
-            aria-selected={tab === value}
-            aria-pressed={undefined}
-            selected={tab === value}
-            onClick={() => setTab(value)}
-          >
-            {value === "active" ? ORDERS_COPY.active : ORDERS_COPY.past}
-            {value === "active" && orders.active.length + orders.runs.length > 0 ? ` (${orders.active.length + orders.runs.length})` : ""}
-          </Chip>
-        ))}
+      <SearchField value={query} onChange={setQuery} label={ORDERS_COPY.search} placeholder={ORDERS_COPY.search} />
+
+      <div role="tablist" aria-label="Orders" className="flex gap-6 border-b border-sand">
+        {(["active", "past"] as const).map((value) => {
+          const on = tab === value;
+          return (
+            <button
+              key={value}
+              type="button"
+              role="tab"
+              aria-selected={on}
+              onClick={() => setTab(value)}
+              className={`-mb-px min-h-11 border-b-[3px] py-2 text-body focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-maroon ${
+                on ? "border-maroon font-bold text-maroon" : "border-transparent font-medium text-mocha"
+              }`}
+            >
+              {value === "active" ? ORDERS_COPY.active : ORDERS_COPY.past} ({counts[value]})
+            </button>
+          );
+        })}
       </div>
 
       {runs.length > 0 ? (
@@ -168,22 +193,33 @@ export function OrdersView({ initial }: { initial: OrdersReply }) {
       ) : null}
 
       {list.length === 0 && runs.length === 0 ? (
-        <EmptyState
-          icon={<Receipt weight="regular" size={40} />}
-          action={
-            tab === "active" ? (
+        searching ? (
+          <EmptyState
+            icon={<MagnifyingGlass weight="regular" size={40} />}
+            action={
+              <PillButton variant="secondary" onClick={() => setQuery("")}>
+                {ORDERS_COPY.clearSearch}
+              </PillButton>
+            }
+          >
+            {ORDERS_COPY.noMatch}
+          </EmptyState>
+        ) : (
+          <EmptyState
+            icon={<Receipt weight="regular" size={40} />}
+            action={
               <PillLink href="/home" variant="secondary">
                 {ORDERS_COPY.browse}
               </PillLink>
-            ) : undefined
-          }
-        >
-          {tab === "active" ? ORDERS_COPY.noActive : ORDERS_COPY.noPast}
-        </EmptyState>
+            }
+          >
+            {tab === "active" ? ORDERS_COPY.noActive : ORDERS_COPY.noPast}
+          </EmptyState>
+        )
       ) : list.length === 0 ? null : (
-        <section aria-labelledby="orders-heading">
+        <section aria-labelledby="orders-heading" className="flex flex-col gap-4">
           {tab === "active" ? (
-            <h2 id="orders-heading" className="mb-3 font-display text-section font-bold text-maroon">
+            <h2 id="orders-heading" className="font-display text-section font-bold text-maroon">
               {ORDERS_COPY.myOrders}
             </h2>
           ) : (
@@ -193,11 +229,27 @@ export function OrdersView({ initial }: { initial: OrdersReply }) {
           )}
           <ul className="flex flex-col gap-3">
             {list.map((order) => (
-              <OrderCard key={order.id} order={order} now={orders.now} />
+              <OrderListCard
+                key={order.id}
+                order={order}
+                now={orders.now}
+                onFeedback={tab === "past" ? () => setFeedbackFor(order) : undefined}
+                onReorder={tab === "past" ? () => cart.reorder(order.items) : undefined}
+              />
             ))}
           </ul>
+          <p className="py-2 text-center text-secondary text-mocha">{ORDERS_COPY.endOfList}</p>
         </section>
       )}
+
+      <Sheet open={feedbackFor !== null} onClose={() => setFeedbackFor(null)} title={ORDERS_COPY.feedbackTitle}>
+        {feedbackFor ? (
+          <div className="flex flex-col gap-3">
+            <p className="text-secondary text-mocha">{ACCOUNT_COPY.feedback.aboutOrder(feedbackFor.id, getSource(feedbackFor.sourceId).name)}</p>
+            <FeedbackForm key={feedbackFor.id} orderId={feedbackFor.id} />
+          </div>
+        ) : null}
+      </Sheet>
     </div>
   );
 }

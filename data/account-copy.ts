@@ -169,6 +169,8 @@ export const ACCOUNT_COPY = {
     pickAFace: "Pick a face first.",
     tooLong: `Keep it under ${FEEDBACK_TEXT_MAX} characters.`,
     tooSoon: "That went through a moment ago. Try again in a few seconds.",
+    notYourOrder: "That order is not one of yours.",
+    aboutOrder: (orderId: string, cafe: string) => `About ${orderId} from ${cafe}`,
     thanksTitle: "Thanks",
     thanks: "Your feedback reached the team.",
     again: "Send more feedback",
