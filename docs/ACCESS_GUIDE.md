@@ -127,3 +127,22 @@ You need: the laptop with the Cafe desk (Chrome, logged in with **QX_CAFE_PASSWO
 - Reject: place one, and on the laptop click **Reject**, pick a reason. The phone shows the reason and the refund.
 - Vending: on the phone order a Paper Boat from **UC Vending Machine** (pick up), on the laptop click **Accept and ready**, then open **Vending › Open the kiosk**, type the phone's 4-digit code on the keypad and watch the slot light up.
 - Menu: Menu › Cafe Delice › switch **Tea** off. The phone can no longer add it.
+
+## 6. Add QuickX to a phone's home screen
+
+QuickX can sit on the home screen like an app: it opens full screen from a maroon "Q" icon and starts at the gate. Nothing is installed and nothing works offline; it always loads fresh from the internet, so it needs a connection like the website does. Use the link you test with (the dev link for testing, the production link for real use).
+
+**Android, Chrome**
+1. Open the QuickX link in Chrome.
+2. Tap the three-dot menu at the top right.
+3. Tap **Add to Home screen** (on some phones **Install app**), then **Add** (or **Install**).
+4. The QuickX icon appears on the home screen. Tap it: QuickX opens without the browser's address bar.
+
+**iPhone, Safari**
+1. Open the QuickX link in Safari (it has to be Safari on iPhone).
+2. Tap the **Share** button (the square with an arrow pointing up) in the bar at the bottom.
+3. Scroll down and tap **Add to Home Screen**, then **Add** at the top right.
+4. The QuickX icon appears on the home screen. Tap it: QuickX opens full screen.
+
+To remove it, press and hold the icon and choose **Remove** (Android: **Remove** or **Uninstall**; iPhone: **Remove App**, then **Delete from Home Screen**). Sessions work as they do in the browser: an 8-hour permanent-code session or a 15-minute temporary one, then the gate again.
+
