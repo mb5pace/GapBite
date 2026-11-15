@@ -26,7 +26,7 @@ export function OrderProgress({ order, now }: { order: ProgressInput; now: numbe
           ))}
         </ol>
       </div>
-      <ol className="mt-1.5 grid grid-cols-4 gap-1" aria-hidden="true">
+      <ol className="mt-2 grid grid-cols-4 gap-1" aria-hidden="true">
         {labels.map((label, i) => (
           <li key={label} className={`text-caption leading-tight ${i === current ? "font-semibold text-espresso" : "text-mocha"}`}>
             {label}

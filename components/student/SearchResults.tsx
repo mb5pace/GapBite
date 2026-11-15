@@ -28,7 +28,7 @@ function ResultRow({ item }: { item: MenuItem }) {
         <ItemTile itemId={item.id} name={item.name} sourceId={item.sourceId} size="sm" />
         <span className="min-w-0 flex-1">
           <span className="block text-body font-bold text-espresso">{item.name}</span>
-          <span className="mt-0.5 flex items-center gap-2 text-secondary text-mocha">
+          <span className="mt-1 flex items-center gap-2 text-secondary text-mocha">
             <Money amount={item.price} className="font-display text-section font-bold text-maroon" />
             <span aria-hidden="true">·</span>
             <span>{item.category}</span>

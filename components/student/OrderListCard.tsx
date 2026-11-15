@@ -78,14 +78,26 @@ export function OrderListCard({
         <span className="text-secondary text-mocha">{modeLine(order)}</span>
       </Link>
       {onFeedback || onReorder ? (
-        <div className="mt-4 grid grid-cols-2 gap-3">
+        // Side by side when both labels fit on one line, stacked full width on narrow phones.
+        <div className="mt-4 flex flex-wrap gap-3">
           {onFeedback ? (
-            <PillButton variant="outline" size="md" onClick={onFeedback} aria-label={`${ORDERS_COPY.shareFeedback} ${order.id}`}>
+            <PillButton
+              variant="outline"
+              size="md"
+              onClick={onFeedback}
+              aria-label={`${ORDERS_COPY.shareFeedback} ${order.id}`}
+              className="flex-1 basis-0 whitespace-nowrap"
+            >
               {ORDERS_COPY.shareFeedback}
             </PillButton>
           ) : null}
           {onReorder ? (
-            <PillButton size="md" onClick={onReorder} aria-label={`${ORDERS_COPY.orderAgain} ${order.id}`}>
+            <PillButton
+              size="md"
+              onClick={onReorder}
+              aria-label={`${ORDERS_COPY.orderAgain} ${order.id}`}
+              className="flex-1 basis-0 whitespace-nowrap"
+            >
               {ORDERS_COPY.orderAgain}
             </PillButton>
           ) : null}

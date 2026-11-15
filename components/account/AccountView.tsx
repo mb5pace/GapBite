@@ -20,7 +20,7 @@ import { Money } from "@/components/ui/Money";
 import { NavRow } from "@/components/ui/NavRow";
 import { useMe } from "@/components/student/useMe";
 
-const ICON = { weight: "regular" as const, size: 22 };
+const ICON = { weight: "regular" as const, size: 24 };
 
 /**
  * Account (docs/SCREENS.md): the profile card, then the rows. Wallet, My Profile, Preferences, Notifications,
@@ -53,7 +53,7 @@ export function AccountView() {
               {me.user.name}
             </span>
             {isStaff ? (
-              <span className="shrink-0 rounded-pill bg-blush px-2 py-0.5 font-sans text-caption font-bold text-maroon">{COPY.student.staffBadge}</span>
+              <span className="shrink-0 rounded-pill bg-blush px-2 py-1 font-sans text-caption font-bold text-maroon">{COPY.student.staffBadge}</span>
             ) : null}
           </p>
           <p className="mt-1 text-secondary text-mocha">

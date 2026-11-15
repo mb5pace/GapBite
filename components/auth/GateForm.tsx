@@ -73,9 +73,9 @@ export function GateForm({ notice }: { notice?: string }) {
             className="flex size-11 items-center justify-center rounded-pill text-mocha focus-visible:outline-2 focus-visible:outline-maroon"
           >
             {visible ? (
-              <EyeSlash weight="regular" size={22} aria-hidden="true" />
+              <EyeSlash weight="regular" size={24} aria-hidden="true" />
             ) : (
-              <Eye weight="regular" size={22} aria-hidden="true" />
+              <Eye weight="regular" size={24} aria-hidden="true" />
             )}
           </button>
         }

@@ -19,7 +19,9 @@ export function StatusLine({ sourceId, className = "" }: { sourceId: SourceId; c
   const label = sourceLabel(menu.hours, menu.service, sourceId, menu.now);
   return (
     <span className={`flex items-start gap-2 text-secondary text-espresso ${className}`} data-source-status={sourceId}>
-      <span className={`mt-1.5 size-2 shrink-0 rounded-pill ${DOT[label.tone]}`} aria-hidden="true" />
+      <span className="flex h-5 shrink-0 items-center" aria-hidden="true">
+        <span className={`size-2 rounded-pill ${DOT[label.tone]}`} />
+      </span>
       <span>{statusLineText(label, status?.sources[sourceId]?.readyMin)}</span>
     </span>
   );

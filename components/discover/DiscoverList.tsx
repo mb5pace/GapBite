@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { DISCOVER_COPY, DISCOVER_TOPICS, type DiscoverTopic } from "@/data/discover-copy";
 import { NavRow } from "@/components/ui/NavRow";
 
-const ICON = { weight: "regular" as const, size: 22 };
+const ICON = { weight: "regular" as const, size: 24 };
 const ICONS: Record<DiscoverTopic, ReactNode> = {
   introduction: <Info {...ICON} />,
   help: <Compass {...ICON} />,

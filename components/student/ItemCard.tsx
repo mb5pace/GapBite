@@ -30,11 +30,11 @@ export function ItemCard({ item, unavailable = false }: { item: MenuItem; unavai
         {item.description ? <p className={`line-clamp-1 text-secondary ${unavailable ? "text-taupe" : "text-mocha"}`}>{item.description}</p> : null}
         <Money amount={item.price} className={`font-display text-section font-bold tabular-nums ${unavailable ? "text-taupe" : "text-espresso"}`} />
         <div className="mt-1 flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1 rounded-pill bg-sand px-2 py-0.5 text-caption font-medium text-mocha">
-            <Timer weight="regular" size={14} aria-hidden="true" />
+          <span className="inline-flex items-center gap-1 rounded-pill bg-sand px-2 py-1 text-caption font-medium text-mocha">
+            <Timer weight="regular" size={20} aria-hidden="true" />
             {COPY.student.menu.prep(item.prepMin)}
           </span>
-          {reason ? <span className="rounded-pill bg-sand px-3 py-0.5 text-caption font-semibold text-espresso">{reason}</span> : null}
+          {reason ? <span className="rounded-pill bg-sand px-3 py-1 text-caption font-semibold text-espresso">{reason}</span> : null}
         </div>
       </div>
       <div className="relative w-24 shrink-0 self-start pb-6">

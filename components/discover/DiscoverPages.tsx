@@ -12,7 +12,7 @@ function Steps({ steps }: { steps: readonly string[] }) {
           <span className="flex size-7 shrink-0 items-center justify-center rounded-pill bg-sand font-bold tabular-nums text-maroon" aria-hidden="true">
             {index + 1}
           </span>
-          <span className="min-w-0 pt-0.5">
+          <span className="min-w-0 pt-1">
             <span className="sr-only">Step {index + 1}: </span>
             {step}
           </span>

@@ -23,7 +23,7 @@ export function SearchField({
         {label}
       </label>
       <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-mocha" aria-hidden="true">
-        <MagnifyingGlass weight="regular" size={22} />
+        <MagnifyingGlass weight="regular" size={24} />
       </span>
       <input
         id={id}

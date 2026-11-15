@@ -119,6 +119,11 @@ Three sessions, in order. Everything is built on the `dev` branch and tested on 
 - [ ] **Scan button number badge.** A read-only list of ready delivery bags grouped by building (cafe, building, earning, waiting time). Tapping a row only says "Scan this bag at the <source> counter to take it"; nothing can be claimed remotely.
 - [ ] **Add to home screen.** Web manifest, icons, cream splash, standalone display.
 - [ ] **Visual polish pass** at 360 px.
+  Every student screen (gate, identify, Home, the five menus, cart, checkout, order detail for pickup and delivery, Orders Active and Past, Updates, Wallet, Account and its sections, Discover, the runner sheet) was checked at 360 and 390 px with a script that measures spacing against the bible scale, icon sizes, cards inside cards, tap targets and the number of filled primary buttons on screen. Fixes:
+  - **Icons only 20 or 24 px.** To 24 px (were 22, 30, 32 or 36): Wallet and Updates row icons, header Back arrow, search magnifier, cafe tile icon, Next break clock, gate eye button, Account and Discover row icons, feedback faces. To 20 px (were 14, 18 or 24): stepper minus and plus, Log out, the Prep badge timer, banner icons.
+  - **Spacing only from the scale (4, 8, 12, 16, 20, 24, 32, 40 px).** 2 px paddings, gaps and nudges became 4 px or were removed (Prep badge, staff badge, arch card tag, unavailable reason pill, tall chip, Discover page lines, search result lines, nav row hints, banner icon, Home pin, stepper inner padding); 6 px gaps became 8 px (progress line labels); the status dot sits centred in a 20 px line box instead of a 6 px nudge; the gate and Identify pages use 40 px instead of 64 and 48.
+  - **Orders card buttons.** "Share feedback" no longer wraps inside its pill: the two buttons sit side by side when both labels fit on one line and stack full width on narrower phones.
+  - Already clean, no change needed: one filled primary per screen (the cart bar counts as the screen's action on menus), no cards inside cards, every tap target at least 44 px, no banned pattern from bible section 9, page headers the same on every sub-page (Back, title, Scan, wallet chip).
 
 ### Phase C: Cafe portal as a kitchen display, demo tools, release (later session)
 - [ ] **Cafe portal redesigned as a POS / kitchen display.** Fixed left sidebar (Queue, Vending, Hours and items, Today); top bar with live status counts, per-source open / paused switches and the clock; tickets styled as kitchen order slips with large item lines and big action buttons; ticket colour by age (normal, amber, red); "Scan buyer QR" for pickups; printable kitchen slip; large touch targets.
@@ -136,7 +141,7 @@ Raised in v1.0.0 Phase B1 (the brief was silent, simplest behaviour kept until a
 - **Progress line stages.** A segment is full once its stage is reached (Placed is full the moment the order exists). Only Preparing and On the way fill over time, and they stop at 90%. A delivery that is Ready but has no runner shows Preparing full and On the way empty. Home shows one card (the order due first) and "+N more", so the old two-card strip is gone.
 - **Unavailable tab** holds only item-level reasons (switched off, outside its own time, sold out). When a whole cafe is closed or paused, its items stay in their categories (the menu is still worth reading) with Add off, and the header line says why.
 - **No veg field.** Every item at UC is vegetarian (docs/MENU.md), so the veg mark is on every item and the menu data has no new field.
-- **Add button** is 36 px high with a 44 px tap area (a 44 px pill would cover most of a 96 px picture).
+- **Add button** is a full 44 px outlined pill beside the picture, so the visible button and its tap area are the same size.
 - **Home header** wraps "Ahmedabad University" onto two lines on a 360 px phone rather than cutting it, because the Scan button and the wallet chip need their room.
 - **Search** keeps matching the cafe name, so typing "delice" lists every Cafe Delice dish, and the order progress card stays visible above the results.
 

@@ -52,7 +52,7 @@ export function Header({
         <div className="min-w-0">
           {title === null ? (
             <div className="flex items-start gap-2">
-              <MapPin weight="regular" size={20} className="mt-0.5 shrink-0 text-maroon" aria-hidden="true" />
+              <MapPin weight="regular" size={20} className="shrink-0 text-maroon" aria-hidden="true" />
               <div className="min-w-0">
                 <p className="text-secondary font-semibold leading-tight text-espresso">{COPY.student.home.locationName}</p>
                 <p className="text-secondary leading-tight text-mocha">{COPY.student.home.locationPlace}</p>
@@ -64,7 +64,7 @@ export function Header({
               aria-label="Back"
               className="flex size-11 shrink-0 items-center justify-center rounded-pill bg-sand text-espresso transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon"
             >
-              <ArrowLeft weight="regular" size={22} aria-hidden="true" />
+              <ArrowLeft weight="regular" size={24} aria-hidden="true" />
             </Link>
           ) : (
             <h1 className="line-clamp-2 break-words font-display text-title font-extrabold leading-tight text-maroon">{title}</h1>

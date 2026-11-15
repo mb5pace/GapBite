@@ -10,7 +10,7 @@ const ICON_COLOUR: Record<Tone, string> = {
 };
 
 function ToneIcon({ tone }: { tone: Tone }) {
-  const props = { weight: "regular" as const, size: 24, "aria-hidden": true };
+  const props = { weight: "regular" as const, size: 20, "aria-hidden": true };
   if (tone === "warning") return <Warning {...props} />;
   if (tone === "error") return <WarningCircle {...props} />;
   return <Info {...props} />;
@@ -34,7 +34,7 @@ export function Banner({
       role={tone === "error" ? "alert" : "status"}
       className="flex items-start gap-3 rounded-card bg-parchment p-4"
     >
-      <span className={`mt-0.5 shrink-0 ${ICON_COLOUR[tone]}`}>
+      <span className={`shrink-0 ${ICON_COLOUR[tone]}`}>
         <ToneIcon tone={tone} />
       </span>
       <p className="min-w-0 flex-1 text-secondary text-espresso">{children}</p>

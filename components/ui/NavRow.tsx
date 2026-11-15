@@ -11,7 +11,7 @@ function RowBody({ icon, title, hint }: { icon: ReactNode; title: string; hint?:
       </span>
       <span className="min-w-0 flex-1">
         <span className="block font-display text-section font-bold leading-tight text-maroon">{title}</span>
-        {hint ? <span className="mt-0.5 block text-secondary text-mocha">{hint}</span> : null}
+        {hint ? <span className="mt-1 block text-secondary text-mocha">{hint}</span> : null}
       </span>
       <CaretRight weight="regular" size={20} className="shrink-0 text-mocha" aria-hidden="true" />
     </>

@@ -20,7 +20,7 @@ export function Chip({
 }: ChipProps) {
   const shape =
     variant === "capsule"
-      ? "min-h-16 min-w-16 flex-col gap-0.5 px-4 text-body"
+      ? "min-h-16 min-w-16 flex-col gap-1 px-4 text-body"
       : "h-11 px-4 text-secondary";
   const colour = selected
     ? variant === "capsule"

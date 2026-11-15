@@ -28,7 +28,7 @@ export function SourceTile({ source, wide = false }: { source: Source; wide?: bo
       className={`flex flex-col gap-2 transition-transform duration-150 ease-out active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon ${wide ? "col-span-2" : ""}`}
     >
       <span className={`flex flex-col justify-between rounded-tile p-4 text-cream ${wide ? "aspect-[2/1]" : "aspect-square"} ${SOURCE_BG[source.id]}`} aria-hidden="true">
-        <PlaceIcon weight="regular" size={wide ? 36 : 30} />
+        <PlaceIcon weight="regular" size={24} />
         <span className="font-display text-title font-extrabold leading-none">{source.name}</span>
       </span>
       <span className="flex flex-col gap-1 px-1">

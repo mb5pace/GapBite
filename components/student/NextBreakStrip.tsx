@@ -43,7 +43,7 @@ export function NextBreakStrip() {
   return (
     <div className="flex items-center gap-3 rounded-card bg-parchment p-4">
       <span className="flex size-10 shrink-0 items-center justify-center rounded-pill bg-sand text-maroon" aria-hidden="true">
-        <Clock weight="regular" size={22} />
+        <Clock weight="regular" size={24} />
       </span>
       <p className="text-secondary text-espresso">
         {next ? (

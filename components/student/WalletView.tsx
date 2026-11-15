@@ -37,7 +37,7 @@ function LedgerRow({ entry, now }: { entry: LedgerEntry; now: number }) {
   const inner = (
     <>
       <span className="flex size-11 shrink-0 items-center justify-center rounded-pill bg-sand text-maroon" aria-hidden="true">
-        <Icon weight="regular" size={22} />
+        <Icon weight="regular" size={24} />
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-body font-bold text-espresso">{WALLET_COPY.types[entry.type]}</p>
