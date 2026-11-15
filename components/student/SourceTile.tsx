@@ -1,54 +1,46 @@
 "use client";
 
+import { Coffee, CookingPot, Hamburger, Leaf, Storefront, type Icon } from "@phosphor-icons/react";
 import Link from "next/link";
-import type { Source } from "@/data/menu";
-import { Badge } from "@/components/ui/Badge";
-import { SourceGlyph } from "@/components/ui/SourceGlyph";
-import { sourceLabel } from "@/lib/hours-rules";
-import { useCart } from "./CartProvider";
+import type { Source, SourceId } from "@/data/menu";
+import { StatusLine } from "./StatusLine";
+
+/** Each place's own icon and its source colour (UI_UX_BIBLE.md "Source colours"). Full class names, so Tailwind sees them. */
+const ICON: Record<SourceId, Icon> = {
+  "truly-indian": CookingPot,
+  "global-bistro": Hamburger,
+  "cafe-delice": Coffee,
+  "greens-grains": Leaf,
+  vending: Storefront,
+};
+const TILE_BG: Record<SourceId, string> = {
+  "truly-indian": "bg-src-truly-indian",
+  "global-bistro": "bg-src-global-bistro",
+  "cafe-delice": "bg-src-cafe-delice",
+  "greens-grains": "bg-src-greens-grains",
+  vending: "bg-src-vending",
+};
 
 /**
- * One of the five places that sell. The line drawing is a Phosphor icon in a
- * sand circle until the Open Peeps illustrations are added. The badge says what the place is doing right now, from
- * the live hours: "Open now", "Opens at 12:00", "Closed today", "Closed today (Diwali)" or "Paused".
+ * A place on Home: a square tile in its source colour with a small icon and its name set in cream as a wordmark
+ * (our own lettering, not anyone's logo), then the name and one status line underneath. Vending spans the full width
+ * at the bottom, so its tile is twice as wide as it is tall.
  */
 export function SourceTile({ source, wide = false }: { source: Source; wide?: boolean }) {
-  const { menu } = useCart();
-  const label = sourceLabel(menu.hours, menu.service, source.id, menu.now);
-  const focus = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon";
-  const press = "transition-transform duration-150 ease-out active:scale-[0.98]";
-  const glyph = (
-    <span className="flex size-12 shrink-0 items-center justify-center rounded-pill bg-sand text-maroon" aria-hidden="true">
-      <SourceGlyph sourceId={source.id} size={26} />
-    </span>
-  );
-  const words = (
-    <span className="min-w-0 flex-1">
-      <span className="block font-display text-section font-bold text-maroon">{source.name}</span>
-      <span className="mt-0.5 block text-secondary text-mocha">{source.tagline}</span>
-      <span className="mt-2 block" data-source-status={source.id}>
-        <Badge tone={label.tone} wrap>
-          {label.text}
-        </Badge>
-      </span>
-    </span>
-  );
-
-  // The full-width tile (vending) lays out in one row; the cafe tiles stack. The status sits under the name in both:
-  // a long one ("Closed today (Diwali)") does not fit beside the icon on a 360 px phone.
-  if (wide) {
-    return (
-      <Link href={`/s/${source.id}`} className={`col-span-2 flex items-center gap-3 rounded-card bg-parchment p-4 ${press} ${focus}`}>
-        {glyph}
-        {words}
-      </Link>
-    );
-  }
-
+  const PlaceIcon = ICON[source.id];
   return (
-    <Link href={`/s/${source.id}`} className={`flex min-h-40 flex-col justify-between gap-4 rounded-card bg-parchment p-4 ${press} ${focus}`}>
-      {glyph}
-      {words}
+    <Link
+      href={`/s/${source.id}`}
+      className={`flex flex-col gap-2 transition-transform duration-150 ease-out active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon ${wide ? "col-span-2" : ""}`}
+    >
+      <span className={`flex flex-col justify-between rounded-tile p-4 text-cream ${wide ? "aspect-[2/1]" : "aspect-square"} ${TILE_BG[source.id]}`} aria-hidden="true">
+        <PlaceIcon weight="regular" size={wide ? 36 : 30} />
+        <span className="font-display text-title font-extrabold leading-none">{source.name}</span>
+      </span>
+      <span className="flex flex-col gap-1 px-1">
+        <span className="text-body font-semibold text-espresso">{source.name}</span>
+        <StatusLine sourceId={source.id} />
+      </span>
     </Link>
   );
 }

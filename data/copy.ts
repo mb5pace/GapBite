@@ -117,6 +117,8 @@ export const COPY = {
       greeting: (greeting: string, name: string) => `${greeting}, ${name}`,
       searchClear: "Clear search",
       orderFrom: "Order from",
+      cafesTitle: "Cafes at UC",
+      cafesSubtitle: "Order your favourite meal",
       popular: "Popular at UC",
       bestseller: "Bestseller",
       noResults: "Nothing matches that. Try poha, cold coffee or Paper Boat.",

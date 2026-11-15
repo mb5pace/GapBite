@@ -311,18 +311,18 @@ export interface SourceLabel {
   /** "Open now", "Opens at 12:00", "Closed today (Diwali)", "Closed today", "Closed for today", "Paused". */
   text: string;
   open: boolean;
-  tone: "olive" | "amber" | "taupe";
+  tone: "olive" | "amber" | "brick" | "taupe";
 }
 
 /** The status line on a Home tile. A whole closed day beats a pause; a pause beats the hours. */
 export function sourceLabel(cfg: HoursConfig, service: ServiceState, sourceId: SourceId, nowMs: number): SourceLabel {
   if (!service.available) return { text: "Not available", open: false, tone: "taupe" };
   const closure = closureAt(cfg, sourceId, nowMs);
-  if (closure?.kind === "holiday") return { text: `Closed today (${closure.note})`, open: false, tone: "taupe" };
-  if (closure?.kind === "closed-day") return { text: "Closed today", open: false, tone: "taupe" };
-  if (cfg.sources[sourceId].paused) return { text: "Paused", open: false, tone: "amber" };
+  if (closure?.kind === "holiday") return { text: `Closed today (${closure.note})`, open: false, tone: "brick" };
+  if (closure?.kind === "closed-day") return { text: "Closed today", open: false, tone: "brick" };
+  if (cfg.sources[sourceId].paused) return { text: "Paused", open: false, tone: "brick" };
   if (closure?.kind === "before-open") return { text: `Opens at ${closure.opensAt}`, open: false, tone: "amber" };
-  if (closure?.kind === "after-close") return { text: "Closed for today", open: false, tone: "taupe" };
+  if (closure?.kind === "after-close") return { text: "Closed for today", open: false, tone: "brick" };
   return { text: "Open now", open: true, tone: "olive" };
 }
 

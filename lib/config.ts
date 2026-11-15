@@ -156,7 +156,22 @@ export const POLL_MS = {
   /** Cafe queue. */
   cafe: 3000,
   admin: 5000,
+  /** Home: each place's status and "Ready in about N min" (/api/status). Paused while the tab is hidden. */
+  status: 15000,
 } as const;
+
+// ---------------------------------------------------------------------------
+// "Ready in about N min" on a cafe tile and menu header (docs/BUSINESS_RULES.md "Ready estimate")
+// ---------------------------------------------------------------------------
+
+/** Each order a cafe has accepted and not yet finished (ACCEPTED or PREPARING) adds this many minutes. */
+export const QUEUE_MIN_PER_ORDER = 2;
+/** The estimate is rounded up to a multiple of this. */
+export const READY_EST_STEP_MIN = 5;
+/** The estimate never says more than this, however long the queue. */
+export const READY_EST_CAP = 30;
+/** The server keeps one answer from /api/status for this long, however many students ask. */
+export const STATUS_CACHE_MS = 5000;
 
 // ---------------------------------------------------------------------------
 // Small UI timings

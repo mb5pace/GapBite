@@ -51,11 +51,12 @@ export function HomeView() {
         <SearchResults groups={groups} onClear={() => setQuery("")} />
       ) : (
         <>
-          <section aria-labelledby="order-from">
-            <h2 id="order-from" className="mb-3 font-display text-section font-bold text-maroon">
-              {COPY.student.home.orderFrom}
+          <section aria-labelledby="cafes">
+            <h2 id="cafes" className="font-display text-section font-bold text-maroon">
+              {COPY.student.home.cafesTitle}
             </h2>
-            <div className="grid grid-cols-2 gap-3">
+            <p className="mb-4 text-secondary text-mocha">{COPY.student.home.cafesSubtitle}</p>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-5">
               {SOURCES.map((source) => (
                 <SourceTile key={source.id} source={source} wide={source.kind === "vending"} />
               ))}
