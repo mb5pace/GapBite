@@ -14,6 +14,7 @@ export const COPY = {
     network: "Could not reach QuickX. Check your connection and try again.",
     wrongPortal: "That page is for a different QuickX portal. Log out and enter the right code.",
     needUser: "Tell us who's ordering first.",
+    loading: "Your food is on the stove…",
   },
 
   /** The pages Next shows when a page is missing or breaks. They carry our colours, never the browser's. */

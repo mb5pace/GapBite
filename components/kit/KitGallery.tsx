@@ -24,6 +24,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { IconButton } from "@/components/ui/IconButton";
 import { Input } from "@/components/ui/Input";
 import { ItemTile } from "@/components/ui/ItemTile";
+import { LoadingView } from "@/components/ui/LoadingView";
 import { Money } from "@/components/ui/Money";
 import { PillButton } from "@/components/ui/PillButton";
 import { Sheet } from "@/components/ui/Sheet";
@@ -290,6 +291,12 @@ export function KitGallery() {
             <Textarea label="Anything to add? (optional)" hint="Up to 500 characters." value={comment} maxLength={500} onChange={(event) => setComment(event.target.value)} />
           </div>
         </div>
+      </Section>
+
+      <Section title="Loading view" note="Shown only while a page is actually loading, never as a delay. Three thin lines of steam rise and fade; with reduce motion on they stand still.">
+        <Phone>
+          <LoadingView compact />
+        </Phone>
       </Section>
 
       <Section title="Sheet" note="Slides up in 200 ms. Close with Esc, the dim area, or by dragging the handle down 80 px. On the laptop portals the same component opens as a centred dialog.">
