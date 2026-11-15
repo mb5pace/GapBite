@@ -17,7 +17,7 @@ export function CafeHeader() {
   const links = [
     { href: "/cafe", label: CAFE_COPY.nav.queue, badge: waiting },
     { href: "/cafe/vending", label: CAFE_COPY.nav.vending },
-    { href: "/cafe/menu", label: CAFE_COPY.nav.menu },
+    { href: "/cafe/hours", label: CAFE_COPY.nav.hours },
     { href: "/cafe/today", label: CAFE_COPY.nav.today },
   ];
 

@@ -20,7 +20,7 @@ export function rejectReason(id: string): (typeof REJECT_REASONS)[number] | unde
 }
 
 export const CAFE_COPY = {
-  nav: { queue: "Queue", vending: "Vending", menu: "Hours and items", today: "Today" },
+  nav: { queue: "Queue", vending: "Vending", hours: "Hours and items", today: "Today" },
   all: "All",
   filterLabel: "Show orders from",
   soundOn: "Sound on",
@@ -130,7 +130,6 @@ export const CAFE_COPY = {
     soldOut: "Sold out",
   },
   menu: {
-    title: "Menu availability",
     intro: "Switch an item off when it has run out. Students cannot order it until you switch it back on.",
     available: "Available today",
     off: "Off today",
@@ -146,6 +145,9 @@ export const CAFE_COPY = {
     days: "Open days",
     takingOrders: "Taking orders",
     pausedLabel: "Paused",
+    nowLabel: "Right now",
+    unsaved: "Not saved yet",
+    holidayListLabel: "Holidays, earliest first",
     pauseHint: "Paused means no new orders for this place until you switch it back on.",
     pauseSwitch: (name: string) => `${name}, taking orders`,
     saveHours: "Save hours",
