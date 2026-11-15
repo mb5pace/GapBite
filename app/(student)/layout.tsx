@@ -4,6 +4,7 @@ import { CartBar, CartBarSpacer } from "@/components/student/CartBar";
 import { StudentProviders } from "@/components/student/CartProvider";
 import { RunnerProvider } from "@/components/runner/RunnerProvider";
 import { LiveBottomBar, LiveHeader } from "@/components/student/Live";
+import { UpdateSound } from "@/components/student/UpdateSound";
 import { requirePageSession } from "@/lib/auth";
 import { getMeNow } from "@/lib/me";
 import { getMenuStateNow } from "@/lib/menu";
@@ -23,6 +24,7 @@ export default async function StudentLayout({ children }: { children: ReactNode 
   return (
     <StudentProviders userId={me.user.id} initialMenu={menu} initialMe={me}>
       <RunnerProvider>
+        <UpdateSound />
         <div className="mx-auto min-h-dvh w-full max-w-[430px]">
           <LiveHeader greeting={greetingNow()} tempMsLeft={me.sessionMsLeft} />
           <main className="px-5 pb-[calc(7rem+env(safe-area-inset-bottom))] pt-2">

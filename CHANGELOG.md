@@ -4,6 +4,25 @@ Everything that changes in QuickX is written here, newest first. The format foll
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-13
+
+Account and Discover are built, and the dev preview now keeps its own data. Production keeps working exactly as before: its orders, wallets and staff IDs are untouched.
+
+### Added
+- **Account** is now a real page: your name, ID, a Staff badge if you are staff, and your wallet balance, then Wallet, My Profile, Preferences, Notifications, Order History, Refund Status, Terms and Conditions, Feedback, Support and Log out (it asks first).
+- **My Profile**: change your first name.
+- **Preferences**: choose a default building, pickup or delivery, and as soon as possible or next break. Checkout starts from them, and the Next break strip on Home counts from your default building (or says "for pickup").
+- **Notifications**: three switches. Sounds plays a soft chime when a new Update arrives while QuickX is open (off until you turn it on). The other two say they are not connected yet.
+- **Order History**: your finished orders and the deliveries you carried, with All, Orders and Runs, and what each run did to your wallet.
+- **Refund Status**: every refund with why it happened and the total.
+- **Terms and Conditions** and **Support**: what this prototype is, the credits, the UC help desk, and a place for the team's contact details.
+- **Feedback**: pick a face from 1 to 5 and add a comment, from Account or Discover.
+- **Discover**: Introduction, Help, Smart Vending (with a button into the machine) and a FAQ on fees, the wallet minimum, late and missed deliveries, runner earnings, refunds and the 4-digit code.
+
+### Changed
+- The dev preview now keeps its own orders, wallets, staff IDs and codes, separate from production, so testing on the dev link can never touch real data. Production is unchanged.
+- `/api/health` now also says which environment it is (`production`, `preview` or `local`) and which key prefix it uses, so a deployment can be checked without logging in.
+
 ## [0.8.0] - 2026-11-13
 
 First tagged version. It covers everything built in Phases 0 to 8: ordering from the four cafes and the vending machine, the cafe desk, runner buddies, and what happens when an order is late.
@@ -44,5 +63,6 @@ First tagged version. It covers everything built in Phases 0 to 8: ordering from
 ### Changed
 - The colours look the same on every phone and laptop, including phones set to dark mode or "darken websites".
 
-[Unreleased]: https://github.com/mb5pace/GapBite/compare/v0.8.0...dev
+[Unreleased]: https://github.com/mb5pace/GapBite/compare/v0.9.0...dev
+[0.9.0]: https://github.com/mb5pace/GapBite/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/mb5pace/GapBite/releases/tag/v0.8.0

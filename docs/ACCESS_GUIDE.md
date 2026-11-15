@@ -11,6 +11,8 @@ Production site: **https://quickx-gapbite.vercel.app**
 | Gate (type a code) | https://quickx-gapbite.vercel.app/ | anyone |
 | Identify (who is ordering) | https://quickx-gapbite.vercel.app/identify | after a student code |
 | Student Home | https://quickx-gapbite.vercel.app/home | a student or staff session that has identified |
+| Student Discover (Introduction, Help, Smart Vending, Feedback, FAQ) | https://quickx-gapbite.vercel.app/discover | a student or staff session that has identified |
+| Student Account (profile, Preferences, Notifications, Order History, Refund Status, Terms, Feedback, Support, Log out) | https://quickx-gapbite.vercel.app/account | a student or staff session that has identified |
 | Cafe queue | https://quickx-gapbite.vercel.app/cafe | cafe session |
 | Cafe vending stock | https://quickx-gapbite.vercel.app/cafe/vending | cafe session |
 | Cafe kiosk (full screen) | https://quickx-gapbite.vercel.app/cafe/kiosk | cafe session |

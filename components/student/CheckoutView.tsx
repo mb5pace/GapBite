@@ -14,7 +14,6 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Money } from "@/components/ui/Money";
 import { PillButton, PillLink } from "@/components/ui/PillButton";
 import { SourceGlyph } from "@/components/ui/SourceGlyph";
-import { DEFAULT_BUILDING, DEFAULT_MODE } from "@/lib/config";
 import { formatRupees } from "@/lib/format";
 import { postJson } from "@/lib/http";
 import { estimatePromisedAt, feeFor, priceLines, slotAvailable, slotsLeftToday, walkFor } from "@/lib/order-rules";
@@ -46,9 +45,11 @@ export function CheckoutView() {
   const cart = useCart();
   const me = useMe();
 
-  const [mode, setMode] = useState<OrderMode>(DEFAULT_MODE);
-  const [buildingId, setBuildingId] = useState<BuildingId>(DEFAULT_BUILDING);
-  const [when, setWhen] = useState("asap");
+  // Start from Account › Preferences. The time stays on the preference until you pick one yourself, so it follows
+  // the mode and the building you choose (a nearer building can open an earlier break).
+  const [mode, setMode] = useState<OrderMode>(me.prefs.defaultMode);
+  const [buildingId, setBuildingId] = useState<BuildingId>(me.prefs.defaultBuilding);
+  const [pickedWhen, setPickedWhen] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [topUpOpen, setTopUpOpen] = useState(false);
@@ -80,6 +81,8 @@ export function CheckoutView() {
   const need = topUpNeeded(me.balance, total);
   const slots = slotsLeftToday(now);
   const slotOk = (slot: string) => slotAvailable(slot, now, priced.prepMin, walk);
+  const preferredWhen = me.prefs.defaultWhen === "next-break" ? (slots.find(slotOk) ?? "asap") : "asap";
+  const when = pickedWhen ?? preferredWhen;
   const slotProblem = when !== "asap" && !slotOk(when);
   const cartProblem = Object.keys(cart.issues).length > 0;
 
@@ -209,7 +212,7 @@ export function CheckoutView() {
       <Section title={CHECKOUT_COPY.whenLabel}>
         <div className="flex flex-col gap-3">
           <div>
-            <Chip selected={when === "asap"} onClick={() => setWhen("asap")}>
+            <Chip selected={when === "asap"} onClick={() => setPickedWhen("asap")}>
               {CHECKOUT_COPY.asap}
             </Chip>
           </div>
@@ -223,7 +226,7 @@ export function CheckoutView() {
                     variant="capsule"
                     selected={when === slot}
                     disabled={!open}
-                    onClick={() => setWhen(slot)}
+                    onClick={() => setPickedWhen(slot)}
                     aria-label={open ? `Break at ${slot}` : `Break at ${slot}, too late`}
                   >
                     <span className="font-display font-bold tabular-nums">{slot}</span>

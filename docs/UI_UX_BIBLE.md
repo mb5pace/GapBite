@@ -62,6 +62,10 @@ Text on `cream`/`parchment` is `espresso` or `maroon`. Text on `maroon` is `crea
 11. **Money:** `₹240` with no decimals, Indian digit grouping (`₹1,250`). Credits in `olive` with `+`, debits in `brick` with `−`.
 12. **Empty states:** one line illustration, one sentence, one action.
 13. **Due and alert states (Phase 8):** a card that is due, or a Ready delivery with no runner for 3 minutes, gets a 2 px `amber` ring all round (a full border, never a side stripe) and, where there is room, a small amber warning icon. Alert cards pinned above the cafe queue are `cream` with a 2 px ring: `brick` for a failed order or a bag being brought back, `amber` for a no-show. The colour is the ring and the icon only; the words stay in `espresso`, so contrast is never a problem. Same rule as the Banner: amber is never used as text.
+14. **List row (Phase 9):** the Account and Discover rows: `parchment` card, 44 px `sand` icon circle, Grandstander title, a `mocha` hint line and a caret. At least 64 px tall; the whole row is the tap target. A row that opens a sheet (Log out) is the same row as a button.
+15. **Accordion (Phase 9):** the FAQ. `parchment` cards; the title row is the button (at least 56 px) with a caret that turns when open and `aria-expanded`, so the state is not shown by colour alone. Any number can be open.
+16. **Face rating (Phase 9):** five 56 px circles, worst to best (Phosphor smileys). The chosen one is filled on `blush`. It is one radio group with arrow-key support.
+17. **Text area (Phase 9):** like the Input: `sand`, no border, a visible label, a hint, an error line and a character counter when there is a limit.
 
 ## 5. Illustrations and imagery
 

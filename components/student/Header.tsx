@@ -20,6 +20,9 @@ export function routeFor(pathname: string): { title: string | null; back?: strin
   if (first === "cart") return { title: titles.cart, back: "/home" };
   if (first === "checkout") return { title: titles.checkout, back: "/cart" };
   if (first === "o") return { title: titles.order, back: "/orders" };
+  if (first === "discover" && second) {
+    return { title: (COPY.student.discoverTopics as Titles)[second] ?? titles.discover, back: "/discover" };
+  }
   if (first === "account" && second) {
     return { title: (COPY.student.accountSections as Titles)[second] ?? titles.account, back: "/account" };
   }

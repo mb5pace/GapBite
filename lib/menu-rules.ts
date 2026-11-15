@@ -58,8 +58,9 @@ export interface NextBreak {
  * not in the past. With prep 5, GICT 2 and buffer 5 the lead is 12 minutes, so
  * the 11:50 break needs an order by 11:38. Null when no break is left today.
  */
-export function nextBreak(nowMs: number, prepMin: number, buildingId: BuildingId): NextBreak | null {
-  const leadMin = prepMin + getBuilding(buildingId).walkMin + SLOT_LEAD_BUFFER_MIN;
+export function nextBreak(nowMs: number, prepMin: number, buildingId: BuildingId | null): NextBreak | null {
+  // No building means pickup at UC: there is no walk.
+  const leadMin = prepMin + (buildingId ? getBuilding(buildingId).walkMin : 0) + SLOT_LEAD_BUFFER_MIN;
   for (const slot of BREAK_SLOTS) {
     const orderByMs = slotEpoch(slot, nowMs) - leadMin * 60_000;
     if (orderByMs >= nowMs) return { slot, orderByMs, leadMin };

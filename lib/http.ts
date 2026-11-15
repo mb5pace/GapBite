@@ -26,17 +26,17 @@ async function parse<T>(res: Response): Promise<ApiResult<T>> {
 }
 
 /**
- * POST JSON. A 401 sends the person back to the gate, except on the gate's own
+ * POST (or PUT) JSON. A 401 sends the person back to the gate, except on the gate's own
  * login call, where a 401 just means the code was wrong.
  */
 export async function postJson<T>(
   url: string,
   body: unknown,
-  options: { redirectOn401?: boolean } = {},
+  options: { redirectOn401?: boolean; method?: "POST" | "PUT" } = {},
 ): Promise<ApiResult<T>> {
   try {
     const res = await fetch(url, {
-      method: "POST",
+      method: options.method ?? "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
       cache: "no-store",

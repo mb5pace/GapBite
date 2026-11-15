@@ -55,9 +55,9 @@ Reverse-chronological feed grouped by Today / Earlier. Each row: small icon by k
 Profile card at top (name, AU or staff ID, Staff badge if staff, wallet balance). Then rows: **Wallet**, **My Profile**, **Preferences**, **Notifications**, **Order History**, **Refund Status**, **Terms and Conditions**, **Feedback**, **Support**, **Logout**.
 1. **Wallet:** balance, Top up (mock UPI sheet: amount chips, "Pay with UPI" → 1.5 s processing → success), ledger list with type, amount (+/−), order link, time.
 2. **My Profile:** name (editable), ID (read-only), role.
-3. **Preferences:** default building, default mode (pickup/delivery), default "when" (ASAP). Saved to Redis.
-4. **Notifications:** toggles (order updates, wallet updates, sounds). Only "sounds" has an effect; others are cosmetic and say so.
-5. **Order History:** same list as Orders › Past, plus runs, with filters All / Orders / Runs.
+3. **Preferences:** default building (the six buildings), default way to get it (pickup / delivery) and default time (As soon as possible / Next break). Saved to Redis with an explicit Save button. Checkout starts from them (the time stays on the preference until you pick one yourself; "Next break" is the first break still open, or as soon as possible if none is), and the Next break strip on Home uses the default building, or "for pickup" with no walk when pickup is the default.
+4. **Notifications:** toggles (order updates, wallet updates, sounds), saved the moment they flip. Only "sounds" has an effect: a soft chime when a new Update arrives while QuickX is open (off by default); the other two say "Not connected yet".
+5. **Order History:** same list as Orders › Past, plus finished runs (where it went, how it ended, and what it did to your wallet), with filters All / Orders / Runs.
 6. **Refund Status:** every refund with reason (cancelled, rejected, failed late) and "Refunded to wallet" state.
 7. **Terms and Conditions:** short static text including the prototype disclaimer.
 8. **Feedback:** same as Discover › Feedback.

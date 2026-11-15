@@ -14,6 +14,7 @@ import {
 import { useState, type ReactNode } from "react";
 import { ArchCard } from "@/components/ui/ArchCard";
 import { Badge } from "@/components/ui/Badge";
+import { Accordion } from "@/components/ui/Accordion";
 import { Banner } from "@/components/ui/Banner";
 import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
@@ -27,6 +28,9 @@ import { Money } from "@/components/ui/Money";
 import { PillButton } from "@/components/ui/PillButton";
 import { Sheet } from "@/components/ui/Sheet";
 import { Stepper, type StepperStep } from "@/components/ui/Stepper";
+import { FaceRating } from "@/components/ui/FaceRating";
+import { NavRow } from "@/components/ui/NavRow";
+import { Textarea } from "@/components/ui/Textarea";
 import { Toggle } from "@/components/ui/Toggle";
 import { BottomBar } from "@/components/student/BottomBar";
 import { Header } from "@/components/student/Header";
@@ -93,6 +97,8 @@ export function KitGallery() {
   const [code, setCode] = useState("48");
   const [entered, setEntered] = useState("");
   const [added, setAdded] = useState(0);
+  const [rating, setRating] = useState(4);
+  const [comment, setComment] = useState("");
 
   const popular = MENU_ITEMS.filter((i) => i.tags.includes("bestseller")).slice(0, 5);
   const coffee = getItem("cd-cold-coffee");
@@ -265,6 +271,24 @@ export function KitGallery() {
           <Toggle checked={available} onChange={setAvailable} label="Tea, available today" />
           <span className="text-body text-espresso">{available ? "Available today" : "Off today"}</span>
           <Toggle checked={false} onChange={() => undefined} label="Disabled example" disabled />
+        </div>
+      </Section>
+
+      <Section title="List row, FAQ, rating and text box" note="The Account and Discover pages. A row opens a page; an FAQ row opens to its answer; the rating is a 1 to 5 face; the text box counts characters.">
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="flex flex-col gap-3">
+            <NavRow href="/account/wallet" icon={<Receipt weight="regular" size={22} />} title="Wallet" hint="Balance, top up and every payment" />
+            <Accordion
+              items={[
+                { id: "kit-fees", title: "What does delivery cost?", paragraphs: ["Pickup at UC is free. Delivery adds ₹5 to AG, GICT, SAS and AMSOM."] },
+                { id: "kit-late", title: "What if my order is late?", paragraphs: ["Every delivery has 5 minutes of grace after the promised time."] },
+              ]}
+            />
+          </div>
+          <div className="flex max-w-sm flex-col gap-5 rounded-card bg-parchment p-4">
+            <FaceRating value={rating} onChange={setRating} label="Your rating" words={["Very bad", "Bad", "Okay", "Good", "Great"]} describe={(n, word) => `${n} of 5, ${word}`} />
+            <Textarea label="Anything to add? (optional)" hint="Up to 500 characters." value={comment} maxLength={500} onChange={(event) => setComment(event.target.value)} />
+          </div>
         </div>
       </Section>
 

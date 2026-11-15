@@ -4,6 +4,8 @@
  * the same thing for polling. Server-side only; the type is safe to import anywhere.
  */
 import { countLiveOrders } from "./orders";
+import { getPrefs } from "./prefs";
+import type { Prefs } from "./prefs-rules";
 import { countRuns } from "./runs";
 import type { Session } from "./session";
 import { getUnread } from "./updates";
@@ -20,20 +22,21 @@ export interface MeData {
   activeOrder: boolean;
   /** Time left on a temp-code session, measured on the server; null for other sessions. */
   sessionMsLeft: number | null;
-  /** Saved preferences. Null until Preferences exist (Phase 9). */
-  prefs: null;
+  /** Saved preferences (defaults until the user saves some). */
+  prefs: Prefs;
   /** Server time, epoch ms. */
   now: number;
 }
 
 export async function getMe(session: Session, now: number): Promise<MeData | null> {
   if (!session.userId) return null;
-  const [user, balance, unread, live, runs] = await Promise.all([
+  const [user, balance, unread, live, runs, prefs] = await Promise.all([
     getUser(session.userId),
     getBalance(session.userId),
     getUnread(session.userId),
     countLiveOrders(session.userId),
     countRuns(session.userId),
+    getPrefs(session.userId),
   ]);
   if (!user) return null;
   return {
@@ -42,7 +45,7 @@ export async function getMe(session: Session, now: number): Promise<MeData | nul
     unread,
     activeOrder: live > 0 || runs > 0,
     sessionMsLeft: session.codeType === "temp" ? Math.max(0, session.exp * 1000 - now) : null,
-    prefs: null,
+    prefs,
     now,
   };
 }

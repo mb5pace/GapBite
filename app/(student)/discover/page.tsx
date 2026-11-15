@@ -1,8 +1,6 @@
-import { Compass } from "@phosphor-icons/react/ssr";
-import { COPY } from "@/data/copy";
-import { EmptyState } from "@/components/ui/EmptyState";
+import { DiscoverList } from "@/components/discover/DiscoverList";
 
-/** Placeholder. Discover (Introduction, Help, Smart Vending, Feedback, FAQ) is Phase 9. */
+/** Discover: Introduction, Help, Smart Vending, Feedback and FAQ. */
 export default function Discover() {
-  return <EmptyState icon={<Compass weight="regular" size={40} />}>{COPY.student.stubs.discover}</EmptyState>;
+  return <DiscoverList />;
 }

@@ -88,7 +88,7 @@ function RunItem({ run, now }: { run: RunCard; now: number }) {
   );
 }
 
-function OrderCard({ order, now }: { order: OrderSummary; now: number }) {
+export function OrderCard({ order, now }: { order: OrderSummary; now: number }) {
   const promised = isTerminal(order.status) ? null : promisedLine(order);
   const due = isDue(order, now);
   return (
