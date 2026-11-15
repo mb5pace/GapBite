@@ -32,14 +32,14 @@ export function HomeView() {
   return (
     <div className="flex flex-col gap-6 pt-2">
       <div className="flex flex-col gap-4">
-        <header>
+        <div>
           <h1 className="flex items-center gap-2 font-display text-title font-bold leading-tight text-maroon">
             <span className="line-clamp-2 break-words">{COPY.student.home.greeting(greetingFor(cart.menu.now), me.user.name)}</span>
             {me.user.role === "staff" ? (
               <span className="shrink-0 rounded-pill bg-blush px-2 py-0.5 font-sans text-caption font-bold text-maroon">{COPY.student.staffBadge}</span>
             ) : null}
           </h1>
-        </header>
+        </div>
         <SearchField value={query} onChange={setQuery} />
         <ServiceBanner placement="home" />
         <WalletBanner />

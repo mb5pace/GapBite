@@ -18,7 +18,7 @@ export function ItemAddControl({ item, outlined = false }: { item: MenuItem; out
   const qty = cart.qtyOf(item.id);
   const ok = itemStatus(item, cart.menu) === "ok";
   const pill =
-    "relative inline-flex h-9 min-w-20 items-center justify-center rounded-pill border-[1.5px] px-5 text-secondary font-bold before:absolute before:-inset-y-1 before:inset-x-0 before:content-[''] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon";
+    "inline-flex h-11 min-w-20 items-center justify-center rounded-pill border-[1.5px] px-5 text-secondary font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon";
 
   if (!ok) {
     const reason = itemStateText(item, cart.menu) ?? undefined;
@@ -33,7 +33,7 @@ export function ItemAddControl({ item, outlined = false }: { item: MenuItem; out
     );
   }
   if (qty > 0) {
-    return <QtyStepper name={item.name} qty={qty} onInc={() => cart.add(item.id)} onDec={() => cart.setQty(item.id, qty - 1)} compact={outlined} />;
+    return <QtyStepper name={item.name} qty={qty} onInc={() => cart.add(item.id)} onDec={() => cart.setQty(item.id, qty - 1)} />;
   }
   return outlined ? (
     <button

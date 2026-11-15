@@ -2,30 +2,28 @@
 
 import { Minus, Plus } from "@phosphor-icons/react";
 
-/** [−] 2 [+] on a sand pill. Both buttons are 44 px; `compact` is 36 px with the same 44 px tap area, for a menu card. */
+/** [−] 2 [+] on a sand pill. Both buttons are 44 px. */
 export function QtyStepper({
   name,
   qty,
   onInc,
   onDec,
   incDisabled = false,
-  compact = false,
 }: {
   name: string;
   qty: number;
   onInc: () => void;
   onDec: () => void;
   incDisabled?: boolean;
-  compact?: boolean;
 }) {
   const button =
-    `relative flex ${compact ? "size-9 before:absolute before:-inset-1 before:content-['']" : "size-11"} items-center justify-center rounded-pill transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon`;
+    "flex size-11 items-center justify-center rounded-pill transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon";
   return (
     <span className="inline-flex items-center gap-1 rounded-pill bg-sand p-0.5">
       <button type="button" aria-label={`Remove one ${name}`} onClick={onDec} className={`${button} bg-cream text-espresso`}>
         <Minus weight="bold" size={18} aria-hidden="true" />
       </button>
-      <span className={`${compact ? "min-w-6" : "min-w-8"} text-center font-display text-section font-bold tabular-nums text-espresso`} aria-live="polite">
+      <span className="min-w-8 text-center font-display text-section font-bold tabular-nums text-espresso" aria-live="polite">
         <span className="sr-only">Quantity </span>
         {qty}
       </span>

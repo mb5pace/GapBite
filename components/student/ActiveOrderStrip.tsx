@@ -48,7 +48,7 @@ export function ActiveOrderStrip() {
       {more > 0 ? (
         <Link
           href="/orders"
-          className="self-end rounded-pill px-2 py-1 text-secondary font-semibold text-maroon focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon"
+          className="inline-flex h-11 items-center self-end rounded-pill px-3 text-secondary font-semibold text-maroon focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon"
         >
           +{more} more
         </Link>

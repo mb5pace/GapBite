@@ -37,7 +37,7 @@ export function ItemCard({ item, unavailable = false }: { item: MenuItem; unavai
           {reason ? <span className="rounded-pill bg-sand px-3 py-0.5 text-caption font-semibold text-espresso">{reason}</span> : null}
         </div>
       </div>
-      <div className="relative w-24 shrink-0 self-start pb-5">
+      <div className="relative w-24 shrink-0 self-start pb-6">
         <ItemTile itemId={item.id} name={item.name} sourceId={item.sourceId} size="xl" />
         <div className="absolute inset-x-0 bottom-0 flex justify-center">
           <ItemAddControl item={item} outlined />
