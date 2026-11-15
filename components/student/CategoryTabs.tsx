@@ -11,7 +11,7 @@ export interface TabSection {
 /**
  * Sticky horizontal tabs under the header, one for each section of a menu (a section is an element with
  * id="section-<id>"). The open one has a 3 px maroon underline. Tapping a tab scrolls to its section; scrolling the page
- * moves the underline. It measures the sticky header once and keeps `--sticky-offset` (header + tabs) on the page, so
+ * moves the underline (at the very bottom, the last one). It measures the sticky header once and keeps `--sticky-offset` (header + tabs) on the page, so
  * sections stop just below them.
  */
 export function CategoryTabs({ sections }: { sections: TabSection[] }) {
@@ -56,7 +56,9 @@ export function CategoryTabs({ sections }: { sections: TabSection[] }) {
         const el = document.getElementById(`section-${id}`);
         if (el && el.getBoundingClientRect().top <= offset.current + 1) current = id;
       }
-      setPicked(current);
+      // At the very bottom the last section may be too short to ever reach the tabs: it is still the one being read.
+      const atBottom = window.scrollY > 0 && window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+      setPicked(atBottom ? ids[ids.length - 1] : current);
     };
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(update);
