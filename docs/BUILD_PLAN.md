@@ -114,11 +114,11 @@ Three sessions, in order. Everything is built on the `dev` branch and tested on 
 - [x] **Home in SmartQ style.** Location line "Ahmedabad University · UC" with a pin, search, a square cafe tile grid with Open now / Opens at HH:MM / Paused and "Ready in about X min" from that cafe's queue, Popular at UC.
 - [x] **Order progress line on Home.** Four parts tied to the real status (delivery: Placed, Preparing, On the way, Delivered; pickup: Placed, Preparing, Ready at counter, Collected) with the Phosphor `PersonSimpleWalk` icon standing on the current part and a gentle walking bob, reduced motion respected, "+1 more" for a second order.
 - [x] **Menu pages in SmartQ style.** Category tabs including Unavailable, search, cards with a veg dot, description, price, a "Prep N min" badge, the photo on the right if there is one, an outlined Add button.
-- [ ] **Order Detail.** A large QR plus the 4-digit code and "Show this screen to collect your order" for pickup and vending.
-- [ ] **Orders tab like the SmartQ Past screen.** Search, underlined Active / Past tabs, cards with status badge, date and time, order ID, items with prices, Share feedback and Order again, an end-of-list line.
-- [ ] **Scan button number badge.** A read-only list of ready delivery bags grouped by building (cafe, building, earning, waiting time). Tapping a row only says "Scan this bag at the <source> counter to take it"; nothing can be claimed remotely.
-- [ ] **Add to home screen.** Web manifest, icons, cream splash, standalone display.
-- [ ] **Visual polish pass** at 360 px.
+- [x] **Order Detail.** A large QR plus the 4-digit code and "Show this screen to collect your order" for pickup and vending.
+- [x] **Orders tab like the SmartQ Past screen.** Search, underlined Active / Past tabs, cards with status badge, date and time, order ID, items with prices, Share feedback and Order again, an end-of-list line.
+- [x] **Scan button number badge.** A read-only list of ready delivery bags grouped by building (cafe, building, earning, waiting time). Tapping a row only says "Scan this bag at the <source> counter to take it"; nothing can be claimed remotely.
+- [x] **Add to home screen.** Web manifest, icons, cream splash, standalone display.
+- [x] **Visual polish pass** at 360 px.
   Every student screen (gate, identify, Home, the five menus, cart, checkout, order detail for pickup and delivery, Orders Active and Past, Updates, Wallet, Account and its sections, Discover, the runner sheet) was checked at 360 and 390 px with a script that measures spacing against the bible scale, icon sizes, cards inside cards, tap targets and the number of filled primary buttons on screen. Fixes:
   - **Icons only 20 or 24 px.** To 24 px (were 22, 30, 32 or 36): Wallet and Updates row icons, header Back arrow, search magnifier, cafe tile icon, Next break clock, gate eye button, Account and Discover row icons, feedback faces. To 20 px (were 14, 18 or 24): stepper minus and plus, Log out, the Prep badge timer, banner icons.
   - **Spacing only from the scale (4, 8, 12, 16, 20, 24, 32, 40 px).** 2 px paddings, gaps and nudges became 4 px or were removed (Prep badge, staff badge, arch card tag, unavailable reason pill, tall chip, Discover page lines, search result lines, nav row hints, banner icon, Home pin, stepper inner padding); 6 px gaps became 8 px (progress line labels); the status dot sits centred in a 20 px line box instead of a 6 px nudge; the gate and Identify pages use 40 px instead of 64 and 48.
@@ -134,6 +134,15 @@ Three sessions, in order. Everything is built on the `dev` branch and tested on 
 
 ## Open questions
 (Add questions here when a doc is silent. Keep the simplest behaviour until answered.)
+
+Raised in v1.0.0 Phase B2 (the brief was silent, simplest behaviour kept until answered):
+- **QR lifetime.** The collect QR (and the "Show this screen" strip) shows while a pickup is Placed, Accepted, Preparing or Ready. Once it is collected, cancelled, rejected or failed, the server stops sending it and the card keeps only the ID, badge and cafe. A no-show only happens to deliveries, which never have a QR, so its counter collection still uses the 4 digits.
+- **Badge words on pickup cards.** Ready reads "Ready to collect" (the existing word); Placed and Accepted are amber like Preparing.
+- **Share feedback and Order again** are on Past cards only. An order still in progress has nothing to rate yet and is already on its way.
+- **Order again** opens the cart once something is added, so the student sees what went in. "Keep my cart" on the replace question leaves everything as it was. Quantities are capped by the usual cart rules (10 units, vending stock).
+- **Orders search** matches dish names, the cafe name and the order ID. My runs is hidden while a search is typed (the search is about your own orders).
+- **Ready list leaves out the order ID** as well as the buyer and the code, so a typed ID cannot be taken from the list without going to the counter. "Minutes since ready" is counted from the server's time when the cafe marked it ready. Staff never see the top-up note.
+- **Home-screen icon.** The "Q" is drawn from a ring and a tail (no font file needed at build time), cream on maroon; the maskable icon keeps the mark inside the safe circle.
 
 Raised in v1.0.0 Phase B1 (the brief was silent, simplest behaviour kept until answered):
 - **Vending tile** is full width at 2:1, not 1:1 (a 1:1 tile that wide would fill the screen). Its status line says "Open now · Ready now" because its prep time is 0.

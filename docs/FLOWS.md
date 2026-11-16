@@ -75,6 +75,16 @@ interface Order {
 2. Staff type the 4 digits into the order card in the Cafe portal (or into the queue's "Collect" box). Match → `COLLECTED`. Buyer Update: "Collected. Enjoy!"
 3. Vending pickup: buyer opens the kiosk screen (Cafe portal › Vending kiosk, shown on the laptop beside the machine), enters the code, sees the slots dispense, order becomes `COLLECTED`.
 
+### Collect QR (v1.0.0 Phase B2)
+
+While a pickup or vending pickup order is not finished, the buyer's Order Detail shows a QR code above the four code boxes. Phase C's cafe scanner will read it.
+
+- **Text in the QR:** `QX:COLLECT:<orderId>:<code>`, for example `QX:COLLECT:QX-4821:0397`. The prefix is `COLLECT_QR_PREFIX` in `lib/config.ts`; the order ID is `QX-` and 4 digits (the same pattern as everywhere else); the code is the order's 4-digit collect code, leading zeros kept. Nothing else is in it: no name, no amount.
+- **Made on the server only**, by `collectQrText` in `lib/order-ref.ts`, and drawn there as an SVG path (`lib/qr.ts`). The browser never builds it.
+- **Only in the buyer's own reply:** `GET /api/orders/[id]` from the buyer's session (and the server render of `/o/[orderId]`) carries a `qr` field for a pickup order that is not finished. No other reply has it: not the orders list, not the cafe queue or bag slip, not the kiosk, not Admin › Live orders, not the runner preview, not the ready list, and not anyone else asking for the same order ID. Delivery orders never get one (the buyer shows the code to the runner).
+- **Reading it (Phase C):** `parseCollectQr(text)` in `lib/order-ref.ts` returns `{ orderId, code }` or `null` for anything that is not exactly this shape. The scanner then does what typing the code does today: the code must match the order, the order must be `READY` (or a no-show still in its hold) and belong to that counter's source. Scanning is a faster way to type the code, not a new permission.
+- It is not the bag slip QR. The bag slip's `QX:ORDER:QX-4821` is for runners picking up delivery bags and carries no code.
+
 ## 3b. Runner buddy picks up
 
 1. A student at UC taps the **Scan** button (always visible in the Student portal header).
@@ -84,6 +94,7 @@ interface Order {
 5. On success → `PICKED_UP`, holder set. Popup shows "Run accepted. Take it to GICT ground floor lobby by 11:47." Cafe card moves to **Out for delivery** with the runner's name. Buyer Update: "Picked up by runner buddy Aarav. On the way to GICT." (staff: "Picked up by QuickX staff.")
 6. Failure messages, one line each: "Already taken by someone else", "Not ready yet", "This is your own order", "Top up to at least ₹50 to run", "You already have 3 active runs", "This order is for pickup at UC".
 7. Scanning several bags in a row is the batching: each scan is its own accept.
+7a. **Ready to deliver list (v1.0.0 Phase B2).** The Scan button carries a badge with the number of delivery bags that are `READY` with no holder, not counting the caller's own orders, and the runner sheet lists them under the camera, grouped by building (near zone first, oldest first). The list comes from `GET /api/runs/ready` (any student or staff session, read every 10 seconds while the tab is visible). Each entry has only: source name, building short name and drop point, the earning for that zone (or "Staff delivery" for staff), item count and minutes since ready. No order ID, no buyer, no code. The list is read-only: tapping a row says "Scan this bag at the <source> counter to take it." Nothing can be claimed from it; the only way to take a bag is still the scan and atomic accept in steps 2 to 5.
 8. A run (including one given to staff with "Send with staff", 3c) then shows in Orders › My runs until it is delivered or settled.
 
 ## 3c. Staff from the counter
