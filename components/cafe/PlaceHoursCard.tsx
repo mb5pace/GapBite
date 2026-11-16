@@ -87,7 +87,7 @@ export function PlaceHoursCard({
         </div>
         <span className="flex items-center gap-3">
           <span className={`text-secondary font-medium ${config.paused ? "text-brick" : "text-espresso"}`}>{config.paused ? copy.pausedLabel : copy.takingOrders}</span>
-          <Toggle checked={!config.paused} disabled={busy} label={copy.pauseSwitch(source.name)} onChange={(on) => void setPaused(!on)} />
+          <Toggle size="desk" checked={!config.paused} disabled={busy} label={copy.pauseSwitch(source.name)} onChange={(on) => void setPaused(!on)} />
         </span>
       </div>
 
@@ -98,7 +98,7 @@ export function PlaceHoursCard({
           <span className="px-2 text-secondary font-medium text-mocha">{copy.days}</span>
           <span className="flex flex-wrap gap-2">
             {WEEK_ORDER.map((day) => (
-              <Chip key={day} selected={shown.days.includes(day)} aria-label={WEEKDAY_NAMES[day]} onClick={() => toggleDay(day)}>
+              <Chip size="desk" key={day} selected={shown.days.includes(day)} aria-label={WEEKDAY_NAMES[day]} onClick={() => toggleDay(day)}>
                 {WEEKDAY_SHORT[day]}
               </Chip>
             ))}
@@ -109,7 +109,7 @@ export function PlaceHoursCard({
       {problem ? <Banner tone="error">{problem}</Banner> : null}
 
       <div className="flex flex-wrap items-center gap-3">
-        <PillButton size="md" disabled={!dirty || busy} onClick={() => void save()}>
+        <PillButton size="desk" disabled={!dirty || busy} onClick={() => void save()}>
           {busy ? copy.saving : copy.saveHours}
         </PillButton>
         {dirty ? <span className="text-secondary text-mocha">{copy.unsaved}</span> : null}

@@ -43,7 +43,7 @@ export function StaffDialog({
         ))}
       </div>
       <div className="mt-6">
-        <PillButton size="md" variant="outline" onClick={onClose}>
+        <PillButton size="desk" variant="outline" onClick={onClose}>
           {CAFE_COPY.cancel}
         </PillButton>
       </div>

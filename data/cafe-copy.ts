@@ -179,6 +179,8 @@ export const CAFE_COPY = {
     kiosk: "Open the kiosk",
     kioskHint: "Full screen, for the laptop beside the machine.",
     soldOut: "Sold out",
+    shelf: (letter: string) => `Shelf ${letter}`,
+    leftCount: (n: number) => `${n} left`,
   },
   menu: {
     intro: "Switch an item off when it has run out. Students cannot order it until you switch it back on.",
@@ -246,6 +248,8 @@ export const CAFE_COPY = {
     refunds: "Refunds",
     feesKept: "Delivery fees kept",
     revenueBySource: "Revenue by source",
+    revenueTile: "Revenue",
+    moreTitle: "Everything else today",
     source: "Source",
     finished: "Finished orders",
     revenue: "Revenue",

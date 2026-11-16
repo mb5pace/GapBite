@@ -80,7 +80,7 @@ export function HolidaysSection({
             widthClass="w-64"
             aria-describedby="holiday-note-hint"
           />
-          <PillButton size="md" disabled={busy || !date || note.trim() === ""} onClick={() => void add()}>
+          <PillButton size="desk" disabled={busy || !date || note.trim() === ""} onClick={() => void add()}>
             {copy.holidayAdd}
           </PillButton>
         </div>
@@ -99,7 +99,7 @@ export function HolidaysSection({
                   <span className="text-body font-medium text-espresso">{dateWords(holiday.date)}</span>
                   <span className="text-body text-mocha"> · {holiday.note}</span>
                 </span>
-                <PillButton variant="secondary" size="md" disabled={busy} aria-label={copy.holidayRemove(dateWords(holiday.date), holiday.note)} onClick={() => void remove(holiday)}>
+                <PillButton variant="secondary" size="desk" disabled={busy} aria-label={copy.holidayRemove(dateWords(holiday.date), holiday.note)} onClick={() => void remove(holiday)}>
                   Remove
                 </PillButton>
               </li>

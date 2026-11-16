@@ -26,7 +26,7 @@ export function PillField({ label, value, onChange, widthClass = "w-36", classNa
         value={value}
         onChange={(event) => onChange(event.target.value)}
         className={[
-          "h-11 rounded-pill bg-sand px-4 text-body tabular-nums text-espresso placeholder:text-taupe",
+          "h-12 rounded-pill bg-sand px-4 text-body tabular-nums text-espresso placeholder:text-taupe",
           "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon",
           widthClass,
           className,

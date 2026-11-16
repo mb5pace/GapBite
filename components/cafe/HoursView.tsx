@@ -39,7 +39,7 @@ export function HoursView() {
   }
 
   return (
-    <div className="flex max-w-5xl flex-col gap-6">
+    <div className="flex flex-col gap-6">
       <p className="max-w-2xl text-body text-mocha">{copy.intro}</p>
 
       {data && !data.service.available ? <Banner tone="warning">{copy.serviceOff}</Banner> : null}
@@ -52,7 +52,7 @@ export function HoursView() {
             <h2 id="places-title" className="font-display text-section font-bold text-maroon">
               {copy.placesTitle}
             </h2>
-            <div className="grid gap-4">
+            <div className="grid gap-4 xl:grid-cols-2">
               {SOURCES.map((source) => (
                 <PlaceHoursCard
                   key={source.id}

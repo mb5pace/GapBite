@@ -28,10 +28,10 @@ export function BagSlipDialog({ orderId, onClose }: { orderId: string | null; on
         </div>
       ) : null}
       <div className="mt-6 flex gap-3">
-        <PillButton size="md" disabled={!data} onClick={() => orderId && printSlip(orderId)}>
+        <PillButton size="desk" disabled={!data} onClick={() => orderId && printSlip(orderId)}>
           {copy.print}
         </PillButton>
-        <PillButton size="md" variant="secondary" onClick={onClose}>
+        <PillButton size="desk" variant="secondary" onClick={onClose}>
           {copy.close}
         </PillButton>
       </div>

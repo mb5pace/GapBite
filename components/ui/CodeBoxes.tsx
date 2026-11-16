@@ -5,8 +5,8 @@ import { CODE_DIGITS } from "@/lib/config";
 
 const BOX =
   "flex items-center justify-center rounded-field border-[1.5px] bg-cream font-display font-bold text-espresso";
-/** md: the buyer's code box and the runner entry. sm: the Collect box on a cafe queue card. */
-const SIZE = { md: "h-16 w-14 text-greeting", sm: "h-12 w-11 text-title" } as const;
+/** md: the buyer's code box and the runner entry. sm: 48 px boxes for the laptop portals (the no-show Collect on the Cafe alert bar, Admin's Reveal code). */
+const SIZE = { md: "h-16 w-14 text-greeting", sm: "size-12 text-title" } as const;
 
 /**
  * Four separate rounded boxes (UI_UX_BIBLE.md section 4): Plus Jakarta Sans 32, 1.5 px

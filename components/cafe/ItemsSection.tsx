@@ -92,17 +92,17 @@ function ItemRow({
         </div>
         <PillField label={copy.from} type="time" step={HOURS_STEP_MIN * 60} value={shown.from} onChange={(from) => edit({ from })} widthClass="w-32" />
         <PillField label={copy.until} type="time" step={HOURS_STEP_MIN * 60} value={shown.until} onChange={(until) => edit({ until })} widthClass="w-32" />
-        <PillButton size="md" disabled={!dirty || busy} onClick={() => void save()}>
+        <PillButton size="desk" disabled={!dirty || busy} onClick={() => void save()}>
           {copy.saveWindow}
         </PillButton>
         {!isDefault && !dirty ? (
-          <PillButton size="md" variant="secondary" disabled={busy} onClick={() => void reset()}>
+          <PillButton size="desk" variant="secondary" disabled={busy} onClick={() => void reset()}>
             {copy.resetWindow}
           </PillButton>
         ) : null}
         <span className="flex shrink-0 items-center gap-3">
           <span className={`text-secondary font-medium ${available ? "text-espresso" : "text-brick"}`}>{available ? CAFE_COPY.menu.available : CAFE_COPY.menu.off}</span>
-          <Toggle checked={available} label={CAFE_COPY.menu.switchLabel(item.name)} onChange={onAvailable} />
+          <Toggle size="desk" checked={available} label={CAFE_COPY.menu.switchLabel(item.name)} onChange={onAvailable} />
         </span>
       </div>
       {problem ? <Banner tone="error">{problem}</Banner> : null}
@@ -152,7 +152,7 @@ export function ItemsSection({
 
       <div role="group" aria-label={copy.pick} className="flex flex-wrap gap-2">
         {SOURCES.map((source) => (
-          <Chip key={source.id} selected={sourceId === source.id} onClick={() => setSourceId(source.id)}>
+          <Chip size="desk" key={source.id} selected={sourceId === source.id} onClick={() => setSourceId(source.id)}>
             {source.kind === "vending" ? "Vending" : source.name}
           </Chip>
         ))}
