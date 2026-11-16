@@ -137,7 +137,7 @@ Three sessions, in order. Everything is built on the `dev` branch and tested on 
   - [x] No response carries another user's code or collect QR: cafe cards, run cards, kiosk results and Admin live rows have no code; only the buyer's own order detail does.
   - [x] Scripted end-to-end runs (`tests/c2-2-flows.test.mjs`, 11 runs) pass: QR pickup, kiosk vending, student runner with I'm here, staff delivery, runner late, staff late, no-show, cancel, reject, refusals (closed hours, breakfast window, pause, service off) and Order again. With the C2-1 demo tests, 18 of 18 pass against a local Redis behind `tests/shim.mjs`.
   - [ ] Real two-phone plus laptop test on the dev preview (the team).
-- [ ] **DEMO_SCRIPT.md** updated.
+- [x] **DEMO_SCRIPT.md** updated.
 - [ ] **Release v1.0.0** (done by the team, not by the build session).
 
 ## Open questions
