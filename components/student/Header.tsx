@@ -32,16 +32,18 @@ export function routeFor(pathname: string): { title: string | null; back?: strin
 /**
  * Persistent student header (docs/SCREENS.md): on Home the campus and the place (Ahmedabad University, University
  * Centre), on other pages the title or a Back arrow, on the left; Scan and the wallet chip on the right. A temp-session countdown shows on
- * its own row only in the last 3 minutes. `pathname` is only for the /kit gallery.
+ * its own row only in the last 3 minutes. `pathname` and `readyCount` are only for the /kit gallery.
  */
 export function Header({
   balance,
   tempMsLeft,
   pathname,
+  readyCount,
 }: {
   balance: number;
   tempMsLeft: number | null;
   pathname?: string;
+  readyCount?: number;
 }) {
   const livePath = usePathname();
   const { title, back } = routeFor(pathname ?? livePath);
@@ -71,7 +73,7 @@ export function Header({
           )}
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <ScanButton />
+          <ScanButton fixedCount={readyCount} />
           <WalletChip balance={balance} />
         </div>
       </div>

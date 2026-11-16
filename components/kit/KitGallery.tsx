@@ -325,20 +325,20 @@ export function KitGallery() {
         </Sheet>
       </Section>
 
-      <Section title="Student shell" note="The real header and floating bottom bar, in a 390 px frame. Dots on Orders and Updates are real states: an order in progress, unread updates.">
+      <Section title="Student shell" note="The real header and floating bottom bar, in a 390 px frame. Dots on Orders and Updates are real states: an order in progress, unread updates. The first Scan button shows the ready-to-deliver count (2).">
         <div className="flex flex-wrap items-start gap-6">
           <Phone>
-            <Header balance={240} tempMsLeft={null} pathname="/home" />
+            <Header balance={240} tempMsLeft={null} pathname="/home" readyCount={2} />
             <div className="h-24 px-5 text-secondary text-mocha">Page content</div>
             <div className="px-5 pb-3"><BottomBar floating={false} unread activeOrder pathname="/home" /></div>
           </Phone>
           <Phone>
-            <Header balance={30} tempMsLeft={null} pathname="/home" />
+            <Header balance={30} tempMsLeft={null} pathname="/home" readyCount={0} />
             <div className="h-24 px-5 text-secondary text-mocha">Low balance dot</div>
             <div className="px-5 pb-3"><BottomBar floating={false} unread={false} activeOrder={false} pathname="/updates" /></div>
           </Phone>
           <Phone>
-            <Header balance={1250} tempMsLeft={null} pathname="/orders" />
+            <Header balance={1250} tempMsLeft={null} pathname="/orders" readyCount={0} />
             <div className="h-24 px-5 text-secondary text-mocha">Page title instead of the campus line</div>
             <div className="px-5 pb-3"><BottomBar floating={false} unread={false} activeOrder pathname="/orders" /></div>
           </Phone>
