@@ -129,6 +129,14 @@ Three sessions, in order. Everything is built on the `dev` branch and tested on 
 - [x] **Cafe portal redesigned as a POS / kitchen display.** Fixed left sidebar (Queue, Vending, Hours and items, Today); top bar with live status counts, per-source open / paused switches and the clock; tickets styled as kitchen order slips with large item lines and big action buttons; ticket colour by age (normal, amber, red); "Scan buyer QR" for pickups; printable kitchen slip; large touch targets.
 - [x] **Phase 10 demo tools.** Seed, reset (only the current environment's key prefix), and a late-test order.
 - [ ] **Final quality pass** and a real two-phone plus laptop test.
+  **v1.0.0 check (C2-2).**
+  - [x] `npm run build`, `npx tsc --noEmit` and `npx eslint .` clean.
+  - [x] No `console.log`, no leftover stubs or TODOs; the only `console.error` calls go through `logSafeMessage`.
+  - [x] No client component imports `lib/redis.ts` (client files only take types from server modules); the only env values in the browser are the public `NEXT_PUBLIC_APP_VERSION`, `NEXT_PUBLIC_APP_COMMIT` and `NEXT_PUBLIC_FOOD_PHOTOS`.
+  - [x] Every `/api/cafe` and `/api/admin` handler checks its session on the server (`requireApiSession`); only login, logout and health are open.
+  - [x] No response carries another user's code or collect QR: cafe cards, run cards, kiosk results and Admin live rows have no code; only the buyer's own order detail does.
+  - [x] Scripted end-to-end runs (`tests/c2-2-flows.test.mjs`, 11 runs) pass: QR pickup, kiosk vending, student runner with I'm here, staff delivery, runner late, staff late, no-show, cancel, reject, refusals (closed hours, breakfast window, pause, service off) and Order again. With the C2-1 demo tests, 18 of 18 pass against a local Redis behind `tests/shim.mjs`.
+  - [ ] Real two-phone plus laptop test on the dev preview (the team).
 - [ ] **DEMO_SCRIPT.md** updated.
 - [ ] **Release v1.0.0** (done by the team, not by the build session).
 
