@@ -150,7 +150,7 @@ export function AlertStrip() {
   }
 
   return (
-    <section aria-label={CAFE_COPY.alerts.sectionLabel} className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+    <section id="alerts" aria-label={CAFE_COPY.alerts.sectionLabel} className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
       {queue.alerts.map((alert) => (
         <AlertCard
           key={alert.id}

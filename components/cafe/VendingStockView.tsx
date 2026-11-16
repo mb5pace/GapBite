@@ -44,8 +44,7 @@ export function VendingStockView() {
     <div className="flex max-w-3xl flex-col gap-4">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-title font-bold text-maroon">{copy.title}</h1>
-          <p className="mt-1 max-w-xl text-body text-mocha">{copy.intro}</p>
+          <p className="max-w-xl text-body text-mocha">{copy.intro}</p>
         </div>
         <div className="flex flex-col items-end gap-1">
           <PillLink href="/cafe/kiosk" size="md">

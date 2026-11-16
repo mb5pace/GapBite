@@ -2,14 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { CAFE_COPY, type RejectReasonId } from "@/data/cafe-copy";
-import { SOURCES, type SourceId } from "@/data/menu";
 import { Banner } from "@/components/ui/Banner";
-import { Chip } from "@/components/ui/Chip";
 import { TOAST_MS } from "@/lib/config";
 import { postJson } from "@/lib/http";
 import { columnOf, type CafeCard, type QueueColumnId } from "@/lib/order-types";
 import { AlertStrip } from "./AlertStrip";
 import { BagSlipDialog } from "./BagSlipDialog";
+import { useDesk } from "./DeskProvider";
 import { OrderCard } from "./OrderCard";
 import { useQueue } from "./QueueProvider";
 import { RejectDialog } from "./RejectDialog";
@@ -17,15 +16,13 @@ import { StaffDialog } from "./StaffDialog";
 
 const COLUMNS: QueueColumnId[] = ["new", "preparing", "ready", "out"];
 
-type Filter = "all" | SourceId;
-
 /**
  * The queue (docs/SCREENS.md "Queue"): New, Preparing, Ready, Out for delivery, with
  * source tabs. The list itself is polled by the layout's QueueProvider.
  */
 export function QueueView() {
   const queue = useQueue();
-  const [filter, setFilter] = useState<Filter>("all");
+  const { filter } = useDesk();
   const [busyId, setBusyId] = useState<string | null>(null);
   /** The words, and the status the order was in when it failed. The error goes when the order moves. */
   const [errors, setErrors] = useState<Record<string, { text: string; status: string }>>({});
@@ -80,18 +77,6 @@ export function QueueView() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="sr-only">{CAFE_COPY.nav.queue}</h1>
-      <div role="group" aria-label={CAFE_COPY.filterLabel} className="flex flex-wrap gap-2">
-        <Chip selected={filter === "all"} onClick={() => setFilter("all")}>
-          {CAFE_COPY.all}
-        </Chip>
-        {SOURCES.map((source) => (
-          <Chip key={source.id} selected={filter === source.id} onClick={() => setFilter(source.id)}>
-            {source.kind === "vending" ? "Vending" : source.name}
-          </Chip>
-        ))}
-      </div>
-
       {queue.stale ? <Banner tone="warning">{CAFE_COPY.queueError}</Banner> : null}
       {notice ? <Banner>{notice}</Banner> : null}
       <AlertStrip />
@@ -100,7 +85,7 @@ export function QueueView() {
         {COLUMNS.map((column) => {
           const cards = visible.filter((o) => columnOf(o.status) === column);
           return (
-            <section key={column} aria-label={CAFE_COPY.columns[column]} className="flex min-h-48 flex-col gap-3 rounded-card bg-parchment p-3">
+            <section key={column} id={`col-${column}`} aria-label={CAFE_COPY.columns[column]} className="flex min-h-48 flex-col gap-3 rounded-card bg-parchment p-3">
               <h2 className="flex items-baseline justify-between px-1 font-display text-section font-bold text-maroon">
                 {CAFE_COPY.columns[column]}
                 <span className="text-secondary font-medium tabular-nums text-mocha" aria-label={`${cards.length} orders`}>

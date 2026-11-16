@@ -30,10 +30,7 @@ export function TodayView() {
 
   return (
     <div className="flex max-w-3xl flex-col gap-6">
-      <div>
-        <h1 className="font-display text-title font-bold text-maroon">{copy.title}</h1>
-        <p className="mt-1 max-w-xl text-body text-mocha">{copy.intro}</p>
-      </div>
+      <p className="max-w-xl text-body text-mocha">{copy.intro}</p>
 
       {error && !data ? <Banner tone="error">{error.message}</Banner> : null}
       {isLoading && !data ? <div className="h-72 rounded-card bg-sand" aria-busy="true" /> : null}

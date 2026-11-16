@@ -22,12 +22,35 @@ export function rejectReason(id: string): (typeof REJECT_REASONS)[number] | unde
 }
 
 export const CAFE_COPY = {
-  nav: { queue: "Queue", vending: "Vending", hours: "Hours and items", today: "Today" },
+  nav: { queue: "Queue", vending: "Vending", hours: "Hours and items", today: "Today", kiosk: "Kiosk" },
+  /** The POS shell around every Cafe page: sidebar, top bar, source filter (v1.0.0 Phase C1). */
+  shell: {
+    deskName: "UC Cafe Desk",
+    navLabel: "Cafe desk",
+    newBadge: (n: number) => `${n} new`,
+    logOut: "Log out",
+    countsLabel: "Orders by column",
+    alerts: "Alerts",
+    countLabel: (column: string, n: number) => `${column}: ${n}`,
+    switchesLabel: "Taking orders",
+    pauseSwitch: (name: string) => `${name} open for orders`,
+    paused: "Paused",
+    switchFailed: (name: string) => `Could not change ${name}. Check the connection and try again.`,
+    scanBuyer: "Scan buyer QR",
+  },
+  /** Short names for the top bar's open / paused switches, where the full names do not fit. */
+  sourceShort: {
+    "truly-indian": "Truly",
+    "global-bistro": "Bistro",
+    "cafe-delice": "Delice",
+    "greens-grains": "Greens",
+    vending: "Vending",
+  } as const,
   all: "All",
   filterLabel: "Show orders from",
   soundOn: "Sound on",
   soundOff: "Sound off",
-  soundHint: "Click once on this page so the browser allows sound.",
+  soundHint: "Click once to allow sound.",
   clockLabel: "Time now",
   columns: {
     new: "New",
