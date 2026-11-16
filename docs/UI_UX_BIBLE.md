@@ -26,9 +26,9 @@ Status colours, muted to sit in the same family (use for text, borders and small
 | `amber` | `#B7791F` | Due now, unclaimed, low balance |
 | `brick` | `#A3261C` | Failed late, rejected, money out, errors |
 
-### Source colours, only for cafe tiles and menu headers
+### Source colours, only for cafe tiles, menu headers and Cafe tickets
 
-One colour for each place, used as the background of its tile on Home and of the header card on its menu page, with text in `cream`. Nowhere else. Contrast of `cream` (`#FFFCDF`) on each:
+One colour for each place, used as the background of its tile on Home, of the header card on its menu page and of the header strip on its Cafe ticket (v1.0.0 Phase C1), with text in `cream`; and as an 8 px dot beside the place's name on the Cafe desk's switches and source filter. Nowhere else. Contrast of `cream` (`#FFFCDF`) on each:
 
 | Token | Hex | Place | `cream` on it |
 |---|---|---|---|
@@ -116,7 +116,8 @@ Short and functional only: 150–200 ms ease-out for sheets, tab changes and but
 ## 7. Layout per portal
 
 1. **Student:** 390 px design width. On wider screens centre a 430 px column on `cream` (no fake phone frame). Bottom bar and header always visible.
-2. **Cafe and Admin:** desktop layout on `cream`, top header bar in `parchment`, content max 1440 px. Same tokens, same fonts, denser spacing (12/16). Queue columns are `parchment` panels with cards in `cream`.
+2. **Cafe and Admin:** desktop layout on `cream`, same tokens, same fonts, denser spacing (12/16). Admin has a top header bar in `parchment`, content max 1440 px. The **Cafe desk is a POS** (v1.0.0 Phase C1): a fixed `parchment` sidebar (220 px from 1280 px, a 72 px icon rail below that) with 48 px rows, the open one filled `maroon` with `cream` text; a `parchment` top bar; every touch target at least 48 px. Queue columns are `parchment` panels with kitchen tickets in `cream`.
+   **POS tickets (exception).** A kitchen ticket may carry an outline that shows its age, all the way round (never a side or top stripe): a 2 px `amber` outline when a New ticket has waited `NEW_AMBER_MIN` (2) minutes or a delivery is due within `DUE_SOON_MIN` (2) minutes or a Ready delivery has had no runner for 3 minutes; a 3 px `brick` outline when a New ticket has waited `NEW_RED_MIN` (5) minutes (with a `brick` "Waiting" badge) or a delivery is past its promised time, through grace. Its header strip is in the place's source colour. The alerts are one `brick` bar with `cream` text above the columns. The Today page may open with a row of large number tiles (orders, delivered, collected, failed, revenue): real counts for the desk, the one allowed exception to banned pattern 10.
 3. Kiosk: full-screen `maroon` background with `cream` keypad; the one deliberately dark screen, because it stands in for a machine.
 
 ## 8. Writing

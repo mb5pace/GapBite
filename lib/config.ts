@@ -207,6 +207,12 @@ export const ORDERS_LIST_MAX = 60;
 
 /** A new order in the queue stays highlighted this long. */
 export const NEW_ORDER_HIGHLIGHT_MS = 5000;
+/** Cafe POS tickets (v1.0.0 Phase C1): a New ticket not accepted for this long gets a 2 px amber outline. */
+export const NEW_AMBER_MIN = 2;
+/** ...and from this long a 3 px brick outline and a "Waiting" badge. */
+export const NEW_RED_MIN = 5;
+/** A delivery ticket gets an amber outline this long before its promised time (brick from the promised time through grace). */
+export const DUE_SOON_MIN = 2;
 /** The queue and the Today totals read at most this many orders. */
 export const CAFE_ORDERS_MAX = 500;
 /** What a bag slip QR says. The runner scan in Phase 7 reads the order ID after this prefix. */

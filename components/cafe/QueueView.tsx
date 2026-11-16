@@ -60,9 +60,12 @@ export function QueueView() {
     return null;
   }
 
+  /** Mark ready. An order still only Accepted is started first, so the buyer hears both steps, as before. */
   async function markReady(id: string) {
+    const status = queue.orders.find((o) => o.id === id)?.status;
+    if (status === "ACCEPTED" && !(await run(id, { action: "start" }))) return;
     const done = await run(id, { action: "ready" });
-    if (done) setSlipId(id); // the bag slip appears when an order is Ready
+    if (done) setSlipId(id); // the slip appears when an order is Ready
   }
 
   async function reject(id: string, reason: RejectReasonId) {
@@ -76,22 +79,26 @@ export function QueueView() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex h-full min-h-0 flex-col gap-3">
       {queue.stale ? <Banner tone="warning">{CAFE_COPY.queueError}</Banner> : null}
       {notice ? <Banner>{notice}</Banner> : null}
       <AlertStrip />
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4" aria-busy={queue.loading}>
+      <div className="grid min-h-0 flex-1 grid-cols-4 gap-3" aria-busy={queue.loading}>
         {COLUMNS.map((column) => {
           const cards = visible.filter((o) => columnOf(o.status) === column);
           return (
-            <section key={column} id={`col-${column}`} aria-label={CAFE_COPY.columns[column]} className="flex min-h-48 flex-col gap-3 rounded-card bg-parchment p-3">
-              <h2 className="flex items-baseline justify-between px-1 font-display text-section font-bold text-maroon">
+            <section key={column} id={`col-${column}`} aria-label={CAFE_COPY.columns[column]} className="flex min-h-0 flex-col rounded-card bg-parchment">
+              <h2 className="flex shrink-0 items-center justify-between gap-2 px-4 pb-2 pt-3 font-display text-section font-bold text-maroon">
                 {CAFE_COPY.columns[column]}
-                <span className="text-secondary font-medium tabular-nums text-mocha" aria-label={`${cards.length} orders`}>
+                <span
+                  className="inline-flex h-8 min-w-8 items-center justify-center rounded-pill bg-cream px-2 text-body font-extrabold tabular-nums text-maroon"
+                  aria-label={`${cards.length} orders`}
+                >
                   {cards.length}
                 </span>
               </h2>
+              <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-3 pb-3 pt-1" data-column-list="">
               {queue.loading ? (
                 <>
                   <div className="h-40 rounded-card bg-sand" aria-label={CAFE_COPY.queueLoading} />
@@ -115,11 +122,13 @@ export function QueueView() {
                       ready: () => void markReady(card.id),
                       slip: () => setSlipId(card.id),
                       staff: () => setStaffId(card.id),
+                      print: () => setSlipId(card.id),
                       collect: async (code) => (await run(card.id, { action: "collect", code })) !== null,
                     }}
                   />
                 ))
               )}
+              </div>
             </section>
           );
         })}

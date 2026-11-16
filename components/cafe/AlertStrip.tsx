@@ -5,7 +5,6 @@ import { ArrowUUpLeft, Warning, WarningCircle } from "@phosphor-icons/react";
 import { CAFE_COPY } from "@/data/cafe-copy";
 import { getSource } from "@/data/menu";
 import { CodeBoxes } from "@/components/ui/CodeBoxes";
-import { PillButton } from "@/components/ui/PillButton";
 import { CODE_DIGITS } from "@/lib/config";
 import { formatRupees } from "@/lib/format";
 import { postJson } from "@/lib/http";
@@ -14,6 +13,11 @@ import { formatClock, formatMsLeft } from "@/lib/time";
 import { useQueue } from "./QueueProvider";
 
 type AlertAction = "seen" | "returned" | "collect";
+
+/** The action buttons on the brick bar: cream pills with brick words, 48 px tall. */
+const BAR_BUTTON =
+  "inline-flex h-12 shrink-0 items-center justify-center rounded-pill bg-cream px-5 text-body font-bold text-brick " +
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream disabled:bg-sand disabled:text-taupe";
 
 /** What the card says, as one sentence. */
 function alertText(alert: CafeAlert): string {
@@ -38,19 +42,20 @@ function CollectBox({ id, busy, onCollect }: { id: string; busy: boolean; onColl
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-2">
-      <p className="text-secondary text-mocha">{CAFE_COPY.alerts.collectHint}</p>
-      <CodeBoxes value={code} onChange={setCode} label={`${CAFE_COPY.alerts.collect} ${id}`} size="sm" />
-      <PillButton type="submit" size="md" disabled={busy || code.length !== CODE_DIGITS} aria-label={`${CAFE_COPY.alerts.collect} ${id}`}>
-        {CAFE_COPY.alerts.collect}
-      </PillButton>
+      <p className="text-secondary text-cream">{CAFE_COPY.alerts.collectHint}</p>
+      <span className="flex flex-wrap items-center gap-3">
+        <CodeBoxes value={code} onChange={setCode} label={`${CAFE_COPY.alerts.collect} ${id}`} size="sm" />
+        <button type="submit" disabled={busy || code.length !== CODE_DIGITS} aria-label={`${CAFE_COPY.alerts.collect} ${id}`} className={BAR_BUTTON}>
+          {CAFE_COPY.alerts.collect}
+        </button>
+      </span>
     </form>
   );
 }
 
 /**
- * One alert (docs/SCREENS.md "Alerts"). Red: a failed order, or a bag the staff are bringing back. Amber: a
- * buyer who did not show up, whose bag is held at the counter. The colour is the ring and the icon; the words
- * stay in espresso, so contrast is never a problem. It stays until someone acts on it.
+ * One alert (docs/SCREENS.md "Alerts") as a row of the brick alert bar: an icon, what kind it is, the sentence, the hold
+ * time for a no-show, and its action. It stays until someone acts on it.
  */
 function AlertCard({
   alert,
@@ -72,54 +77,46 @@ function AlertCard({
   const Icon = noShow ? Warning : alert.kind === "staff-return" ? ArrowUUpLeft : WarningCircle;
 
   return (
-    <article
-      aria-label={`${label}: ${alert.orderId}`}
-      data-alert={alert.kind}
-      className={`flex flex-col gap-3 rounded-card bg-cream p-4 ring-2 ${noShow ? "ring-amber" : "ring-brick"}`}
-    >
-      <div className="flex items-start gap-3">
-        <span className={`mt-0.5 shrink-0 ${noShow ? "text-amber" : "text-brick"}`}>
-          <Icon size={24} weight="regular" aria-hidden="true" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-secondary font-bold text-espresso">{label}</p>
-          <p className="text-body text-espresso">{alertText(alert)}</p>
-          {alert.kind === "staff-return" && alert.holderName ? (
-            <p className="text-secondary text-mocha">{copy.staffCarrier(alert.holderName)}</p>
-          ) : null}
-          {noShow && alert.holdUntil !== undefined ? (
-            <p className="text-secondary tabular-nums text-mocha">
-              {holding ? (
-                <>
-                  {copy.holdUntil(formatClock(alert.holdUntil))} · {formatMsLeft(alert.holdUntil - now)} {copy.holdLeft}
-                </>
-              ) : (
-                copy.holdEnded
-              )}
-            </p>
-          ) : null}
-        </div>
+    <article aria-label={`${label}: ${alert.orderId}`} data-alert={alert.kind} className="flex flex-wrap items-center gap-x-4 gap-y-3 px-4 py-3">
+      <span className="shrink-0" aria-hidden="true">
+        <Icon size={24} weight="regular" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-body text-cream">
+          <span className="font-bold">{label}</span> · {alertText(alert)}
+        </p>
+        {alert.kind === "staff-return" && alert.holderName ? <p className="text-secondary text-cream">{copy.staffCarrier(alert.holderName)}</p> : null}
+        {noShow && alert.holdUntil !== undefined ? (
+          <p className="text-secondary tabular-nums text-cream">
+            {holding ? (
+              <>
+                {copy.holdUntil(formatClock(alert.holdUntil))} · {formatMsLeft(alert.holdUntil - now)} {copy.holdLeft}
+              </>
+            ) : (
+              copy.holdEnded
+            )}
+          </p>
+        ) : null}
+        {error ? (
+          <p role="alert" className="mt-1 inline-block rounded-pill bg-cream px-3 py-1 text-secondary font-medium text-brick">
+            {error}
+          </p>
+        ) : null}
       </div>
 
       {holding ? (
         <CollectBox id={alert.orderId} busy={busy} onCollect={(code) => onAct("collect", code)} />
       ) : (
-        <div>
-          <PillButton
-            size="md"
-            disabled={busy}
-            onClick={() => void onAct(alert.kind === "staff-return" ? "returned" : "seen")}
-            aria-label={`${alert.kind === "staff-return" ? copy.returned : copy.seen} ${alert.orderId}`}
-          >
-            {alert.kind === "staff-return" ? copy.returned : copy.seen}
-          </PillButton>
-        </div>
+        <button
+          type="button"
+          className={BAR_BUTTON}
+          disabled={busy}
+          onClick={() => void onAct(alert.kind === "staff-return" ? "returned" : "seen")}
+          aria-label={`${alert.kind === "staff-return" ? copy.returned : copy.seen} ${alert.orderId}`}
+        >
+          {alert.kind === "staff-return" ? copy.returned : copy.seen}
+        </button>
       )}
-      {error ? (
-        <p role="alert" className="text-secondary font-medium text-brick">
-          {error}
-        </p>
-      ) : null}
     </article>
   );
 }
@@ -150,7 +147,11 @@ export function AlertStrip() {
   }
 
   return (
-    <section id="alerts" aria-label={CAFE_COPY.alerts.sectionLabel} className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+    <section
+      id="alerts"
+      aria-label={CAFE_COPY.alerts.sectionLabel}
+      className="flex max-h-60 shrink-0 flex-col divide-y divide-cream overflow-y-auto rounded-card bg-brick text-cream"
+    >
       {queue.alerts.map((alert) => (
         <AlertCard
           key={alert.id}

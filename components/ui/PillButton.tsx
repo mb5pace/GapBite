@@ -5,11 +5,11 @@ import Link from "next/link";
 import type { ComponentProps } from "react";
 
 type Variant = "primary" | "secondary" | "outline";
-type Size = "lg" | "md";
+type Size = "lg" | "md" | "ticket";
 
 interface PillOptions {
   variant?: Variant;
-  /** lg is the 56 px primary action. md is 44 px, for rows and headers. */
+  /** lg is the 56 px primary action. md is 44 px, for rows and headers. ticket is at least 56 px and grows if its words wrap (Cafe tickets in narrow columns). */
   size?: Size;
   /** Round cream circle with a maroon arrow at the right end (primary only). */
   arrow?: boolean;
@@ -25,6 +25,7 @@ const VARIANT: Record<Variant, string> = {
 const SIZE: Record<Size, string> = {
   lg: "h-14 px-6 text-section",
   md: "h-11 px-4 text-secondary",
+  ticket: "min-h-14 px-4 py-2 text-section leading-tight text-center",
 };
 
 function pillClass({ variant = "primary", size = "lg", arrow = false, full = false }: PillOptions, extra: string) {
