@@ -172,7 +172,7 @@ export const COPY = {
     codeNotUnused: "That code has already been used or removed. The list is up to date now.",
     sessionAlreadyEnded: "That session has already ended.",
     slotEmpty: "There is no permanent code in that slot.",
-    nav: { codes: "Codes", staff: "Staff", users: "Users", orders: "Live orders", service: "Service" },
+    nav: { codes: "Codes", staff: "Staff", users: "Users", orders: "Live orders", service: "Service", demo: "Demo" },
     service: {
       title: "Service",
       intro: "Switch the whole service off when QuickX should not take any new orders, for example during a power cut or a long break. Students see your message on every screen and no new order can be placed. Orders already placed keep moving as normal. Only Admin can do this. A cafe can pause itself from the Cafe portal.",

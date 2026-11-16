@@ -127,7 +127,7 @@ Three sessions, in order. Everything is built on the `dev` branch and tested on 
 
 ### Phase C: Cafe portal as a kitchen display, demo tools, release (later session)
 - [x] **Cafe portal redesigned as a POS / kitchen display.** Fixed left sidebar (Queue, Vending, Hours and items, Today); top bar with live status counts, per-source open / paused switches and the clock; tickets styled as kitchen order slips with large item lines and big action buttons; ticket colour by age (normal, amber, red); "Scan buyer QR" for pickups; printable kitchen slip; large touch targets.
-- [ ] **Phase 10 demo tools.** Seed, reset (only the current environment's key prefix), and a late-test order.
+- [x] **Phase 10 demo tools.** Seed, reset (only the current environment's key prefix), and a late-test order.
 - [ ] **Final quality pass** and a real two-phone plus laptop test.
 - [ ] **DEMO_SCRIPT.md** updated.
 - [ ] **Release v1.0.0** (done by the team, not by the build session).

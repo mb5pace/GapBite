@@ -9,6 +9,7 @@ const LINKS = [
   { href: "/admin/users", label: COPY.admin.nav.users },
   { href: "/admin/orders", label: COPY.admin.nav.orders },
   { href: "/admin/service", label: COPY.admin.nav.service },
+  { href: "/admin/demo", label: COPY.admin.nav.demo },
 ];
 
 /** Admin header links. */

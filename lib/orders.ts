@@ -59,13 +59,13 @@ export function normalizeOrderId(input: string): string | null {
   return parseOrderRef(input);
 }
 
-function newOrderId(): string {
+export function newOrderId(): string {
   const low = 10 ** (ORDER_ID_DIGITS - 1);
   return `${ORDER_ID_PREFIX}${randomInt(low, low * 10)}`;
 }
 
 /** A 4-digit code whose digits differ from the order ID's, so the two are never mistaken for each other. */
-function newCode(orderId: string): string {
+export function newCode(orderId: string): string {
   const idDigits = orderId.slice(ORDER_ID_PREFIX.length);
   for (;;) {
     const code = String(randomInt(0, 10 ** CODE_DIGITS)).padStart(CODE_DIGITS, "0");
