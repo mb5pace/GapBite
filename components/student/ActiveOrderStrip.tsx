@@ -5,7 +5,7 @@ import useSWR from "swr";
 import { getSource } from "@/data/menu";
 import { progressLine } from "@/data/order-copy";
 import { SourceGlyph } from "@/components/ui/SourceGlyph";
-import { POLL_MS } from "@/lib/config";
+import { DONE_CARD_MS, POLL_MS } from "@/lib/config";
 import { getJson } from "@/lib/http";
 import { mostUrgent } from "@/lib/order-progress";
 import { useCart } from "./CartProvider";
@@ -25,7 +25,11 @@ export function ActiveOrderStrip() {
     keepPreviousData: true,
   });
   const active = data?.active ?? [];
-  const order = mostUrgent(active);
+  // Just delivered or collected: keep the card a few seconds so the student on the progress line can celebrate.
+  const justDone = (data?.past ?? []).find(
+    (o) => (o.status === "DELIVERED" || o.status === "COLLECTED") && data !== undefined && data.now - o.updatedAt < DONE_CARD_MS,
+  );
+  const order = mostUrgent(active) ?? justDone ?? null;
   if (!order) return null;
   const more = active.length - 1;
 

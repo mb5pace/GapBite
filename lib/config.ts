@@ -150,6 +150,9 @@ export const STAFF_MAX = 10 ** STAFF_ID_DIGITS - 1;
 // Live sync (polling, not websockets)
 // ---------------------------------------------------------------------------
 
+/** How long Home keeps the order card after the order is delivered or collected, so the celebration can be seen. */
+export const DONE_CARD_MS = 10_000;
+
 export const POLL_MS = {
   /** Active order and Updates. */
   student: 4000,
