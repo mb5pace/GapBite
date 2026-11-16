@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { COPY } from "@/data/copy";
-import { MENU_ITEMS, SOURCES, getSource, type SourceId } from "@/data/menu";
+import { MENU_ITEMS, SOURCES } from "@/data/menu";
 import { ArchCard } from "@/components/ui/ArchCard";
 import { ItemTile } from "@/components/ui/ItemTile";
 import { searchMenu } from "@/lib/search";
@@ -18,10 +18,6 @@ import { ServiceBanner } from "./ServiceBanner";
 import { SourceTile } from "./SourceTile";
 import { useMe } from "./useMe";
 import { WalletBanner } from "./WalletBanner";
-
-/** Home lists the cafes in this order, then the vending machine. */
-const HOME_ORDER: SourceId[] = ["cafe-delice", "truly-indian", "global-bistro", "greens-grains", "vending"];
-const CAFE_COUNT = SOURCES.filter((source) => source.kind === "cafe").length;
 
 const POPULAR = MENU_ITEMS.filter((item) => item.tags.includes("bestseller"));
 
@@ -57,14 +53,14 @@ export function HomeView() {
         <>
           <section aria-labelledby="cafes">
             <h2 id="cafes" className="font-display text-section font-bold text-maroon">
-              {COPY.student.home.cafesTitle} · {CAFE_COUNT}
+              {COPY.student.home.cafesTitle}
             </h2>
             <p className="mb-4 text-secondary text-mocha">{COPY.student.home.cafesSubtitle}</p>
-            <div className="flex flex-col gap-3">
-              {HOME_ORDER.map((id) => (
-                <SourceTile key={id} source={getSource(id)} />
+            <div className="@container"><div className="grid grid-cols-2 gap-x-3 gap-y-5 @min-[600px]:grid-cols-3 @min-[880px]:grid-cols-4 @min-[600px]:max-w-[1120px]">
+              {SOURCES.map((source) => (
+                <SourceTile key={source.id} source={source} wide={source.kind === "vending"} />
               ))}
-            </div>
+            </div></div>
           </section>
 
           <NextBreakStrip />
