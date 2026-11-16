@@ -53,6 +53,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Everything except Next.js internals and public files.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.svg|apple-icon|manifest.webmanifest|icons/|illustrations/|food/|scanner/).*)"],
+  // Everything except Next.js internals and public files (link-preview images included, so WhatsApp can fetch them).
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.svg|apple-icon|opengraph-image|twitter-image|manifest.webmanifest|icons/|illustrations/|food/|scanner/).*)"],
 };
