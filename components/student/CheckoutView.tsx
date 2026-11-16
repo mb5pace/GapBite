@@ -16,6 +16,8 @@ import { PillButton, PillLink } from "@/components/ui/PillButton";
 import { SourceGlyph } from "@/components/ui/SourceGlyph";
 import { formatRupees } from "@/lib/format";
 import { postJson } from "@/lib/http";
+import { checkOrder, slotBlock } from "@/lib/hours-rules";
+import type { MenuState } from "@/lib/menu-rules";
 import { estimatePromisedAt, feeFor, priceLines, slotAvailable, slotsLeftToday, walkFor } from "@/lib/order-rules";
 import type { PlaceResult } from "@/lib/orders";
 import type { OrderMode } from "@/lib/order-types";
@@ -80,7 +82,11 @@ export function CheckoutView() {
   const total = priced.subtotal + fee;
   const need = topUpNeeded(me.balance, total);
   const slots = slotsLeftToday(now);
-  const slotOk = (slot: string) => slotAvailable(slot, now, priced.prepMin, walk);
+  // Hours, pauses and item windows (BUSINESS_RULES "Opening hours, holidays and pauses"): the same rule the server applies.
+  const menu = cart.menu as MenuState;
+  const itemIds = priced.items.map((line) => line.itemId);
+  const slotBlocked = (slot: string) => slotBlock(menu.hours, menu.service, { sourceId: priced.sourceId, itemIds, slot, nowMs: now });
+  const slotOk = (slot: string) => slotAvailable(slot, now, priced.prepMin, walk) && slotBlocked(slot) === null;
   const preferredWhen = me.prefs.defaultWhen === "next-break" ? (slots.find(slotOk) ?? "asap") : "asap";
   const when = pickedWhen ?? preferredWhen;
   const slotProblem = when !== "asap" && !slotOk(when);
@@ -94,9 +100,15 @@ export function CheckoutView() {
     promisedAt: estimate,
   });
 
+  const hoursBlock = checkOrder(menu.hours, menu.service, { sourceId: priced.sourceId, itemIds, nowMs: now, targetMs: estimate });
+  // One plain line under the break chips when hours or an item window is what greys a break out.
+  const whyBlocked = slots.map(slotBlocked).find((block) => block?.code === "item-window" || block?.code === "target-closed");
+
   const blockedReason = cartProblem
     ? CHECKOUT_COPY.fixCart
-    : slotProblem
+    : hoursBlock
+      ? hoursBlock.message
+      : slotProblem
       ? ORDER_COPY.breakTooClose
       : need > 0
         ? `Top up ${formatRupees(need)} more to place this order.`
@@ -220,6 +232,9 @@ export function CheckoutView() {
             <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none]" role="group" aria-label="Break times">
               {slots.map((slot) => {
                 const open = slotOk(slot);
+                const block = slotBlocked(slot);
+                const caption = open ? CHECKOUT_COPY.breakCaption : block ? (block.code === "item-window" ? CHECKOUT_COPY.notThen : CHECKOUT_COPY.closedAt) : CHECKOUT_COPY.tooLate;
+                const reason = block ? block.message : "too late";
                 return (
                   <Chip
                     key={slot}
@@ -227,15 +242,16 @@ export function CheckoutView() {
                     selected={when === slot}
                     disabled={!open}
                     onClick={() => setPickedWhen(slot)}
-                    aria-label={open ? `Break at ${slot}` : `Break at ${slot}, too late`}
+                    aria-label={open ? `Break at ${slot}` : `Break at ${slot}, ${reason}`}
                   >
                     <span className="font-display font-bold tabular-nums">{slot}</span>
-                    <span className="text-caption">{open ? CHECKOUT_COPY.breakCaption : CHECKOUT_COPY.tooLate}</span>
+                    <span className="text-caption">{caption}</span>
                   </Chip>
                 );
               })}
             </div>
           ) : null}
+          {whyBlocked ? <p className="text-secondary text-mocha">{whyBlocked.message}</p> : null}
         </div>
       </Section>
 

@@ -1,4 +1,14 @@
-import { ADMIN_ADJUST_MAX, ADMIN_NOTE_MAX, ADMIN_NOTE_MIN, MAX_UNITS_PER_ORDER, MORNING_CUTOFF, TOPUP_MAX, TOPUP_MIN, WALLET_MIN_TO_USE, WALLET_SUGGESTED } from "@/lib/config";
+import {
+  ADMIN_ADJUST_MAX,
+  ADMIN_NOTE_MAX,
+  ADMIN_NOTE_MIN,
+  MAX_UNITS_PER_ORDER,
+  SERVICE_MESSAGE_MAX,
+  TOPUP_MAX,
+  TOPUP_MIN,
+  WALLET_MIN_TO_USE,
+  WALLET_SUGGESTED,
+} from "@/lib/config";
 import { formatRupees } from "@/lib/format";
 
 /**
@@ -14,6 +24,7 @@ export const COPY = {
     network: "Could not reach QuickX. Check your connection and try again.",
     wrongPortal: "That page is for a different QuickX portal. Log out and enter the right code.",
     needUser: "Tell us who's ordering first.",
+    loading: "Your food is on the stove…",
   },
 
   /** The pages Next shows when a page is missing or breaks. They carry our colours, never the browser's. */
@@ -100,18 +111,36 @@ export const COPY = {
     },
     home: {
       searchLabel: "Search the menu",
-      searchPlaceholder: "Search poha, cold coffee, Paper Boat…",
+      searchPlaceholder: "Search dishes or cafes",
+      locationName: "Ahmedabad University",
+      locationPlace: "University Centre (UC)",
+      greeting: (greeting: string, name: string) => `${greeting}, ${name}`,
       searchClear: "Clear search",
       orderFrom: "Order from",
+      cafesTitle: "Cafes at UC",
+      cafesSubtitle: "Order your favourite meal",
       popular: "Popular at UC",
       bestseller: "Bestseller",
-      open: "Open",
       noResults: "Nothing matches that. Try poha, cold coffee or Paper Boat.",
+      openItem: (name: string) => `Open ${name} on its menu`,
       forPickup: "pickup",
       noMoreBreaks: "No more breaks today. You can still order as soon as possible.",
     },
+    /** A place that is closed or paused (docs/SCREENS.md "Closed states"). */
+    closed: {
+      browse: "Browse the menu",
+      browseHint: "You can still look through the menu. Adding is off until it opens.",
+      lineAbove: "Adding is off until it opens.",
+      pausedLineAbove: "Adding is off for now.",
+      dismiss: "Dismiss",
+      noticeLabel: "Closed places",
+      unavailableNow: "Unavailable now",
+    },
     menu: {
-      morningOnly: "Morning only",
+      searchIn: (cafe: string) => `Search in ${cafe}`,
+      categories: "Categories",
+      prep: (min: number) => `Prep ${min} min`,
+      noMatch: "Nothing on this menu matches that.",
       notToday: "Not today",
       soldOut: "Sold out",
       readyNow: "Ready now",
@@ -143,7 +172,28 @@ export const COPY = {
     codeNotUnused: "That code has already been used or removed. The list is up to date now.",
     sessionAlreadyEnded: "That session has already ended.",
     slotEmpty: "There is no permanent code in that slot.",
-    nav: { codes: "Codes", staff: "Staff", users: "Users", orders: "Live orders" },
+    nav: { codes: "Codes", staff: "Staff", users: "Users", orders: "Live orders", service: "Service", demo: "Demo" },
+    service: {
+      title: "Service",
+      intro: "Switch the whole service off when QuickX should not take any new orders, for example during a power cut or a long break. Students see your message on every screen and no new order can be placed. Orders already placed keep moving as normal. Only Admin can do this. A cafe can pause itself from the Cafe portal.",
+      stateLabel: "QuickX is available",
+      on: "Taking orders",
+      off: "Not taking orders",
+      messageLabel: "Message students see",
+      messageHint: `Shown on every student screen while the service is off. Up to ${SERVICE_MESSAGE_MAX} characters.`,
+      save: "Save message",
+      saving: "Saving",
+      saved: "Saved. Students see it on their next refresh, within a few seconds.",
+      savedOn: "QuickX is taking orders again. Students see it on their next refresh.",
+      previewLabel: "What students see while it is off",
+      switchOff: "Turn the service off?",
+      switchOffBody: "Nobody can place a new order until you turn it back on. Orders already placed carry on.",
+      confirmOff: "Turn it off",
+      keepOn: "Keep it on",
+      badValue: "That value is not allowed.",
+      tooLong: `Keep the message under ${SERVICE_MESSAGE_MAX} characters.`,
+      failed: "Could not save. Check your connection and try again.",
+    },
     staff: {
       title: "Staff",
       intro: "Staff sign in with any student access code, then tap \"I'm QuickX staff\" and type their ID.",
@@ -203,9 +253,11 @@ export const WALLET_COPY = {
 
 /** Why an item could not be added to the cart, in one plain sentence. */
 export function refusalMessage(
-  reason: "limit" | "stock" | "unavailable" | "morning-closed" | "sold-out",
+  reason: "limit" | "stock" | "unavailable" | "closed" | "window" | "sold-out",
   itemName: string,
   left = 0,
+  /** For closed and window: the full sentence from the hours rules ("Global Bistro opens at 12:00."). */
+  detail?: string,
 ): string {
   switch (reason) {
     case "limit":
@@ -214,8 +266,9 @@ export function refusalMessage(
       return `Only ${left} ${itemName} left.`;
     case "unavailable":
       return `${itemName} is not available today.`;
-    case "morning-closed":
-      return `${itemName} is a morning item. Morning items stop at ${MORNING_CUTOFF.hour}:${String(MORNING_CUTOFF.minute).padStart(2, "0")}.`;
+    case "closed":
+    case "window":
+      return detail ?? `${itemName} cannot be ordered right now.`;
     case "sold-out":
       return `${itemName} is sold out.`;
   }

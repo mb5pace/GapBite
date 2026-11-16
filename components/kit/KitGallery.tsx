@@ -24,6 +24,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { IconButton } from "@/components/ui/IconButton";
 import { Input } from "@/components/ui/Input";
 import { ItemTile } from "@/components/ui/ItemTile";
+import { LoadingView } from "@/components/ui/LoadingView";
 import { Money } from "@/components/ui/Money";
 import { PillButton } from "@/components/ui/PillButton";
 import { Sheet } from "@/components/ui/Sheet";
@@ -126,9 +127,9 @@ export function KitGallery() {
         </ul>
       </Section>
 
-      <Section title="Type" note="Grandstander for display, Figtree for text. 72 is for the gate wordmark and the show-code screen only.">
+      <Section title="Type" note="Plus Jakarta Sans for everything. 72 is for the gate wordmark (the only place the chunky logo type is used) and the show-code screen.">
         <div className="flex flex-col gap-2 rounded-card bg-parchment p-5">
-          <p className="font-display text-display font-extrabold text-maroon">QuickX</p>
+          <p className="font-wordmark text-display font-extrabold text-maroon">QuickX</p>
           <p className="font-display text-greeting font-extrabold text-maroon">Riya, 32 greeting</p>
           <p className="font-display text-title font-extrabold text-maroon">Screen title, 24</p>
           <p className="font-display text-section font-bold text-maroon">Section title, 18</p>
@@ -292,6 +293,12 @@ export function KitGallery() {
         </div>
       </Section>
 
+      <Section title="Loading view" note="Shown only while a page is actually loading, never as a delay. Three thin lines of steam rise and fade; with reduce motion on they stand still.">
+        <Phone>
+          <LoadingView compact />
+        </Phone>
+      </Section>
+
       <Section title="Sheet" note="Slides up in 200 ms. Close with Esc, the dim area, or by dragging the handle down 80 px. On the laptop portals the same component opens as a centred dialog.">
         <div className="flex gap-3">
           <PillButton variant="secondary" onClick={() => setSheet(true)}>Open a sheet</PillButton>
@@ -318,21 +325,21 @@ export function KitGallery() {
         </Sheet>
       </Section>
 
-      <Section title="Student shell" note="The real header and floating bottom bar, in a 390 px frame. Dots on Orders and Updates are real states: an order in progress, unread updates.">
+      <Section title="Student shell" note="The real header and floating bottom bar, in a 390 px frame. Dots on Orders and Updates are real states: an order in progress, unread updates. The first Scan button shows the ready-to-deliver count (2).">
         <div className="flex flex-wrap items-start gap-6">
           <Phone>
-            <Header greeting="Good morning" name="Riya" isStaff={false} balance={240} tempMsLeft={null} pathname="/home" />
+            <Header balance={240} tempMsLeft={null} pathname="/home" readyCount={2} />
             <div className="h-24 px-5 text-secondary text-mocha">Page content</div>
             <div className="px-5 pb-3"><BottomBar floating={false} unread activeOrder pathname="/home" /></div>
           </Phone>
           <Phone>
-            <Header greeting="Good afternoon" name="Ramesh" isStaff balance={30} tempMsLeft={null} pathname="/home" />
-            <div className="h-24 px-5 text-secondary text-mocha">Staff badge, low balance dot</div>
+            <Header balance={30} tempMsLeft={null} pathname="/home" readyCount={0} />
+            <div className="h-24 px-5 text-secondary text-mocha">Low balance dot</div>
             <div className="px-5 pb-3"><BottomBar floating={false} unread={false} activeOrder={false} pathname="/updates" /></div>
           </Phone>
           <Phone>
-            <Header greeting="" name="" isStaff={false} balance={1250} tempMsLeft={null} pathname="/orders" />
-            <div className="h-24 px-5 text-secondary text-mocha">Page title instead of the greeting</div>
+            <Header balance={1250} tempMsLeft={null} pathname="/orders" readyCount={0} />
+            <div className="h-24 px-5 text-secondary text-mocha">Page title instead of the campus line</div>
             <div className="px-5 pb-3"><BottomBar floating={false} unread={false} activeOrder pathname="/orders" /></div>
           </Phone>
         </div>

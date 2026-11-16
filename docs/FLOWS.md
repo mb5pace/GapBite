@@ -67,13 +67,36 @@ interface Order {
 1. New order appears in the Cafe portal queue under **New** with a soft sound and a highlight for 5 seconds (sound can be muted).
 2. Staff: **Accept** (or **Reject** with reason). On accept, `promisedAt` is fixed. Buyer Update: "Cafe Delice accepted your order."
 3. **Start preparing** → `PREPARING`. Buyer Update: "Your order is being prepared."
-4. **Mark ready** → `READY`. A bag slip appears with: order ID, source, items, building and drop point (or "PICKUP"), and a QR code encoding `QX:ORDER:QX-4821`. In the real world it would be printed and stapled to the bag. Buyer Update: "Your order is ready." (pickup: "Ready at the Cafe Delice counter.")
+4. **Mark ready** → `READY`. The kitchen slip appears with: order ID, source, placed time, items, building and drop point (or "PICKUP"), the promised time, and for a delivery a QR code encoding `QX:ORDER:QX-4821`. It prints on 80 mm paper and is stapled to the bag. It never shows the buyer's code. Buyer Update: "Your order is ready." (pickup: "Ready at the Cafe Delice counter.") On the desk (v1.0.0 Phase C1) **Mark ready** on a ticket that is only Accepted does Start preparing first, so the buyer gets both Updates.
 
 ## 3a. Pickup at UC
 
-1. Buyer comes to the counter and shows the code.
-2. Staff type the 4 digits into the order card in the Cafe portal (or into the queue's "Collect" box). Match → `COLLECTED`. Buyer Update: "Collected. Enjoy!"
-3. Vending pickup: buyer opens the kiosk screen (Cafe portal › Vending kiosk, shown on the laptop beside the machine), enters the code, sees the slots dispense, order becomes `COLLECTED`.
+1. Buyer comes to the counter and shows their order page (the collect QR and the 4-digit code under it).
+2. Staff tap **Scan buyer QR** (top bar) or **Collect** on the Ready ticket, and scan the QR or type the 4 digits (see "Scan collect" below). Match → `COLLECTED`. Buyer Update: "Collected. Enjoy!"
+3. Vending pickup: buyer opens the kiosk screen (Cafe portal › Kiosk, shown on the laptop beside the machine), types the code or taps **Scan QR** and holds up the order page, sees the slots dispense, order becomes `COLLECTED`.
+
+### Collect QR (v1.0.0 Phase B2)
+
+While a pickup or vending pickup order is not finished, the buyer's Order Detail shows a QR code above the four code boxes. The Cafe desk's Scan buyer QR and the kiosk's Scan QR read it (Phase C1, "Scan collect" below).
+
+- **Text in the QR:** `QX:COLLECT:<orderId>:<code>`, for example `QX:COLLECT:QX-4821:0397`. The prefix is `COLLECT_QR_PREFIX` in `lib/config.ts`; the order ID is `QX-` and 4 digits (the same pattern as everywhere else); the code is the order's 4-digit collect code, leading zeros kept. Nothing else is in it: no name, no amount.
+- **Made on the server only**, by `collectQrText` in `lib/order-ref.ts`, and drawn there as an SVG path (`lib/qr.ts`). The browser never builds it.
+- **Only in the buyer's own reply:** `GET /api/orders/[id]` from the buyer's session (and the server render of `/o/[orderId]`) carries a `qr` field for a pickup order that is not finished. No other reply has it: not the orders list, not the cafe queue or bag slip, not the kiosk, not Admin › Live orders, not the runner preview, not the ready list, and not anyone else asking for the same order ID. Delivery orders never get one (the buyer shows the code to the runner).
+- **Reading it:** `parseCollectQr(text)` in `lib/order-ref.ts` returns `{ orderId, code }` or `null` for anything that is not exactly this shape. Scanning is a faster way to type the code, not a new permission: the code must match the order and the order must be `READY`. (A no-show bag is a delivery, which has no QR; it is still collected with the 4 digits on its alert row.)
+- It is not the bag slip QR. The bag slip's `QX:ORDER:QX-4821` is for runners picking up delivery bags and carries no code.
+
+### Scan collect (v1.0.0 Phase C1)
+
+`POST /api/cafe/collect`, **cafe session only** (a student, staff or Admin session is refused), with one of:
+- `{ qr }`: the scanned text, `QX:COLLECT:<orderId>:<code>`;
+- `{ orderId, code }`: the 4 digits typed for one ticket (its Collect button);
+- `{ code }`: the 4 digits typed from the top bar; it collects the **oldest** Ready counter pickup with that code (the same rule as the kiosk).
+
+The server, in this order: a desk paused by wrong codes is refused ("Too many wrong codes. Try again in a minute."); text that is not a collect QR → "That is not a QuickX collect code."; no such order → **"Order not found"**; a vending order → **"Collect this at the vending kiosk"**; a delivery order → "This order is for delivery. A runner or staff member takes it."; a code that does not match → **"Wrong code"** (counted); the right code but not `READY` → **"Not ready yet"** (Placed, Accepted, Preparing), **"Already collected"** (Collected) or "That order is closed." (cancelled, rejected, failed). Otherwise one Lua script moves it `READY` → `COLLECTED` and writes the buyer's "Collected. Enjoy!" Update together (the same script as every other desk step), so two scans of the same QR collect it once. The reply has the order ID and items, never the code.
+
+Wrong codes use the kiosk's limit (`KIOSK_RATE_LIMIT`: 5 wrong codes, then a minute's pause for the whole desk, even for a right code) under their own key, `collect:wrong`.
+
+**Kiosk Scan QR:** `POST /api/cafe/kiosk` also takes `{ qr }`. Only a vending pickup in `READY` with the right code is released; a counter pickup is told "Collect this at the <source> counter."; already collected → "Already collected."; a wrong code counts towards the kiosk's own lock.
 
 ## 3b. Runner buddy picks up
 
@@ -84,6 +107,7 @@ interface Order {
 5. On success → `PICKED_UP`, holder set. Popup shows "Run accepted. Take it to GICT ground floor lobby by 11:47." Cafe card moves to **Out for delivery** with the runner's name. Buyer Update: "Picked up by runner buddy Aarav. On the way to GICT." (staff: "Picked up by QuickX staff.")
 6. Failure messages, one line each: "Already taken by someone else", "Not ready yet", "This is your own order", "Top up to at least ₹50 to run", "You already have 3 active runs", "This order is for pickup at UC".
 7. Scanning several bags in a row is the batching: each scan is its own accept.
+7a. **Ready to deliver list (v1.0.0 Phase B2).** The Scan button carries a badge with the number of delivery bags that are `READY` with no holder, not counting the caller's own orders, and the runner sheet lists them under the camera, grouped by building (near zone first, oldest first). The list comes from `GET /api/runs/ready` (any student or staff session, read every 10 seconds while the tab is visible). Each entry has only: source name, building short name and drop point, the earning for that zone (or "Staff delivery" for staff), item count and minutes since ready. No order ID, no buyer, no code. The list is read-only: tapping a row says "Scan this bag at the <source> counter to take it." Nothing can be claimed from it; the only way to take a bag is still the scan and atomic accept in steps 2 to 5.
 8. A run (including one given to staff with "Send with staff", 3c) then shows in Orders › My runs until it is delivered or settled.
 
 ## 3c. Staff from the counter

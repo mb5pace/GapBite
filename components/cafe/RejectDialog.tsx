@@ -33,6 +33,7 @@ export function RejectDialog({
       <div role="radiogroup" aria-label={CAFE_COPY.rejectTitle} className="mt-4 flex flex-wrap gap-2">
         {REJECT_REASONS.map((item) => (
           <Chip
+            size="desk"
             key={item.id}
             role="radio"
             aria-checked={reason === item.id}
@@ -45,10 +46,10 @@ export function RejectDialog({
         ))}
       </div>
       <div className="mt-6 flex gap-3">
-        <PillButton size="md" disabled={reason === null || busy} onClick={() => reason && onConfirm(reason)}>
+        <PillButton size="desk" disabled={reason === null || busy} onClick={() => reason && onConfirm(reason)}>
           {CAFE_COPY.rejectConfirm}
         </PillButton>
-        <PillButton size="md" variant="secondary" onClick={close}>
+        <PillButton size="desk" variant="secondary" onClick={close}>
           {CAFE_COPY.cancel}
         </PillButton>
       </div>

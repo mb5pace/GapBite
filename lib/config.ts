@@ -76,8 +76,6 @@ export const PICKUP_STALE_MIN = 30;
 // ---------------------------------------------------------------------------
 
 export const MAX_UNITS_PER_ORDER = 10;
-/** Items tagged "morning" cannot be ordered at or after this IST time. */
-export const MORNING_CUTOFF = { hour: 11, minute: 30 } as const;
 
 export const ORDER_ID_PREFIX = "QX-";
 export const ORDER_ID_DIGITS = 4;
@@ -152,13 +150,33 @@ export const STAFF_MAX = 10 ** STAFF_ID_DIGITS - 1;
 // Live sync (polling, not websockets)
 // ---------------------------------------------------------------------------
 
+/** How long Home keeps the order card after the order is delivered or collected, so the celebration can be seen. */
+export const DONE_CARD_MS = 10_000;
+
 export const POLL_MS = {
   /** Active order and Updates. */
   student: 4000,
   /** Cafe queue. */
   cafe: 3000,
   admin: 5000,
+  /** Home: each place's status and "Ready in about N min" (/api/status). Paused while the tab is hidden. */
+  status: 15000,
+  /** The Scan button's count and the runner sheet's "Ready to deliver" list (/api/runs/ready). Paused while the tab is hidden. */
+  ready: 10000,
 } as const;
+
+// ---------------------------------------------------------------------------
+// "Ready in about N min" on a cafe tile and menu header (docs/BUSINESS_RULES.md "Ready estimate")
+// ---------------------------------------------------------------------------
+
+/** Each order a cafe has accepted and not yet finished (ACCEPTED or PREPARING) adds this many minutes. */
+export const QUEUE_MIN_PER_ORDER = 2;
+/** The estimate is rounded up to a multiple of this. */
+export const READY_EST_STEP_MIN = 5;
+/** The estimate never says more than this, however long the queue. */
+export const READY_EST_CAP = 30;
+/** The server keeps one answer from /api/status for this long, however many students ask. */
+export const STATUS_CACHE_MS = 5000;
 
 // ---------------------------------------------------------------------------
 // Small UI timings
@@ -192,10 +210,21 @@ export const ORDERS_LIST_MAX = 60;
 
 /** A new order in the queue stays highlighted this long. */
 export const NEW_ORDER_HIGHLIGHT_MS = 5000;
+/** Cafe POS tickets (v1.0.0 Phase C1): a New ticket not accepted for this long gets a 2 px amber outline. */
+export const NEW_AMBER_MIN = 2;
+/** ...and from this long a 3 px brick outline and a "Waiting" badge. */
+export const NEW_RED_MIN = 5;
+/** A delivery ticket gets an amber outline this long before its promised time (brick from the promised time through grace). */
+export const DUE_SOON_MIN = 2;
 /** The queue and the Today totals read at most this many orders. */
 export const CAFE_ORDERS_MAX = 500;
 /** What a bag slip QR says. The runner scan in Phase 7 reads the order ID after this prefix. */
 export const SLIP_QR_PREFIX = "QX:ORDER:";
+/**
+ * What the QR on a pickup order's detail page says: QX:COLLECT:<orderId>:<code> (docs/FLOWS.md "Collect QR"). It
+ * carries the 4-digit code, so it is made only for the buyer's own order and never sent anywhere else.
+ */
+export const COLLECT_QR_PREFIX = "QX:COLLECT:";
 /** QR modules of white space around the code, so a camera can find its edges. */
 export const QR_QUIET_MODULES = 4;
 /** The soft chime for a new order: two short notes (Hz), each this long, at a low volume (0 to 1). */
@@ -225,7 +254,8 @@ export const CLOCK_TICK_MS = 15_000;
 /** After the Updates tab opens, unread dots stay this long before everything counts as read. */
 export const MARK_READ_DELAY_MS = 2000;
 /** Home shows at most this many orders in progress; the Orders tab has the rest. */
-export const HOME_STRIP_MAX = 2;
+/** The progress line on Home never fills the stage an order is in beyond this share until the status really changes. */
+export const PROGRESS_FILL_CAP = 0.9;
 /**
  * How long a field may be before the server refuses it. These are sanity limits for what
  * arrives from the browser, not business rules; the real format checks are the patterns above.
@@ -245,6 +275,8 @@ export const INPUT_MAX = {
   codeIndex: 99,
   /** Different items in one order (the 10-unit limit is MAX_UNITS_PER_ORDER). */
   orderLines: 30,
+  /** The text a scanned QR gives (QX:COLLECT:QX-4821:0397 is 25 characters; anything far longer is not ours). */
+  qr: 64,
 } as const;
 /** The shortest request token we accept. */
 export const REQUEST_ID_MIN = 8;
@@ -284,4 +316,21 @@ export const FEEDBACK_KEEP = 500;
 export const FEEDBACK_MIN_INTERVAL_SEC = 10;
 /** Order History › Runs: how many of the user's recent runs are read. */
 export const HISTORY_RUNS_KEEP = 50;
+
+// ---------------------------------------------------------------------------
+// Opening hours, holidays and the service switch (v1.0.0 Phase A). The default times themselves are in data/hours.ts.
+// ---------------------------------------------------------------------------
+
+/** Hours and item windows are set on steps of this many minutes (08:00, 08:05, ...). */
+export const HOURS_STEP_MIN = 5;
+/** What students read when Admin switches the whole service off without writing a message. */
+export const SERVICE_DEFAULT_MESSAGE = "QuickX is not taking orders right now.";
+export const SERVICE_MESSAGE_MAX = 140;
+/** A holiday's note ("Diwali"), and how many holidays are kept. */
+export const HOLIDAY_NOTE_MAX = 40;
+export const HOLIDAYS_MAX = 100;
+/** The notice on Home lists at most this many closed or paused places, one line each. */
+export const CLOSED_NOTICE_MAX_LINES = 3;
+/** How far ahead "Opens Monday at 08:00" looks for the next open day. */
+export const NEXT_OPEN_LOOKAHEAD_DAYS = 8;
 

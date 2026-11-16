@@ -12,12 +12,12 @@ export default async function Gate({ searchParams }: PageProps<"/">) {
 
   return (
     <main className="flex min-h-dvh flex-col bg-sun">
-      <section className="flex flex-1 flex-col items-center justify-center gap-3 px-5 py-16 text-center">
+      <section className="flex flex-1 flex-col items-center justify-center gap-3 px-5 py-10 text-center">
         {/* A simple icon in a sand circle, until the Open Peeps illustration is added. */}
         <span className="mb-4 flex size-24 items-center justify-center rounded-pill bg-sand text-maroon" aria-hidden="true">
           <ForkKnife weight="regular" size={44} />
         </span>
-        <h1 className="font-display text-display font-extrabold text-maroon">QuickX</h1>
+        <h1 className="font-wordmark text-display font-extrabold text-maroon">QuickX</h1>
         <p className="text-section font-medium text-maroon">{COPY.tagline}</p>
       </section>
       <section className="rounded-t-sheet bg-cream px-5 pb-10 pt-8">

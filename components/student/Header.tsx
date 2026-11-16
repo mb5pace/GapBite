@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft } from "@phosphor-icons/react";
+import { ArrowLeft, MapPin } from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { COPY } from "@/data/copy";
@@ -30,64 +30,58 @@ export function routeFor(pathname: string): { title: string | null; back?: strin
 }
 
 /**
- * Persistent student header (docs/SCREENS.md): greeting or page title on the
- * left, Scan and the wallet chip on the right. A temp-session countdown shows on
- * its own row only in the last 3 minutes. `pathname` is only for the /kit gallery.
+ * Persistent student header (docs/SCREENS.md): on Home the campus and the place (Ahmedabad University, University
+ * Centre), on other pages the title or a Back arrow, on the left; Scan and the wallet chip on the right. A temp-session countdown shows on
+ * its own row only in the last 3 minutes. `pathname` and `readyCount` are only for the /kit gallery.
  */
 export function Header({
-  greeting,
-  name,
-  isStaff,
   balance,
   tempMsLeft,
   pathname,
+  readyCount,
 }: {
-  greeting: string;
-  name: string;
-  isStaff: boolean;
   balance: number;
   tempMsLeft: number | null;
   pathname?: string;
+  readyCount?: number;
 }) {
   const livePath = usePathname();
   const { title, back } = routeFor(pathname ?? livePath);
 
   return (
-    <header className="sticky top-0 z-30 bg-cream px-5 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
+    <header data-app-header="" className="sticky top-0 z-30 bg-cream px-5 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))]">
       <div className="flex min-h-12 items-center justify-between gap-3">
         <div className="min-w-0">
           {title === null ? (
-            <>
-              <p className="text-secondary text-mocha">{greeting}</p>
-              <h1 className="flex items-center gap-2 font-display text-greeting font-extrabold text-maroon">
-                <span className="line-clamp-2 break-words">{name}</span>
-                {isStaff ? (
-                  <span className="shrink-0 rounded-pill bg-blush px-2 py-0.5 font-sans text-caption font-bold text-maroon">
-                    {COPY.student.staffBadge}
-                  </span>
-                ) : null}
-              </h1>
-            </>
-          ) : (
-            <div className="flex min-w-0 items-center gap-3">
-              {back ? (
-                <Link
-                  href={back}
-                  aria-label="Back"
-                  className="flex size-11 shrink-0 items-center justify-center rounded-pill bg-sand text-espresso transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon"
-                >
-                  <ArrowLeft weight="regular" size={22} aria-hidden="true" />
-                </Link>
-              ) : null}
-              <h1 className="line-clamp-2 break-words font-display text-title font-extrabold leading-tight text-maroon">{title}</h1>
+            <div className="flex items-start gap-2">
+              <MapPin weight="regular" size={20} className="shrink-0 text-maroon" aria-hidden="true" />
+              <div className="min-w-0">
+                <p className="text-secondary font-semibold leading-tight text-espresso">{COPY.student.home.locationName}</p>
+                <p className="text-secondary leading-tight text-mocha">{COPY.student.home.locationPlace}</p>
+              </div>
             </div>
+          ) : back ? (
+            <Link
+              href={back}
+              aria-label="Back"
+              className="flex size-11 shrink-0 items-center justify-center rounded-pill bg-sand text-espresso transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon"
+            >
+              <ArrowLeft weight="regular" size={24} aria-hidden="true" />
+            </Link>
+          ) : (
+            <h1 className="line-clamp-2 break-words font-display text-title font-extrabold leading-tight text-maroon">{title}</h1>
           )}
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <ScanButton />
+          <ScanButton fixedCount={readyCount} />
           <WalletChip balance={balance} />
         </div>
       </div>
+      {/* With a Back button the title gets its own full-width line below it, so a long title ("Terms and Conditions",
+          "Notifications") never has to break inside a word next to the Scan button and the wallet chip. */}
+      {title !== null && back ? (
+        <h1 className="mt-1 line-clamp-2 break-words font-display text-title font-extrabold leading-tight text-maroon">{title}</h1>
+      ) : null}
       {tempMsLeft !== null ? <SessionChip msLeft={tempMsLeft} /> : null}
     </header>
   );

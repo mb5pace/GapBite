@@ -1,6 +1,6 @@
 # UI/UX BIBLE
 
-The look is taken from the team's reference set (the "KAFE" coffee app shots on Pinterest): warm cream paper, one deep coffee-maroon, chunky friendly headings, pill buttons, a floating rounded tab bar, arch-topped item cards and thin hand-drawn line illustrations. It should feel like a printed cafe menu that came alive, not like a tech startup. Light mode only. Follow this file exactly; if something is not covered, choose the plainest option that fits it and add it here.
+The look is taken from the team's reference set (the "KAFE" coffee app shots on Pinterest): warm cream paper, one deep coffee-maroon, confident bold headings, pill buttons, a floating rounded tab bar, arch-topped item cards and thin hand-drawn line illustrations. It should feel like a printed cafe menu that came alive, not like a tech startup. Light mode only. Follow this file exactly; if something is not covered, choose the plainest option that fits it and add it here.
 
 ## 1. Palette (fixed, sampled from the references)
 
@@ -26,22 +26,50 @@ Status colours, muted to sit in the same family (use for text, borders and small
 | `amber` | `#B7791F` | Due now, unclaimed, low balance |
 | `brick` | `#A3261C` | Failed late, rejected, money out, errors |
 
+### Source colours, only for cafe tiles, menu headers and Cafe tickets
+
+One colour for each place, used as the background of its tile on Home, of the header card on its menu page and of the header strip on its Cafe ticket (v1.0.0 Phase C1), with text in `cream`; and as an 8 px dot beside the place's name on the Cafe desk's switches and source filter. Nowhere else. Contrast of `cream` (`#FFFCDF`) on each:
+
+| Token | Hex | Place | `cream` on it |
+|---|---|---|---|
+| `src-truly-indian` | `#625955` | Truly Indian (warm grey) | 6.6:1 |
+| `src-global-bistro` | `#6D4142` | Global Bistro (same as `mocha`) | 8.2:1 |
+| `src-cafe-delice` | `#94692A` | Cafe Delice (warm gold) | 4.7:1 |
+| `src-greens-grains` | `#4F5E2A` | Greens and Grains | 6.8:1 |
+| `src-vending` | `#371110` | UC Vending Machine (same as `espresso`) | 16.2:1 |
+
+All pass AA (4.5:1) for normal text. The status words under a tile are on `cream`, never on these colours. The status dots (`olive`, `amber`, `brick`, `taupe`) are small and always sit next to their words.
+
 Text on `cream`/`parchment` is `espresso` or `maroon`. Text on `maroon` is `cream`. Check WCAG AA contrast for any new pairing.
 
 `taupe` does not reach AA as text (4.3:1 on `cream`, 3.9:1 on `parchment`, 3.6:1 on `sand`). Use it only for placeholder text, disabled controls (which WCAG exempts), borders and handles. Hints, captions and any other secondary or tertiary text use `mocha` (7:1 or better). Checked ratios: espresso on cream 16.2, maroon on cream 13.1, maroon on sun 9.0, mocha on cream 8.2, brick on cream 7.1, olive on cream 5.6; amber on parchment 3.1 is fine for icons and dots only, never for text.
 
 ## 2. Typography
 
-1. **Display:** Grandstander (Google Fonts), weights 700 and 800. Greetings, screen titles, section titles, prices on item cards, the wordmark, big codes.
-2. **Text:** Figtree (Google Fonts), weights 400, 500, 700. Everything else.
-3. Load both with `next/font/google`. No other fonts.
-4. Scale (mobile): 32 greeting name, 24 screen title, 18 section title, 16 body, 14 secondary, 12 caption. One larger size, 72 display, only for the gate wordmark and the Admin "show code" mode (32 on phones for the code). Line height 1.25 for display (1.1 at 72), 1.5 for text.
+1. **One family: Plus Jakarta Sans** (Google Fonts), weights 400, 500, 600, 700 and 800, for all text, headings and numbers. It reads as professional and calm; the earlier rounded display face read as playful, which is not the tone of a payments-and-orders app. Headings use 700 to 800, body text 400 to 500, buttons and labels 600 to 700.
+2. **The one exception:** the QuickX wordmark on the gate screen keeps its chunky Grandstander (weight 800, loaded for this alone) because it is the logo. It is the class `font-wordmark`. Nothing else uses it, not even the portal headers.
+3. Load with `next/font/google`. No other fonts. Still banned as defaults: Inter, Geist, Space Grotesk, Instrument Serif, Poppins.
+4. **Scale (mobile) and weights.** The sizes are unchanged; the weights are new. Line height 1.25 for headings (1.1 at 72), 1.5 for text.
+
+   | Use | Size | Weight |
+   |---|---|---|
+   | Greeting name, wallet balance | 32 | 800 |
+   | Screen title | 24 | 800 |
+   | Section title, card title | 18 | 700 |
+   | Buttons, chips, labels | 16 or 14 | 600 to 700 |
+   | Body | 16 | 400 to 500 |
+   | Secondary text | 14 | 400 to 500 |
+   | Caption | 12 | 400 to 500 |
+   | Display (gate wordmark, Admin "show code") | 72 (32 on phones for the code) | 800 |
+
+   Plus Jakarta Sans is wider than the faces it replaces, so a screen title that has a Back button sits on its own full-width line under the Back, Scan and wallet row. A title is never allowed to break inside a word.
 5. Sentence case everywhere. No ALL-CAPS labels. Letter-spacing only on the access code and the 4-digit codes (token `tracking-code`).
 6. Numbers that change (countdowns, balances) use `font-variant-numeric: tabular-nums`.
 
 ## 3. Shape, space, depth
 
 1. Spacing scale: 4, 8, 12, 16, 20, 24, 32, 40. Screen side padding 20 px on mobile.
+   Icon sizes in the student portal: 20 or 24 px only. The only larger icons are the loading view's `CookingPot` (56 px) and the empty-state icon in its 96 px circle (40–44 px).
 2. Radius: pills fully rounded; cards 24; inputs 9999 (pill) or 16 for multi-line; sheets 28 on top corners. Do not round everything to the same radius.
 3. **Arch card:** item cards in "Popular at UC" have a tall arch top (top corners radius = half the width) like the "Your Cravings" row in the reference.
 4. Depth by colour, not shadow. Cards are `parchment` on `cream`. Allowed shadow, only on the floating bottom bar and sheets: `0 6px 20px rgba(55,17,16,0.12)`. No other shadows, no coloured shadows, no glow, no blur, no glassmorphism.
@@ -49,23 +77,28 @@ Text on `cream`/`parchment` is `espresso` or `maroon`. Text on `maroon` is `crea
 
 ## 4. Components
 
-1. **Primary pill button:** `maroon` fill, `cream` Grandstander text, height 56, with an optional round `cream` circle holding a `maroon` arrow at the right end (reference "I'm In →"). Full width at the bottom of checkout and sheets.
+1. **Primary pill button:** `maroon` fill, `cream` Plus Jakarta Sans 700 text, height 56, with an optional round `cream` circle holding a `maroon` arrow at the right end (reference "I'm In →"). Full width at the bottom of checkout and sheets.
 2. **Secondary pill:** `sand` fill, `espresso` text; or outline variant with the 1.5 px border.
 3. **Icon button:** 44 px circle, `maroon` fill + `cream` icon (primary, e.g. Scan, notifications) or `sand` fill + `espresso` icon.
 4. **Bottom bar:** floating 12 px above the bottom safe area, 20 px side margins, `parchment`, fully rounded, five 48 px circles. Active = `maroon` circle, `cream` Bold icon. Inactive = `sand` circle, `espresso` Regular icon. Labels hidden; use `aria-label`.
 5. **Chips:** pill, `sand` default, `blush` + `maroon` text when selected. Day/slot chips use the tall capsule (min 64 px high); the selected capsule is filled `maroon` with `cream` text so it stands out in a row, and a slot that is too late is disabled.
 6. **Stepper (order tracker):** vertical, a thick `maroon` rail with round icon nodes like the reference delivery screen; done = filled `maroon`, current = filled with a `sun` ring, upcoming = `sand`. Time on the right.
-7. **Code boxes:** four separate rounded boxes, Grandstander 32, outline 1.5 px.
+7. **Code boxes:** four separate rounded boxes, Plus Jakarta Sans 700 at 32, outline 1.5 px.
 8. **Sheet:** bottom sheet on `parchment`, drag handle, 28 radius. Used for the runner popup, top-up, confirmations. No centred modals on mobile.
-9. **Item tile (no photo):** a `sand` square with 20 radius showing the item's initials (e.g. "CC" for Cold Coffee) in Grandstander `maroon`, plus a tiny source glyph in the corner. Real photos replace it when the team adds them.
+9. **Item tile (no photo):** a `sand` square with 20 radius showing the item's initials (e.g. "CC" for Cold Coffee) in Plus Jakarta Sans 700 `maroon`, plus a tiny source glyph in the corner. Real photos replace it when the team adds them.
 10. **Banner:** `parchment` strip with an icon and one sentence; amber left icon for warnings, never a coloured side stripe.
 11. **Money:** `₹240` with no decimals, Indian digit grouping (`₹1,250`). Credits in `olive` with `+`, debits in `brick` with `−`.
 12. **Empty states:** one line illustration, one sentence, one action.
 13. **Due and alert states (Phase 8):** a card that is due, or a Ready delivery with no runner for 3 minutes, gets a 2 px `amber` ring all round (a full border, never a side stripe) and, where there is room, a small amber warning icon. Alert cards pinned above the cafe queue are `cream` with a 2 px ring: `brick` for a failed order or a bag being brought back, `amber` for a no-show. The colour is the ring and the icon only; the words stay in `espresso`, so contrast is never a problem. Same rule as the Banner: amber is never used as text.
-14. **List row (Phase 9):** the Account and Discover rows: `parchment` card, 44 px `sand` icon circle, Grandstander title, a `mocha` hint line and a caret. At least 64 px tall; the whole row is the tap target. A row that opens a sheet (Log out) is the same row as a button.
+14. **List row (Phase 9):** the Account and Discover rows: `parchment` card, 44 px `sand` icon circle, bold title, a `mocha` hint line and a caret. At least 64 px tall; the whole row is the tap target. A row that opens a sheet (Log out) is the same row as a button.
 15. **Accordion (Phase 9):** the FAQ. `parchment` cards; the title row is the button (at least 56 px) with a caret that turns when open and `aria-expanded`, so the state is not shown by colour alone. Any number can be open.
 16. **Face rating (Phase 9):** five 56 px circles, worst to best (Phosphor smileys). The chosen one is filled on `blush`. It is one radio group with arrow-key support.
 17. **Text area (Phase 9):** like the Input: `sand`, no border, a visible label, a hint, an error line and a character counter when there is a limit.
+18. **Loading view (v1.0.0):** shown only while something is actually loading, never as a delay. The Phosphor `CookingPot` in `maroon`, 56 px, with three thin `taupe` steam lines that rise about 20 px and fade in a 3-second loop (CSS only, staggered), and "Your food is on the stove…" under it in `mocha` body text, on `cream`. The icon's own three vent marks are cut off so the moving steam is the only steam. The student, Cafe and Admin route groups use it between pages with their header (and the student bottom bar) kept in place; the gate and Identify cover the window with it from the moment a code is accepted until the first page arrives. With reduced motion the steam stands still. No mascot, no illustration, no wording borrowed from another app.
+19. **Cafe tile (B1):** a square (1:1, 20 radius) in the place's source colour, a 24 px Phosphor icon in `cream` top left (CookingPot, Hamburger, Coffee, Leaf; Storefront for vending), and the place's name bottom left as a wordmark: Plus Jakarta Sans 800 at the title size, `cream`, no logo from anywhere. The vending tile spans the full width at 2:1. Under it: the name (600, sentence case) and one status line with a 8 px dot.
+20. **Order progress line (B1):** four equal segments, 4 px gaps, 8 px high, `sand` track and `maroon` fill, each stage's label under it in the caption size (the current one 600 in `espresso`, the rest `mocha`). A 20 px Phosphor `PersonSimpleWalk` in `maroon` sits at the end of the fill and bobs 2 px up and down every 600 ms; it stands still with reduced motion. The fill follows the real status only.
+21. **Category tabs (B1):** sticky under the header, text only, 24 px apart, the open one `maroon` 700 with a 3 px `maroon` underline, the rest `mocha` 500. Horizontal scroll, no scrollbar.
+22. **Menu item card (B1):** a 96 px picture (16 radius) on the right with an outlined pill **Add** (1.5 px `maroon` border, `cream` fill, `maroon` text, 44 px high) overlapping its bottom edge; on the left the veg mark (a 16 px `olive` square outline with an 8 px `olive` dot), the name 600, the description in `mocha`, the price 700 with tabular figures, and a `sand` pill "Prep 6 min" with a Phosphor `Timer`. In the Unavailable section the text is `taupe`, a `sand` chip carries the reason in `espresso`, and Add is `taupe` and off. These cards are disabled content, the one place `taupe` is used for item text (the reason chip stays at full contrast).
 
 ## 5. Illustrations and imagery
 
@@ -78,12 +111,13 @@ Text on `cream`/`parchment` is `espresso` or `maroon`. Text on `maroon` is `crea
 
 ## 6. Motion
 
-Short and functional only: 150–200 ms ease-out for sheets, tab changes and button press (scale 0.97). Stepper node fills when status changes. Respect `prefers-reduced-motion`. No parallax, no floating shapes, no typing effects, no confetti except one small burst allowed on "Delivered" for the runner.
+Short and functional only: 150–200 ms ease-out for sheets, tab changes and button press (scale 0.97). Stepper node fills when status changes. Respect `prefers-reduced-motion`. The loading view's steam (3 s) and the little walker on the Home progress line (600 ms bob, 2 px) are the only looping animations, both CSS only, and both stop under reduced motion. No parallax, no floating shapes, no typing effects, no confetti except one small burst allowed on "Delivered" for the runner.
 
 ## 7. Layout per portal
 
 1. **Student:** 390 px design width. On wider screens centre a 430 px column on `cream` (no fake phone frame). Bottom bar and header always visible.
-2. **Cafe and Admin:** desktop layout on `cream`, top header bar in `parchment`, content max 1440 px. Same tokens, same fonts, denser spacing (12/16). Queue columns are `parchment` panels with cards in `cream`.
+2. **Cafe and Admin:** desktop layout on `cream`, same tokens, same fonts, denser spacing (12/16). Admin has a top header bar in `parchment`, content max 1440 px. The **Cafe desk is a POS** (v1.0.0 Phase C1): a fixed `parchment` sidebar (220 px from 1280 px, a 72 px icon rail below that) with 48 px rows, the open one filled `maroon` with `cream` text; a `parchment` top bar; every touch target at least 48 px (PillButton, Chip and Toggle have a `desk` size of 48 px; a ticket's main action is the `ticket` size, at least 56 px, growing if its words wrap). The kitchen slip prints in one colour, `espresso`, on 80 mm paper. Queue columns are `parchment` panels with kitchen tickets in `cream`.
+   **POS tickets (exception).** A kitchen ticket may carry an outline that shows its age, all the way round (never a side or top stripe): a 2 px `amber` outline when a New ticket has waited `NEW_AMBER_MIN` (2) minutes or a delivery is due within `DUE_SOON_MIN` (2) minutes or a Ready delivery has had no runner for 3 minutes; a 3 px `brick` outline when a New ticket has waited `NEW_RED_MIN` (5) minutes (with a `brick` "Waiting" badge) or a delivery is past its promised time, through grace. Its header strip is in the place's source colour. The alerts are one `brick` bar with `cream` text above the columns. The Today page may open with a row of large number tiles (orders, delivered, collected, failed, revenue): real counts for the desk, the one allowed exception to banned pattern 10.
 3. Kiosk: full-screen `maroon` background with `cream` keypad; the one deliberately dark screen, because it stands in for a machine.
 
 ## 8. Writing

@@ -10,8 +10,11 @@ import { Textarea } from "@/components/ui/Textarea";
 import { FEEDBACK_TEXT_MAX } from "@/lib/config";
 import { postJson } from "@/lib/http";
 
-/** The feedback form, used by Account › Feedback and Discover › Feedback: a 1 to 5 face rating and an optional comment. */
-export function FeedbackForm() {
+/**
+ * The feedback form, used by Account › Feedback, Discover › Feedback and an order's "Share feedback" (which passes
+ * `orderId`, saved with the feedback): a 1 to 5 face rating and an optional comment.
+ */
+export function FeedbackForm({ orderId }: { orderId?: string } = {}) {
   const copy = ACCOUNT_COPY.feedback;
   const [rating, setRating] = useState(0);
   const [text, setText] = useState("");
@@ -28,7 +31,7 @@ export function FeedbackForm() {
     }
     setBusy(true);
     setError("");
-    const res = await postJson<{ saved: boolean }>("/api/feedback", { rating, text });
+    const res = await postJson<{ saved: boolean }>("/api/feedback", { rating, text, ...(orderId ? { orderId } : {}) });
     setBusy(false);
     if (!res.ok) {
       setError(res.error ?? copy.failed);

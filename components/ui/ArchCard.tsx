@@ -27,7 +27,7 @@ export function ArchCard({
   price: number;
   /** Shows the round "+" button when given. */
   onAdd?: () => void;
-  /** When the item cannot be ordered right now ("Not today", "Morning only", "Sold out"), shown instead of the "+". */
+  /** When the item cannot be ordered right now ("Not today", "Sold out"), shown instead of the "+". */
   status?: string;
   /** Units of this item already in the cart. */
   inCart?: number;
@@ -37,7 +37,7 @@ export function ArchCard({
       <div className="mx-3 mt-3 aspect-square overflow-hidden rounded-t-[68px] rounded-b-tile">{media}</div>
       <div className="flex flex-1 flex-col gap-2 px-4 pt-3">
         {tag ? (
-          <span className="w-fit rounded-pill bg-blush px-2 py-0.5 text-caption font-bold text-maroon">{tag}</span>
+          <span className="w-fit rounded-pill bg-blush px-2 py-1 text-caption font-bold text-maroon">{tag}</span>
         ) : null}
         <h3 className="line-clamp-2 min-h-10 text-secondary font-bold text-espresso">{title}</h3>
         <div className="mt-auto flex items-center justify-between">

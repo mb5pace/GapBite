@@ -10,16 +10,16 @@ import { Money } from "@/components/ui/Money";
 import { PillButton, PillLink } from "@/components/ui/PillButton";
 import { QtyStepper } from "@/components/ui/QtyStepper";
 import { SourceGlyph } from "@/components/ui/SourceGlyph";
-import { MORNING_CUTOFF } from "@/lib/config";
-import { maxQtyFor, type MenuState } from "@/lib/menu-rules";
+import { itemMessage, maxQtyFor, type MenuState } from "@/lib/menu-rules";
 import type { LineIssue } from "@/lib/cart";
 import { useCart } from "./CartProvider";
 import { useMenuState } from "./menu-state";
 
-function issueText(issue: LineIssue, left: number): string {
+function issueText(issue: LineIssue, left: number, message: string | null): string {
   switch (issue) {
-    case "morning-closed":
-      return `Morning only. Morning items stop at ${MORNING_CUTOFF.hour}:${String(MORNING_CUTOFF.minute).padStart(2, "0")}.`;
+    case "closed":
+    case "window":
+      return message ?? "Not available right now.";
     case "unavailable":
       return "Not available today.";
     case "sold-out":
@@ -84,7 +84,7 @@ export function CartView() {
               </div>
               {issue ? (
                 <p className="flex items-center gap-2 text-secondary font-medium text-brick" role="alert">
-                  {issueText(issue, left)}
+                  {issueText(issue, left, itemMessage(item, cart.menu as MenuState))}
                 </p>
               ) : null}
               <div className="flex items-center justify-between">

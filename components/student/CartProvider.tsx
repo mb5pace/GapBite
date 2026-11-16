@@ -11,8 +11,10 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
+import { useRouter } from "next/navigation";
 import { SWRConfig } from "swr";
 import { COPY, refusalMessage } from "@/data/copy";
+import { ORDERS_COPY } from "@/data/order-copy";
 import { getItem, getSource, type MenuItem, type SourceId } from "@/data/menu";
 import { PillButton } from "@/components/ui/PillButton";
 import { Sheet } from "@/components/ui/Sheet";
@@ -22,6 +24,7 @@ import {
   cartCount,
   cartIssues,
   cartSubtotal,
+  planReorder,
   qtyOf,
   removeItem,
   startNewCart,
@@ -29,11 +32,12 @@ import {
   trySetQty,
   type CartState,
   type LineIssue,
+  type ReorderPlan,
 } from "@/lib/cart";
 import { createCartStore } from "@/lib/cart-store";
 import { TOAST_MS } from "@/lib/config";
 import type { MeData } from "@/lib/me";
-import { maxQtyFor, type MenuState } from "@/lib/menu-rules";
+import { itemMessage, maxQtyFor, type MenuState } from "@/lib/menu-rules";
 import { useMenuState } from "./menu-state";
 
 interface CartContextValue {
@@ -47,6 +51,8 @@ interface CartContextValue {
   setQty: (itemId: string, qty: number) => void;
   remove: (itemId: string) => void;
   clear: () => void;
+  /** "Order again": the same items into the cart (those that can be ordered now), asking first if another cafe's cart would be cleared. */
+  reorder: (lines: readonly { itemId: string; name: string; qty: number }[]) => void;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -60,7 +66,7 @@ export function useCart(): CartContextValue {
 /**
  * The cart for the whole student portal: kept in memory and in sessionStorage,
  * checked against the same rules the server will use (one source, 10 units,
- * stock, morning cutoff, unavailable items). The server prices and re-checks
+ * stock, unavailable items). The server prices and re-checks
  * everything at checkout, so none of this is trusted for money.
  */
 function CartScope({ userId, children }: { userId: string; children: ReactNode }) {
@@ -87,7 +93,7 @@ function CartScope({ userId, children }: { userId: string; children: ReactNode }
       const outcome = tryAdd(store.getSnapshot(), item, menu);
       if (outcome.kind === "added") store.set(outcome.cart);
       else if (outcome.kind === "switch") setPending({ item, from: outcome.from });
-      else toast(refusalMessage(outcome.reason, item.name, maxQtyFor(item, menu)));
+      else toast(refusalMessage(outcome.reason, item.name, maxQtyFor(item, menu), itemMessage(item, menu) ?? undefined));
     },
     [store, menu, toast],
   );
@@ -98,7 +104,7 @@ function CartScope({ userId, children }: { userId: string; children: ReactNode }
       if (!item) return;
       const result = trySetQty(store.getSnapshot(), item, qty, menu);
       store.set(result.cart);
-      if (result.refused) toast(refusalMessage(result.refused, item.name, maxQtyFor(item, menu)));
+      if (result.refused) toast(refusalMessage(result.refused, item.name, maxQtyFor(item, menu), itemMessage(item, menu) ?? undefined));
     },
     [store, menu, toast],
   );
@@ -112,6 +118,26 @@ function CartScope({ userId, children }: { userId: string; children: ReactNode }
   );
 
   const clear = useCallback(() => store.set(EMPTY_CART), [store]);
+
+  const router = useRouter();
+  const [pendingReorder, setPendingReorder] = useState<ReorderPlan | null>(null);
+  const finishReorder = useCallback(
+    (plan: ReorderPlan) => {
+      store.set(plan.cart);
+      if (plan.skipped.length > 0) toast(ORDERS_COPY.skipped(plan.skipped.map((s) => s.name)));
+      router.push("/cart");
+    },
+    [store, toast, router],
+  );
+  const reorder = useCallback(
+    (lines: readonly { itemId: string; name: string; qty: number }[]) => {
+      const plan = planReorder(store.getSnapshot(), lines, menu);
+      if (plan.added.length === 0) toast(ORDERS_COPY.nothingToAdd(plan.skipped.map((s) => s.name)));
+      else if (plan.replaces) setPendingReorder(plan);
+      else finishReorder(plan);
+    },
+    [store, menu, toast, finishReorder],
+  );
 
   function confirmSwitch() {
     if (!pending) return;
@@ -132,8 +158,9 @@ function CartScope({ userId, children }: { userId: string; children: ReactNode }
       setQty,
       remove,
       clear,
+      reorder,
     }),
-    [cart, menu, add, setQty, remove, clear],
+    [cart, menu, add, setQty, remove, clear, reorder],
   );
 
   return (
@@ -155,6 +182,33 @@ function CartScope({ userId, children }: { userId: string; children: ReactNode }
                 {COPY.student.cart.startNew}
               </PillButton>
               <PillButton full variant="secondary" onClick={() => setPending(null)}>
+                {COPY.student.cart.keepCart}
+              </PillButton>
+            </div>
+          </>
+        ) : null}
+      </Sheet>
+      <Sheet
+        open={pendingReorder !== null}
+        onClose={() => setPendingReorder(null)}
+        title={pendingReorder && pendingReorder.added[0] ? `Start a new cart from ${getSource(pendingReorder.added[0].sourceId).name}?` : ""}
+      >
+        {pendingReorder && pendingReorder.replaces ? (
+          <>
+            <p className="text-body text-espresso">Your {getSource(pendingReorder.replaces).name} cart will be cleared.</p>
+            <div className="mt-6 flex flex-col gap-3">
+              <PillButton
+                full
+                arrow
+                onClick={() => {
+                  const plan = pendingReorder;
+                  setPendingReorder(null);
+                  finishReorder(plan);
+                }}
+              >
+                {COPY.student.cart.startNew}
+              </PillButton>
+              <PillButton full variant="secondary" onClick={() => setPendingReorder(null)}>
                 {COPY.student.cart.keepCart}
               </PillButton>
             </div>

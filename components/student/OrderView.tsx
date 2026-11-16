@@ -4,6 +4,7 @@ import {
   Check,
   CookingPot,
   House,
+  Lightbulb,
   PersonSimpleWalk,
   Receipt,
   ShoppingBag,
@@ -15,7 +16,10 @@ import { useState, type ComponentType } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { getBuilding } from "@/data/locations";
 import { getSource } from "@/data/menu";
-import { ORDER_COPY, ORDER_DETAIL_COPY, RUN_COPY, codeInstruction, endedBanner, headline, promisedLine } from "@/data/order-copy";
+import { COLLECT_COPY, ORDER_COPY, ORDER_DETAIL_COPY, RUN_COPY, codeInstruction, endedBanner, headline, promisedLine, statusWord } from "@/data/order-copy";
+import { Badge } from "@/components/ui/Badge";
+import { QrCode } from "@/components/ui/QrCode";
+import type { QrPath } from "@/lib/qr";
 import { Banner } from "@/components/ui/Banner";
 import { Card } from "@/components/ui/Card";
 import { CodeBoxes } from "@/components/ui/CodeBoxes";
@@ -35,6 +39,52 @@ import { formatClock, formatMsLeft } from "@/lib/time";
 export interface OrderReply {
   order: Order;
   now: number;
+  /** Pickup orders that can still be collected: the collect QR (QX:COLLECT:<id>:<code>), made on the server for the buyer only. */
+  qr?: QrPath;
+}
+
+/** The badge on a pickup order's card: on its way amber, ready or collected olive, ended brick. */
+function pickupTone(status: OrderStatus): "amber" | "olive" | "brick" {
+  if (status === "READY" || status === "COLLECTED") return "olive";
+  if (status === "CANCELLED" || status === "REJECTED" || status === "FAILED_LATE") return "brick";
+  return "amber";
+}
+
+/**
+ * The top of a pickup order: "Show this screen to collect your order" on sand, then one card with the order ID, its
+ * status, the cafe, the collect QR (220 px) and the 4-digit code under it. Once it is collected or ended, just the card.
+ */
+function CollectCard({ order, qr }: { order: Order; qr?: QrPath }) {
+  const source = getSource(order.sourceId);
+  return (
+    <>
+      {qr ? (
+        <p className="flex items-center gap-3 rounded-card bg-sand px-4 py-3 text-secondary font-medium text-espresso" data-collect-hint="">
+          <Lightbulb weight="regular" size={24} className="shrink-0 text-maroon" aria-hidden="true" />
+          {COLLECT_COPY.showScreen}
+        </p>
+      ) : null}
+      <Card className="flex flex-col gap-4 p-5" data-collect-card="">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="font-display text-title font-bold tabular-nums text-maroon">{order.id}</h2>
+            <p className="mt-1 flex items-center gap-2 text-secondary font-medium text-mocha">
+              <SourceGlyph sourceId={source.id} size={20} />
+              {source.name}
+            </p>
+          </div>
+          <Badge tone={pickupTone(order.status)}>{statusWord(order.status, order.mode)}</Badge>
+        </div>
+        {qr ? (
+          <div className="flex flex-col items-center gap-4">
+            <QrCode qr={qr} label={COLLECT_COPY.qrLabel(order.id)} />
+            <CodeBoxes value={order.code} label="Collect code" />
+            <p className="text-secondary text-mocha">{codeInstruction(order)}</p>
+          </div>
+        ) : null}
+      </Card>
+    </>
+  );
 }
 
 type IconType = ComponentType<{ weight?: "regular"; size?: number; "aria-hidden"?: boolean }>;
@@ -139,7 +189,8 @@ export function OrderView({ initial }: { initial: OrderReply }) {
     revalidateOnFocus: true,
     keepPreviousData: true,
   });
-  const { order, now: replyNow } = data ?? initial;
+  const { order, now: replyNow, qr } = data ?? initial;
+  const pickup = order.mode === "pickup";
   const now = useServerNow(replyNow);
   const source = getSource(order.sourceId);
   const ended = endedBanner(order);
@@ -167,14 +218,18 @@ export function OrderView({ initial }: { initial: OrderReply }) {
 
   return (
     <div className="flex flex-col gap-6 pt-2">
-      <div>
-        <p className="flex items-center gap-2 text-secondary font-medium text-mocha">
-          <SourceGlyph sourceId={source.id} size={16} />
-          {source.name}
-        </p>
-        <h2 className="font-display text-greeting font-extrabold tabular-nums text-maroon">{order.id}</h2>
-        <p className="mt-1 text-section font-medium text-espresso">{headline(order)}</p>
-      </div>
+      {pickup ? (
+        <CollectCard order={order} qr={qr} />
+      ) : (
+        <div>
+          <p className="flex items-center gap-2 text-secondary font-medium text-mocha">
+            <SourceGlyph sourceId={source.id} size={20} />
+            {source.name}
+          </p>
+          <h2 className="font-display text-greeting font-extrabold tabular-nums text-maroon">{order.id}</h2>
+          <p className="mt-1 text-section font-medium text-espresso">{headline(order)}</p>
+        </div>
+      )}
 
       {ended ? <Banner tone={ended.tone}>{ended.text}</Banner> : null}
 
@@ -194,7 +249,7 @@ export function OrderView({ initial }: { initial: OrderReply }) {
 
       <Stepper steps={buildSteps(order)} />
 
-      {showCode ? (
+      {showCode && !pickup ? (
         <Card className="flex flex-col items-center gap-3 p-5">
           <p className="text-body font-medium text-espresso">{hold ? ORDER_DETAIL_COPY.noShowCode : codeInstruction(order)}</p>
           <CodeBoxes value={order.code} label={order.mode === "delivery" && !hold ? "Handover code" : "Collect code"} />

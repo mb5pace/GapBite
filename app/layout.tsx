@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { figtree, grandstander } from "./fonts";
+import { grandstander, plusJakartaSans } from "./fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "QuickX",
   description: "Food from UC, in your break.",
+  // Added to an iPhone's home screen it opens full screen, with the status bar over the cream page and the short name.
+  appleWebApp: { capable: true, title: "QuickX", statusBarStyle: "default" },
 };
 
 /**
@@ -24,7 +26,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${grandstander.variable} ${figtree.variable} h-full antialiased`}
+      className={`${plusJakartaSans.variable} ${grandstander.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

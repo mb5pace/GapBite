@@ -34,6 +34,9 @@ app/
   preflight.css                 Tailwind's reset with its color-mix rule removed (UI_UX_BIBLE.md "Colour consistency")
   not-found.tsx  error.tsx  global-error.tsx    our own missing-page and error pages (cream, never the browser's white)
   page.tsx                      gate
+  manifest.ts                   web app manifest for Add to Home Screen (QuickX, standalone, cream #FFFCDF). No service worker
+  apple-icon.tsx                180 px home-screen icon for iPhone (next/og ImageResponse)
+  icons/icon-192.png/route.tsx  icons/icon-512.png/route.tsx  icons/icon-maskable-512.png/route.tsx   manifest icons, drawn by lib/app-icon.tsx at build time
   identify/page.tsx
   (student)/
     layout.tsx                  header + bottom bar + runner popup provider
@@ -50,10 +53,12 @@ app/
     account/[section]/page.tsx  wallet | profile | preferences | notifications | history | refunds | terms | feedback | support
   cafe/
     layout.tsx                  cafe session check only, so the kiosk can be full screen
-    (desk)/layout.tsx           header (pages, server clock, sound switch, Logout) + the one queue poll
+    (desk)/layout.tsx           the POS shell (sidebar, top bar, source filter on the Queue) + the one queue poll
     (desk)/page.tsx             queue
     (desk)/vending/page.tsx
-    (desk)/menu/page.tsx
+    (desk)/hours/page.tsx       Hours and items: opening hours, open days, Taking orders / Paused, holidays, item windows, Available today
+    (desk)/menu/page.tsx        redirects to /cafe/hours (the old Menu availability address)
+    (desk)/loading.tsx          the loading view between Cafe pages (the same file exists for (student)/ and admin/). The first load after the gate is the same view as a full-window overlay on the gate and Identify forms. There is deliberately no app/loading.tsx: a loading boundary at the root starts the response before the layouts finish, so an ended-session redirect or notFound() would no longer change the HTTP status (307 / 404 would become 200).. Within the student portal the loading view starts each page's response early, so an address that does not exist (an unknown account section, Discover topic or place, or an order that is not yours) shows the usual "We could not find that page" screen with HTTP status 200 instead of 404 (a "soft 404"); nothing is revealed either way
     (desk)/today/page.tsx
     kiosk/page.tsx              full screen, no header
   admin/
@@ -62,41 +67,47 @@ app/
     staff/page.tsx
     users/page.tsx
     orders/page.tsx             Live orders (every order in progress, Copy order ID, Reveal code)
+    service/page.tsx            Service: the switch for the whole service and the message students read while it is off
     demo/page.tsx
   api/
     auth/login/route.ts         POST code -> sets cookie, returns portal
     auth/identify/route.ts      POST AU/staff id + name
     auth/logout/route.ts
-    me/route.ts                 GET user, wallet, prefs, unread count, session time left
-    menu/route.ts               GET menu + availability + vending stock
+    me/route.ts                 GET user, wallet, prefs, unread count, session time left, the service switch
+    status/route.ts             GET every place's status and "Ready in about N min" (student session). Kept 5 s on the server
+    menu/route.ts               GET availability + vending stock + opening hours, pauses, item windows, holidays + the service switch (the menu itself is static data)
     orders/route.ts             GET mine (orders + runs), POST create
-    orders/[id]/route.ts        GET one (buyer, holder, cafe, admin only)
+    orders/[id]/route.ts        GET one, the buyer only (anyone else gets "not found"). Only the buyer's own reply for an unfinished pickup carries `qr` (the collect QR, FLOWS.md "Collect QR")
     orders/[id]/cancel/route.ts
     runs/route.ts               GET the runs I am carrying (students and staff): building, buyer first name, promised time. No codes
     runs/preview/route.ts       POST scanned id (or QX:ORDER:<id>) -> preview with the earning line, or the refusal
     runs/accept/route.ts        POST id -> atomic accept (first valid scan wins)
     runs/arrive/route.ts        POST id -> "I'm here": arrivedAt + buyer Update, holder only
     runs/handover/route.ts      POST id + code -> DELIVERED and the earning, one atomic step
+    runs/ready/route.ts         GET the Ready to deliver list (any student or staff session): READY delivery bags with no holder, not the caller's own. Source, building, drop point, earning, item count, minutes since ready. No order ID, buyer or code
     wallet/route.ts             GET ledger
     wallet/topup/route.ts       POST amount
     updates/route.ts            GET list, POST mark-read
     prefs/route.ts              GET; PUT (any part: default building, mode, time, the three notification switches). Strict: unknown fields are refused
     profile/route.ts            PUT { name } -> your first name (same rules as Identify); the ID and role cannot change
-    feedback/route.ts           POST { rating 1-5, text? } -> kept for the team; one every 10 s per person
+    feedback/route.ts           POST { rating 1-5, text?, orderId? } -> kept for the team; one every 10 s per person. An orderId must be one of the sender's own orders
     history/route.ts            GET your finished orders and finished runs (no codes)
     refunds/route.ts            GET every refund with its reason, and the total
     cafe/queue/route.ts         GET (runs sweepLate first). Cards have no code, buyer or prices
-    cafe/orders/[id]/route.ts   GET bag slip (with QR path); POST action: accept|reject|start|ready|staff|collect
+    cafe/orders/[id]/route.ts   GET the kitchen slip (placed time, building and drop point, and the bag QR path for a delivery only; never the code); POST action: accept|reject|start|ready|staff|collect
+    cafe/collect/route.ts       POST { qr } | { orderId, code } | { code } -> Scan buyer QR: a READY counter pickup with the right code becomes COLLECTED. Cafe session only; wrong codes pause the desk (KIOSK_RATE_LIMIT)
     cafe/staff/route.ts         GET existing staff IDs, for Send with staff
     cafe/alerts/route.ts        POST seen | returned | collect (+ 4-digit code) on one alert card
     cafe/stock/route.ts         GET; POST adjust one slot or refill all
     cafe/availability/route.ts  GET; POST switch one item on or off (qx:unavailable)
-    cafe/kiosk/route.ts         POST code -> the slots to release; locks for a minute after 5 wrong codes
+    cafe/hours/route.ts         GET hours and the service switch (read only); PUT one change: source (open, close, days) | paused | item (window) | item-reset | holiday-add | holiday-remove. Cafe session
+    cafe/kiosk/route.ts         POST { code } or { qr } (the buyer's collect QR) -> the slots to release; locks for a minute after 5 wrong codes
     cafe/today/route.ts
     admin/codes/route.ts        GET, POST generate|revoke|end
     admin/staff/route.ts
     admin/users/route.ts
     admin/wallet/route.ts       POST adjust
+    admin/service/route.ts      GET; PUT { available, message }: the service-wide switch. Admin session only, the Cafe cannot reach it
     admin/live/route.ts         GET every order in progress (never a code); POST reveal one order's code (admin session, demo tool)
     admin/demo/route.ts         POST seed|reset
 proxy.ts          (Next.js 16 name for middleware.ts)
@@ -123,11 +134,14 @@ lib/
   order-rules.ts  pricing from the menu, fee and walk lookups, break-slot cutoff, promised-time estimate (pure)
   orders.ts       place (one Lua script), read, list, cancel and refund (the refund script is reused by reject)
   runs.ts         runs: preview, accept (one Lua script, with the 3-run and ₹50 rules inside), I'm here, handover (delivers and pays in one script), the run lists
-  order-ref.ts    reads QX-4821 or a slip's QX:ORDER:QX-4821 (pure)
+  order-ref.ts    reads QX-4821 or a slip's QX:ORDER:QX-4821; writes and reads the collect QR text QX:COLLECT:<orderId>:<code> (pure)
+  ready-bags.ts   the Ready to deliver list from the active orders: filter, zone and building order, the earning line, nothing about the buyer (pure)
+  app-icon.tsx    the QuickX home-screen icon (a cream Q on maroon) as an ImageResponse, for the manifest icons and apple-icon
   admin-live.ts   Admin › Live orders: the list and Reveal code
-  cafe.ts         what the cafe desk does: queue, accept, reject, start, ready, collect by code, send with staff, bag slip, kiosk (one Lua script moves an order and tells the buyer)
+  cafe.ts         what the cafe desk does: queue, accept, reject, start, ready, collect by code, scan collect (QR or code), send with staff, kitchen slip, kiosk by code or QR (one Lua script moves an order and tells the buyer)
+  ticket-age.ts   a kitchen ticket's outline (amber, brick) and "Waiting" badge from its age and promised time: NEW_AMBER_MIN, NEW_RED_MIN, DUE_SOON_MIN (pure)
   cafe-today.ts   Today totals from the order records
-  qr.ts           the QR module path for a bag slip (no colours: the browser fills it with the text colour)
+  qr.ts           the QR module path for a bag slip and for the buyer's collect QR (no colours: the browser fills it with the text colour)
   chime.ts        the new-order sound, made with the Web Audio API (browser only)
   late-rules.ts   when an order is due, when grace ends, which of the four outcomes applies, the 3-minute "No runner yet" test, the no-show hold (pure; the browser and the server use the same functions)
   late.ts         sweepLate and settleOrder: one Lua script per order (the lock, status change, refund or runner debit or earning, stock, Updates, indexes and the alert together). Called first in the cafe queue poll, the buyer's order list and order page, the runner's runs and Admin › Live orders; throttled to once a second
@@ -136,24 +150,30 @@ lib/
   ids.ts          staff ids now; order ids and 4-digit codes with ordering
   format.ts       rupees (₹1,25,000), initials
   photos.ts       which item photos exist (list made at build time in next.config.ts)
-  menu-rules.ts   morning cutoff, item status, max quantity, next break (pure)
+  menu-rules.ts   item status (switched off, closed, outside its window, sold out), the reason on a row, max quantity, next break (pure)
+  hours-rules.ts  opening hours, open days, pauses, holidays, item windows and the service switch as one pure module: reading what is stored over the defaults, "is it open", the ordering rule (a to f) in checkOrder and slotBlock, the Home tile label, when a place next opens, the closed-place sheet and notice lines, and the checks on what the Cafe types. The browser and the server use these same functions
+  ready-estimate.ts the "Ready in about N min" formula, the median prep time and the words (pure)
+  source-status.ts  /api/status: each place's status label and estimate, counting ACCEPTED and PREPARING orders from `orders:active` (5 s in-memory cache)
+  order-progress.ts the four-segment progress line: which stage, how full, never past 90% before a status change (pure)
+  menu-sections.ts  a menu page's sections and tabs: categories in data order, then Unavailable only if needed (pure)
+  hours.ts        reads and writes the hours (hash `hours`, one field per setting so two edits never overwrite each other) and the service switch (hash `service`); place-order calls the ordering rule from here
   menu.ts         unavailable switches + vending stock read from Redis
   stock.ts        vending stock, created from startStock on first read
-  cart.ts         cart rules on plain data: one source, 10 units, stock (pure)
+  cart.ts         cart rules on plain data: one source, 10 units, stock; planReorder for Order again (skips what cannot be ordered now) (pure)
   cart-store.ts   browser cart store: memory + sessionStorage per user
   search.ts       menu search across all five sources (pure)
   time.ts         IST formatting, promised time math
 data/
-  menu.ts  locations.ts  breaks.ts  copy.ts (shared UI strings)  order-copy.ts (order words, headlines, Update texts)  cafe-copy.ts (Cafe portal and kiosk words, reject reasons)  account-copy.ts (Account words)  discover-copy.ts (Discover pages and the FAQ; every number in it is read from lib/config.ts)
+  menu.ts  hours.ts (default opening hours, open days, breakfast windows, holidays)  locations.ts  breaks.ts  copy.ts (shared UI strings)  order-copy.ts (order words, headlines, Update texts)  cafe-copy.ts (Cafe portal and kiosk words, reject reasons)  account-copy.ts (Account words)  discover-copy.ts (Discover pages and the FAQ; every number in it is read from lib/config.ts)
 components/
-  ui/             PillButton (+ PillLink), IconButton, Chip, Card, ArchCard, ItemTile, SourceGlyph, Stepper, Sheet (bottom sheet, or centred dialog on the laptop portals), Input, Textarea, CodeBoxes, Banner, Badge, EmptyState, Countdown, Money, LogoutButton, Toggle, PortalNav, NavRow (link or button row), Accordion, FaceRating, VersionLine
+  ui/             PillButton (+ PillLink; sizes lg, md, ticket and desk), IconButton, QrCode (server-made QR on cream), QuickXMark, Chip, Card, ArchCard, ItemTile, SourceGlyph, Stepper, Sheet (bottom sheet, or centred dialog on the laptop portals), Input, Textarea, CodeBoxes, Banner, Badge, EmptyState, Countdown, Money, LogoutButton, Toggle, PortalNav, NavRow (link or button row), Accordion, FaceRating, VersionLine, LoadingView (cooking pot and steam), useHydrated
   kit/            KitGallery, the admin-only /kit page
   account/        AccountView (profile card + rows), LogoutRow (confirm sheet), ProfileView, PreferencesView, NotificationsView, HistoryView, RefundsView, TermsView, SupportView, FeedbackForm (also used by Discover)
   discover/       DiscoverList, DiscoverPages (Introduction, Help, Smart Vending, FAQ)
-  student/        Header, BottomBar, WalletChip, SessionChip (Phase 2); SourceTile, CartBar, OrderStrip (later)
-  runner/         RunnerProvider (the one sheet for the student app), RunnerSheet (scan, preview, accept, handover), QrScanner (camera, decoder served from /scanner), ScanButton
-  cafe/           QueueProvider (one poll, new-order highlight and chime, server clock), CafeHeader, QueueView, OrderCard, RejectDialog, StaffDialog, BagSlipDialog, VendingStockView, MenuAvailabilityView, TodayView, KioskView (AlertCard waits for Phase 8)
-  admin/          CodesPanel, CodeTable, PermanentCodes, ShowCode, StaffPanel, UsersPanel, LiveOrdersPanel, CopyButton, AdminNav
+  student/        Header, BottomBar, WalletChip, SessionChip (Phase 2); SourceTile (with its live status), SourceStatus (badge and the closed-place sheet), StatusLine (status words, dot, estimate), ClosedNotice, ServiceBanner, SearchResults and ItemAddControl (Home search rows), OrderProgress (the four-segment line) and ActiveOrderStrip, CategoryTabs (sticky tabs with scroll-spy), ItemCard (menu item card), CartBar; OrderListCard (Orders tab receipt card), CartProvider (Order again and its replace-cart sheet)
+  runner/         RunnerProvider (the one sheet for the student app), RunnerSheet (scan, preview, accept, handover), QrScanner (camera, decoder served from /scanner), ScanButton (with the ready count badge), ReadyList and useReadyBags (the read-only Ready to deliver list, polled every 10 s while visible)
+  cafe/           QueueProvider (one poll, new-order highlight and chime, server clock), DeskProvider (source filter, Scan buyer QR target, slip to print), CafeShell (DeskSidebar, DeskTopBar with the pause switches and counts, SourceFilterBar), QueueView, OrderCard (the kitchen ticket), AlertStrip (the brick alert bar), ScanCollectDialog, KitchenSlip, BagSlipDialog (Show slip), PrintSlipRoot (80 mm printing), RejectDialog, StaffDialog, VendingStockView (slot grid), HoursView (PlaceHoursCard, HolidaysSection, ItemsSection, PillField), TodayView (number tiles), KioskView (keypad and Scan QR)
+  admin/          CodesPanel, CodeTable, PermanentCodes, ShowCode, StaffPanel, UsersPanel, LiveOrdersPanel, ServicePanel, CopyButton, AdminNav
 public/
   illustrations/  (see bible)
   food/           optional real photos <item-id>.jpg
@@ -204,6 +224,8 @@ All values JSON unless noted.
 | `qx:alerts` | hash | orderId -> alert (failed, staff-return, no-show) until a staff member acts on it |
 | `qx:stock` | hash | slot -> count |
 | `qx:unavailable` | set | item ids off today |
+| `qx:hours` | hash | one field per setting, read tolerantly over the defaults in `data/hours.ts` (a bad or missing field falls back): `s:<sourceId>` = `{ open, close, days }`; `p:<sourceId>` = paused (true / false); `i:<itemId>` = an item's window `{ from?, until? }` (an empty one means "no limit" and overrides the default); `h:<YYYY-MM-DD>` = a holiday's note |
+| `qx:service` | hash | `available` (true / false) and `message`. Written only from Admin › Service; every order and every student screen reads it |
 | `qx:codes:temp` | hash | code -> record (ACCESS.md) |
 | `qx:kiosk:wrong` | integer, TTL 60 | wrong codes typed at the kiosk (5 locks it for the rest of the minute) |
 | `qx:ratelimit:<ip>` | integer, TTL 600 | wrong code tries |

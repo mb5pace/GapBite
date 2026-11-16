@@ -95,8 +95,18 @@ export interface OrderSummary {
   when: string;
   units: number;
   total: number;
+  /** The buyer's own lines (name, quantity, price): the Orders tab shows them and "Order again" reuses them. */
+  items: OrderItem[];
   promisedAt?: number;
   holder?: Holder;
+  /** Minutes from Accepted to Ready, and the walk to the building. They set how fast the progress line fills. */
+  prepMin: number;
+  walkMin: number;
+  /** Epoch ms the cafe accepted it, and the runner picked it up (the first time). */
+  acceptedAt?: number;
+  pickedUpAt?: number;
+  /** Epoch ms the holder tapped "I'm here" at the drop point. */
+  arrivedAt?: number;
   createdAt: number;
   updatedAt: number;
 }
@@ -111,8 +121,14 @@ export function summarize(order: Order): OrderSummary {
     when: order.when,
     units: order.items.reduce((sum, item) => sum + item.qty, 0),
     total: order.total,
+    items: order.items.map((line) => ({ itemId: line.itemId, name: line.name, price: line.price, qty: line.qty })),
     promisedAt: order.promisedAt,
     holder: order.holder,
+    prepMin: order.prepMin,
+    walkMin: order.walkMin,
+    acceptedAt: order.events.find((event) => event.status === "ACCEPTED")?.at,
+    pickedUpAt: order.events.find((event) => event.status === "PICKED_UP")?.at,
+    arrivedAt: order.arrivedAt,
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,
   };

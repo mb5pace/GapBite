@@ -7,12 +7,15 @@ interface ChipProps extends ComponentProps<"button"> {
    * day pickers; the selected capsule is filled maroon so it stands out in a row.
    */
   variant?: "pill" | "capsule";
+  /** desk: 48 px tall, for the Cafe desk (its touch-target minimum). */
+  size?: "md" | "desk";
 }
 
 /** UI_UX_BIBLE.md section 4: `sand` by default, `blush` with `maroon` text when selected. */
 export function Chip({
   selected = false,
   variant = "pill",
+  size = "md",
   type = "button",
   className = "",
   children,
@@ -20,8 +23,10 @@ export function Chip({
 }: ChipProps) {
   const shape =
     variant === "capsule"
-      ? "min-h-16 min-w-16 flex-col gap-0.5 px-4 text-body"
-      : "h-11 px-4 text-secondary";
+      ? "min-h-16 min-w-16 flex-col gap-1 px-4 text-body"
+      : size === "desk"
+        ? "h-12 px-4 text-secondary"
+        : "h-11 px-4 text-secondary";
   const colour = selected
     ? variant === "capsule"
       ? "bg-maroon text-cream"

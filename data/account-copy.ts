@@ -151,7 +151,7 @@ export const ACCOUNT_COPY = {
         title: "Pictures and credits",
         body: [
           "Illustrations: Open Peeps by Pablo Stanley (CC0, openpeeps.com). The drawings are not added yet. Until they are, QuickX uses simple line icons.",
-          "Icons: Phosphor Icons (MIT). Fonts: Grandstander and Figtree (SIL Open Font License). Food photos appear only where the team has taken them.",
+          "Icons: Phosphor Icons (MIT). Fonts: Plus Jakarta Sans, and Grandstander for the QuickX logo only (SIL Open Font License). Food photos appear only where the team has taken them.",
         ],
       },
     ],
@@ -169,6 +169,8 @@ export const ACCOUNT_COPY = {
     pickAFace: "Pick a face first.",
     tooLong: `Keep it under ${FEEDBACK_TEXT_MAX} characters.`,
     tooSoon: "That went through a moment ago. Try again in a few seconds.",
+    notYourOrder: "That order is not one of yours.",
+    aboutOrder: (orderId: string, cafe: string) => `About ${orderId} from ${cafe}`,
     thanksTitle: "Thanks",
     thanks: "Your feedback reached the team.",
     again: "Send more feedback",

@@ -90,13 +90,99 @@ What was checked, and what it found and fixed.
 - [x] Discover pages and FAQ
 
 ## Phase 10 — Demo polish
+(The demo tools, the quality pass and the real-device test are carried into v1.0.0 Phase C below.)
 - [ ] Admin demo tools (seed, reset). (Live orders was pulled forward to Phase 7.) Seed still creates `QX-STF-01 Ramesh`, but through the same `qx:staff:seq` counter and only if that ID does not exist yet, because staff can now be added by hand
 - [ ] Every screen checked against bible §9 and §10
 - [ ] Test on two real phones + laptop at the same time over the deployed URL
 - [ ] Walk through DEMO_SCRIPT.md twice end to end
 
+## v1.0.0
+
+Three sessions, in order. Everything is built on the `dev` branch and tested on the dev preview link (Redis prefix `qxdev:`). Main is production and only changes through a release, which the team does itself.
+
+### Phase A: rules, data and foundations
+- [x] **1. One professional font.** Plus Jakarta Sans (400, 500, 600, 700, 800) for all text, headings and numbers, `tabular-nums` kept on prices, balances and countdowns. Grandstander stays only for the QuickX wordmark on the gate. UI_UX_BIBLE section 2 updated. Every screen checked at 360 px.
+- [x] **2. Menu data.** Required `category` on every item, new item Matar Paneer Paratha (`ti-matar-paneer-paratha`, ₹60, prep 6), and the old `morning` tag and 11:30 rule removed everywhere (config, server, UI text, docs, tests). MENU.md updated.
+- [x] **3. Opening hours, item windows, holidays.** Defaults in `data/hours.ts`, live values in one Redis hash, pure rules shared by browser and server. The ordering rule (a to f) is enforced in place-order on the server with plain refusal messages. Break slot chips and the Home "Next break" strip respect hours and item windows. Orders already placed are never affected.
+- [x] **4. Pause switches.** Per source "Taking orders / Paused" (Cafe portal). Service-wide "QuickX available / not available" with an editable message, only from the new Admin › Service page, with a banner on every student screen. Neither touches active orders.
+- [x] **5. Cafe "Hours and items" page.** Per source hours, open days and pause; holidays; per-item available-from / until and the "Available today" switch (moved here). Validation, instant effect for students.
+- [x] **6. Closed states for students.** Home tile labels, a dismissible once-per-session notice, a sheet when a closed or paused source is opened (Add disabled), "Unavailable now" at the bottom of a menu, and the cart flagging items that became unavailable.
+- [x] **7. Loading view.** CookingPot icon with CSS steam and "Your food is on the stove…", used by the student, Cafe and Admin route groups, reduced motion respected, no artificial delay.
+- [x] **8. Docs, changelog, tests.** BUSINESS_RULES, MENU, SCREENS, ARCHITECTURE, UI_UX_BIBLE and CHANGELOG (Unreleased) updated. Tests for Sunday and holiday closed, Global Bistro before and after 12:00, breakfast cutoffs, paused source, service off, active orders unaffected, and hours edited in the Cafe portal changing what students can order on the next poll. All earlier suites pass. build, tsc and lint clean.
+
+### Phase B: student redesign (later session)
+- [x] **Home in SmartQ style.** Location line "Ahmedabad University · UC" with a pin, search, a square cafe tile grid with Open now / Opens at HH:MM / Paused and "Ready in about X min" from that cafe's queue, Popular at UC.
+- [x] **Order progress line on Home.** Four parts tied to the real status (delivery: Placed, Preparing, On the way, Delivered; pickup: Placed, Preparing, Ready at counter, Collected) with the Phosphor `PersonSimpleWalk` icon standing on the current part and a gentle walking bob, reduced motion respected, "+1 more" for a second order.
+- [x] **Menu pages in SmartQ style.** Category tabs including Unavailable, search, cards with a veg dot, description, price, a "Prep N min" badge, the photo on the right if there is one, an outlined Add button.
+- [x] **Order Detail.** A large QR plus the 4-digit code and "Show this screen to collect your order" for pickup and vending.
+- [x] **Orders tab like the SmartQ Past screen.** Search, underlined Active / Past tabs, cards with status badge, date and time, order ID, items with prices, Share feedback and Order again, an end-of-list line.
+- [x] **Scan button number badge.** A read-only list of ready delivery bags grouped by building (cafe, building, earning, waiting time). Tapping a row only says "Scan this bag at the <source> counter to take it"; nothing can be claimed remotely.
+- [x] **Add to home screen.** Web manifest, icons, cream splash, standalone display.
+- [x] **Visual polish pass** at 360 px.
+  Every student screen (gate, identify, Home, the five menus, cart, checkout, order detail for pickup and delivery, Orders Active and Past, Updates, Wallet, Account and its sections, Discover, the runner sheet) was checked at 360 and 390 px with a script that measures spacing against the bible scale, icon sizes, cards inside cards, tap targets and the number of filled primary buttons on screen. Fixes:
+  - **Icons only 20 or 24 px.** To 24 px (were 22, 30, 32 or 36): Wallet and Updates row icons, header Back arrow, search magnifier, cafe tile icon, Next break clock, gate eye button, Account and Discover row icons, feedback faces. To 20 px (were 14, 18 or 24): stepper minus and plus, Log out, the Prep badge timer, banner icons.
+  - **Spacing only from the scale (4, 8, 12, 16, 20, 24, 32, 40 px).** 2 px paddings, gaps and nudges became 4 px or were removed (Prep badge, staff badge, arch card tag, unavailable reason pill, tall chip, Discover page lines, search result lines, nav row hints, banner icon, Home pin, stepper inner padding); 6 px gaps became 8 px (progress line labels); the status dot sits centred in a 20 px line box instead of a 6 px nudge; the gate and Identify pages use 40 px instead of 64 and 48.
+  - **Orders card buttons.** "Share feedback" no longer wraps inside its pill: the two buttons sit side by side when both labels fit on one line and stack full width on narrower phones.
+  - Already clean, no change needed: one filled primary per screen (the cart bar counts as the screen's action on menus), no cards inside cards, every tap target at least 44 px, no banned pattern from bible section 9, page headers the same on every sub-page (Back, title, Scan, wallet chip).
+
+### Phase C: Cafe portal as a kitchen display, demo tools, release (later session)
+- [x] **Cafe portal redesigned as a POS / kitchen display.** Fixed left sidebar (Queue, Vending, Hours and items, Today); top bar with live status counts, per-source open / paused switches and the clock; tickets styled as kitchen order slips with large item lines and big action buttons; ticket colour by age (normal, amber, red); "Scan buyer QR" for pickups; printable kitchen slip; large touch targets.
+- [x] **Phase 10 demo tools.** Seed, reset (only the current environment's key prefix), and a late-test order.
+- [ ] **Final quality pass** and a real two-phone plus laptop test.
+  **v1.0.0 check (C2-2).**
+  - [x] `npm run build`, `npx tsc --noEmit` and `npx eslint .` clean.
+  - [x] No `console.log`, no leftover stubs or TODOs; the only `console.error` calls go through `logSafeMessage`.
+  - [x] No client component imports `lib/redis.ts` (client files only take types from server modules); the only env values in the browser are the public `NEXT_PUBLIC_APP_VERSION`, `NEXT_PUBLIC_APP_COMMIT` and `NEXT_PUBLIC_FOOD_PHOTOS`.
+  - [x] Every `/api/cafe` and `/api/admin` handler checks its session on the server (`requireApiSession`); only login, logout and health are open.
+  - [x] No response carries another user's code or collect QR: cafe cards, run cards, kiosk results and Admin live rows have no code; only the buyer's own order detail does.
+  - [x] Scripted end-to-end runs (`tests/c2-2-flows.test.mjs`, 11 runs) pass: QR pickup, kiosk vending, student runner with I'm here, staff delivery, runner late, staff late, no-show, cancel, reject, refusals (closed hours, breakfast window, pause, service off) and Order again. With the C2-1 demo tests, 18 of 18 pass against a local Redis behind `tests/shim.mjs`.
+  - [ ] Real two-phone plus laptop test on the dev preview (the team).
+- [x] **DEMO_SCRIPT.md** updated.
+- [ ] **Release v1.0.0** (done by the team, not by the build session).
+
 ## Open questions
 (Add questions here when a doc is silent. Keep the simplest behaviour until answered.)
+
+Raised in v1.0.0 Phase C1 (the brief was silent or unclear, simplest behaviour kept until answered):
+- **Amber and brick on a delivery ticket.** The brief puts both "at the promised time". Amber is taken as "due soon": from `DUE_SOON_MIN` (2) minutes before the promised time; brick from the promised time until grace ends (then the sweep settles it). Pickup tickets get no time outline, because a pickup never fails by itself (the same rule as "Due now"). A Ready delivery with no runner for 3 minutes keeps its amber outline. Please confirm the 2 minutes.
+- **Mark ready on an Accepted ticket** sends Start preparing and then Mark ready (the existing two steps), so the buyer still gets both Updates. If someone else already started it, it goes straight on to ready.
+- **Scan buyer QR with the code alone** (typed from the top bar, with no ticket chosen) collects the oldest Ready counter pickup with that code, as the kiosk does. From a ticket's Collect it is that order only.
+- **Wrong codes at the desk** share one counter for the whole desk with the kiosk's numbers (5 wrong codes, then a minute's pause, even for a right code), under their own key. The old 4-digit Collect action on `/api/cafe/orders/[id]` is still there but the desk no longer uses it; the no-show Collect on the alert bar is unchanged.
+- **The source filter** is shown on the Queue only (it filters tickets) and also narrows the top bar's counts. It is kept while moving between desk pages.
+- **Top bar switches** use short names (Truly, Bistro, Delice, Greens, Vending) with the place's colour dot; the full name is in the tooltip and read out by screen readers.
+- **The 72 px rail** hides the version line and shows the sound hint as a small sun dot on the sound button.
+- **Kitchen slip:** the PICKUP word stays in capitals (as in FLOWS); the slip has no buyer name or prices. The print page is 80 mm by 297 mm with 4 mm margins (a roll printer cuts where the slip ends). Pickup slips no longer carry a QR.
+- **Today tiles** are the brief's five; the other totals (in progress, missed deliveries, cancelled or rejected, refunds, delivery fees kept) stay in a table beside revenue by source.
+
+Raised in v1.0.0 Phase B2 (the brief was silent, simplest behaviour kept until answered):
+- **QR lifetime.** The collect QR (and the "Show this screen" strip) shows while a pickup is Placed, Accepted, Preparing or Ready. Once it is collected, cancelled, rejected or failed, the server stops sending it and the card keeps only the ID, badge and cafe. A no-show only happens to deliveries, which never have a QR, so its counter collection still uses the 4 digits.
+- **Badge words on pickup cards.** Ready reads "Ready to collect" (the existing word); Placed and Accepted are amber like Preparing.
+- **Share feedback and Order again** are on Past cards only. An order still in progress has nothing to rate yet and is already on its way.
+- **Order again** opens the cart once something is added, so the student sees what went in. "Keep my cart" on the replace question leaves everything as it was. Quantities are capped by the usual cart rules (10 units, vending stock).
+- **No promised time on Orders cards.** The brief's card has no line for it, so an active card shows when it was ordered; the promised time and countdown are on Order Detail and the Home progress card. Cancelled now reads brick (it was taupe), as the brief asks.
+- **Orders search** matches dish names, the cafe name and the order ID. My runs is hidden while a search is typed (the search is about your own orders).
+- **Ready list leaves out the order ID** as well as the buyer and the code, so a typed ID cannot be taken from the list without going to the counter. "Minutes since ready" is counted from the server's time when the cafe marked it ready. Staff never see the top-up note.
+- **Home-screen icon.** The "Q" is drawn from a ring and a tail (no font file needed at build time), cream on maroon; the maskable icon keeps the mark inside the safe circle.
+
+Raised in v1.0.0 Phase B1 (the brief was silent, simplest behaviour kept until answered):
+- **Vending tile** is full width at 2:1, not 1:1 (a 1:1 tile that wide would fill the screen). Its status line says "Open now · Ready now" because its prep time is 0.
+- **Ready estimate** rounds up to a multiple of 5, so a result that is already a multiple of 5 stays as it is (10 stays 10). The tile's words (Open now, Closed today, Paused) come from the live hours, refreshed every 4 seconds with the rest of the app; only the "Ready in about N min" part waits for the 15-second `/api/status` answer, so a tile never contradicts its Add buttons.
+- **Progress line stages.** A segment is full once its stage is reached (Placed is full the moment the order exists). Only Preparing and On the way fill over time, and they stop at 90%. A delivery that is Ready but has no runner shows Preparing full and On the way empty. Home shows one card (the order due first) and "+N more", so the old two-card strip is gone.
+- **Unavailable tab** holds only item-level reasons (switched off, outside its own time, sold out). When a whole cafe is closed or paused, its items stay in their categories (the menu is still worth reading) with Add off, and the header line says why.
+- **No veg field.** Every item at UC is vegetarian (docs/MENU.md), so the veg mark is on every item and the menu data has no new field.
+- **Add button** is a full 44 px outlined pill beside the picture, so the visible button and its tap area are the same size.
+- **Home header** wraps "Ahmedabad University" onto two lines on a 360 px phone rather than cutting it, because the Scan button and the wallet chip need their room.
+- **Search** keeps matching the cafe name, so typing "delice" lists every Cafe Delice dish, and the order progress card stays visible above the results.
+
+Raised in v1.0.0 Phase A (the brief or the docs were silent, simplest behaviour kept until answered):
+- **Home notice and "once per session".** The notice stays away once it is dismissed, for the rest of that browser session (until the tab is closed). If it is never dismissed it shows again each time Home opens. It is not shown again just because a different place closes later in the same session.
+- **All places closed.** The notice lists the first three closed places in menu order, one line each (the brief says "max three"); it does not summarise. On a Sunday or a holiday the "Next break" strip carries the "Nothing is open right now. Truly Indian opens tomorrow at 08:00." line.
+- **A pause has no end time.** The closed-place sheet for a paused place says "Check back in a little while." and no time. A paused place stays "Paused" outside its hours too.
+- **Clearing a default window.** An item that has a default window (breakfast, until 11:00) and whose two times are both cleared in the Cafe portal means "no limit" and overrides the default. "Back to default" puts the default back.
+- **Holidays in the past** can be added and removed (harmless); the list is not trimmed.
+- **Time fields** are the browser's own time control, so a phone may show 12-hour time ("07:00 PM"). The value stored and sent is always 24-hour "HH:MM" on 5-minute steps.
+- **Vending** follows the same hours and pauses as the cafes (08:00 to 19:00, Monday to Saturday) and has its own card in Hours and items.
+- **Not-found status inside the student app.** An address that does not exist (an unknown account section, Discover topic or place, or an order that is not yours) shows the same "We could not find that page" screen as before, but its HTTP status is now 200 instead of 404, because the student loading view starts each page's response before the page decides. Nothing about an order is revealed either way, and nobody indexes this app, so it was left as it is. Outside the student portal (`/nothing-here`) it is still a real 404. A loading view at the root was left out on purpose: it would also have turned the "session ended" redirect (307) into a 200.
 
 Raised in Phase 6 (the docs were silent, simplest behaviour kept until answered):
 - The source filter tabs sit above the columns, not in the header: with the pages, the clock, the sound switch and Logout there is no room for six tabs on one row at 1280 px. The header has Queue, Vending, Menu and Today.
@@ -195,8 +281,8 @@ Phase 3 (browse and cart), accepted by the team
 - Next break strip: prep comes from the slowest item of the source in the cart, or 5 minutes (`DEFAULT_PREP_MIN`) with an empty cart, because there is no order history until Phase 5. The building is GICT (`DEFAULT_BUILDING`) until Preferences exist in Phase 9. If the nearest break can no longer be made, the strip shows the next one that can; after the last one it says "No more breaks today."
 - Category chips on the source menu are skipped: menu items have no category field in MENU.md, and none was invented.
 - Vending cells add one unit per tap. Removing and changing quantity happen in the cart, because a stepper does not fit a 44 px tap target in a three-column grid.
-- The morning rule runs from 11:30 IST to midnight (so 00:00 to 11:29 morning items can be ordered). Server time decides; the phone only counts forward from the last server reading.
-- A cart item that stops being orderable (switched off, morning cutoff, stock below the quantity) stays in the cart, is flagged in red, and Checkout is disabled until it is removed.
+- ~~The morning rule runs from 11:30 IST to midnight.~~ Replaced in v1.0.0 Phase A: there is no morning tag and no 11:30 rule. Breakfast is a normal item window ("Breakfast, until 11:00") set in `data/hours.ts` and editable in the Cafe portal. Server time still decides; the phone only counts forward from the last server reading.
+- A cart item that stops being orderable (switched off, its place closed or paused, outside its time window, stock below the quantity) stays in the cart, is flagged in red, and Checkout is disabled until it is removed.
 - `/checkout` is a placeholder until Phase 5. The header gets a Back button and a title on sub-pages; long titles wrap to two lines.
 - Vending stock is created in Redis (`qx:stock`) from `startStock` the first time anyone reads it, so Phase 5's atomic decrement always finds a number.
 - Cafe "Unavailable today" switches are read from `qx:unavailable` now; the Cafe portal that writes them is Phase 6.

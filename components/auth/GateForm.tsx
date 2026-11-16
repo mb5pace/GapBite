@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { COPY } from "@/data/copy";
 import { Input } from "@/components/ui/Input";
+import { LoadingView } from "@/components/ui/LoadingView";
 import { PillButton } from "@/components/ui/PillButton";
 import { CODE_INPUT_MAX } from "@/lib/config";
 import { postJson } from "@/lib/http";
@@ -15,6 +16,8 @@ export function GateForm({ notice }: { notice?: string }) {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  // The code was accepted and the first page of the portal is on its way.
+  const [entering, setEntering] = useState(false);
   // What is typed is hidden by default, so a password never shows on a projector.
   const [visible, setVisible] = useState(false);
 
@@ -29,6 +32,7 @@ export function GateForm({ notice }: { notice?: string }) {
     setError("");
     const res = await postJson<{ next: string }>("/api/auth/login", { code }, { redirectOn401: false });
     if (res.ok && res.data) {
+      setEntering(true);
       router.replace(res.data.next);
       return; // stay busy until the next page loads
     }
@@ -69,9 +73,9 @@ export function GateForm({ notice }: { notice?: string }) {
             className="flex size-11 items-center justify-center rounded-pill text-mocha focus-visible:outline-2 focus-visible:outline-maroon"
           >
             {visible ? (
-              <EyeSlash weight="regular" size={22} aria-hidden="true" />
+              <EyeSlash weight="regular" size={24} aria-hidden="true" />
             ) : (
-              <Eye weight="regular" size={22} aria-hidden="true" />
+              <Eye weight="regular" size={24} aria-hidden="true" />
             )}
           </button>
         }
@@ -84,6 +88,7 @@ export function GateForm({ notice }: { notice?: string }) {
       <PillButton type="submit" arrow full disabled={busy || code.trim() === ""} aria-busy={busy}>
         {COPY.gate.button}
       </PillButton>
+      {entering ? <LoadingView overlay /> : null}
     </form>
   );
 }

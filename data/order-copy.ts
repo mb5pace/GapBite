@@ -89,6 +89,39 @@ export function promisedLine(order: Pick<Order, "sourceId" | "mode" | "buildingI
     : `Ready by ${time} at the ${getSource(order.sourceId).name} counter`;
 }
 
+/**
+ * The one line under the progress line on Home: what is happening to the order and when it should arrive.
+ * "On the way to GICT ground floor lobby · by 18:38".
+ */
+export function progressLine(
+  order: Pick<Order, "sourceId" | "mode" | "status" | "buildingId" | "promisedAt" | "arrivedAt">,
+): string {
+  const source = getSource(order.sourceId).name;
+  const by = order.promisedAt !== undefined ? ` · by ${formatClock(order.promisedAt)}` : "";
+  const building = order.buildingId ? getBuilding(order.buildingId) : null;
+  const where = building ? `${building.short} ${building.dropPoint.toLowerCase()}` : "";
+  switch (order.status) {
+    case "PLACED":
+      return `Waiting for ${source} to accept${by}`;
+    case "ACCEPTED":
+    case "PREPARING":
+      return `${source} is making it${by}`;
+    case "READY":
+      if (order.mode === "delivery") return `Ready at ${source}, waiting for a runner${by}`;
+      return order.sourceId === "vending" ? "Ready at the vending machine · enter your code" : `Ready at the ${source} counter · show your code`;
+    case "PICKED_UP":
+      return order.arrivedAt !== undefined ? `Your runner is waiting at ${where}` : `On the way to ${where}${by}`;
+    default:
+      return `${source}${by}`;
+  }
+}
+
+/** The order detail card for a pickup: what to do with this screen. */
+export const COLLECT_COPY = {
+  showScreen: "Show this screen to collect your order",
+  qrLabel: (orderId: string) => `QR code to collect ${orderId}`,
+};
+
 export const ORDER_COPY = {
   // Checkout and placing
   emptyCart: "Your cart is empty. Pick something from UC first.",
@@ -234,6 +267,14 @@ export function runnerEarnedUpdate(amount: number): { title: string; body: strin
 /** The runner sheet: scanning, preview, accepted, handover. */
 export const RUN_COPY = {
   scanLabel: "Scan a bag",
+  scanLabelWithCount: (n: number) => `Scan a bag, ${n} ready to deliver`,
+  readyTitle: (n: number) => `Ready to deliver (${n})`,
+  readyNone: "No bags are waiting for a runner right now.",
+  readyItems: (n: number) => `${n} ${n === 1 ? "item" : "items"}`,
+  readyFor: (min: number) => (min < 1 ? "ready just now" : `ready ${min} min`),
+  staffDelivery: "Staff delivery",
+  readyHint: (source: string) => `Scan this bag at the ${source} counter to take it.`,
+  readyTopUp: (min: string) => `Top up to at least ${min} to run.`,
   scanTitle: "Scan a bag",
   scanHint: "Point the camera at the QR code on the bag slip.",
   typeInstead: "Type order ID instead",
@@ -288,6 +329,9 @@ export const CHECKOUT_COPY = {
   whenLabel: "When",
   asap: "As soon as possible",
   tooLate: "Too late",
+  /** A break the place is closed for, or that an item in the cart cannot be ordered for. */
+  closedAt: "Closed",
+  notThen: "Not then",
   breakCaption: "Break",
   billLabel: "Bill",
   subtotal: "Subtotal",
@@ -310,6 +354,22 @@ export const CHECKOUT_COPY = {
 export const ORDERS_COPY = {
   active: "Active",
   past: "Past",
+  search: "Search dishes or cafes",
+  place: "University Centre (UC)",
+  orderedOn: "Ordered on",
+  orderId: "Order ID",
+  deliveredTo: (building: string) => `Delivered to ${building}`,
+  deliveryTo: (building: string) => `Delivery to ${building}`,
+  pickupAtCounter: "Pickup at counter",
+  pickupAtMachine: "Pickup at the vending machine",
+  shareFeedback: "Share feedback",
+  orderAgain: "Order again",
+  feedbackTitle: "Share feedback",
+  endOfList: "You've reached the end of recent orders. Older ones are in Account › Order History.",
+  noMatch: "No orders match that. Try a dish, a cafe or an order ID.",
+  clearSearch: "Clear search",
+  skipped: (names: string[]) => `Not added, not available right now: ${names.join(", ")}.`,
+  nothingToAdd: (names: string[]) => `None of these can be ordered right now: ${names.join(", ")}.`,
   myOrders: "My orders",
   noActive: "No orders in progress. Pick something from UC.",
   noPast: "No past orders yet. Finished orders show up here.",

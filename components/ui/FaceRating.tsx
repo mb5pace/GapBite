@@ -65,7 +65,7 @@ export function FaceRating({
               selected ? "bg-blush text-maroon" : "bg-sand text-espresso"
             }`}
           >
-            <Face weight={selected ? "fill" : "regular"} size={32} aria-hidden={true} />
+            <Face weight={selected ? "fill" : "regular"} size={24} aria-hidden={true} />
           </button>
         );
       })}

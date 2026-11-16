@@ -7,12 +7,14 @@ import { initialsOf } from "@/lib/format";
 import { hasPhoto } from "@/lib/photos";
 import { SourceGlyph } from "./SourceGlyph";
 
-type Size = "sm" | "md" | "lg";
+type Size = "sm" | "md" | "lg" | "xl";
 
 const SIZE: Record<Size, { box: string; text: string; glyph: number; corner: string }> = {
   sm: { box: "size-14", text: "text-section", glyph: 12, corner: "bottom-1 right-1" },
   md: { box: "size-20", text: "text-title", glyph: 16, corner: "bottom-2 right-2" },
   lg: { box: "size-28", text: "text-greeting", glyph: 16, corner: "bottom-2 right-2" },
+  /** The 96 px picture on a menu page, with the 16 px corner. */
+  xl: { box: "size-24", text: "text-title", glyph: 14, corner: "bottom-1.5 right-1.5" },
 };
 
 /**
@@ -39,7 +41,7 @@ export function ItemTile({
 }) {
   const listed = itemId !== undefined && hasPhoto(itemId);
   const [photo, setPhoto] = useState<"pending" | "loaded" | "missing">(listed ? "pending" : "missing");
-  const dims = fill ? "h-full w-full" : `${SIZE[size].box} rounded-tile`;
+  const dims = fill ? "h-full w-full" : `${SIZE[size].box} ${size === "xl" ? "rounded-field" : "rounded-tile"}`;
 
   return (
     <div className={`relative flex shrink-0 items-center justify-center overflow-hidden bg-sand ${dims}`}>
@@ -49,7 +51,7 @@ export function ItemTile({
       >
         {initialsOf(name)}
       </span>
-      {photo !== "loaded" ? (
+      {photo !== "loaded" && size !== "xl" ? (
         <SourceGlyph
           sourceId={sourceId}
           size={fill ? SIZE.lg.glyph : SIZE[size].glyph}

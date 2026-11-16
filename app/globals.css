@@ -33,6 +33,14 @@
   --color-amber: #b7791f;
   --color-brick: #a3261c;
 
+  /* Source colours, only for cafe tiles and menu headers (UI_UX_BIBLE.md "Source colours"). Cream text on each is
+     at least 4.5:1. Three equal a surface or ink token above, and are named here so a source can change on its own. */
+  --color-src-truly-indian: #625955;
+  --color-src-global-bistro: #6d4142;
+  --color-src-cafe-delice: #94692a;
+  --color-src-greens-grains: #4f5e2a;
+  --color-src-vending: #371110;
+
   /* The one translucent colour: the dim layer behind a sheet or dialog. Plain sRGB with alpha
      (#RRGGBBAA = espresso at 40%), so every browser blends it the same way. */
   --color-scrim: #37111066;
@@ -72,6 +80,10 @@
   --animate-sheet-in: sheet-in 200ms ease-out;
   --animate-scrim-in: scrim-in 150ms ease-out;
   --animate-dialog-in: dialog-in 150ms ease-out;
+  /* The loading view's steam: slow, and it stops entirely for people who ask for less motion. */
+  --animate-steam: steam 3s ease-in-out infinite;
+  /* The little walker on the Home progress line: up and down 2 px, every 600 ms. Still under reduced motion. */
+  --animate-bob: bob 600ms ease-in-out infinite;
   @keyframes sheet-in {
     from {
       transform: translateY(100%);
@@ -88,6 +100,28 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+  @keyframes bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-2px);
+    }
+  }
+  @keyframes steam {
+    0% {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    35% {
+      opacity: 0.8;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-14px);
     }
   }
   @keyframes scrim-in {
@@ -107,8 +141,11 @@
 
 /* The font variables are set on <html> by next/font, so these must be inline. */
 @theme inline {
-  --font-display: var(--font-grandstander), ui-rounded, system-ui, sans-serif;
-  --font-sans: var(--font-figtree), system-ui, sans-serif;
+  /* One family for everything (UI_UX_BIBLE.md section 2). "display" is the same family at the heading weights. */
+  --font-display: var(--font-jakarta), system-ui, sans-serif;
+  --font-sans: var(--font-jakarta), system-ui, sans-serif;
+  /* The QuickX wordmark on the gate, and nothing else. */
+  --font-wordmark: var(--font-grandstander), ui-rounded, system-ui, sans-serif;
 }
 
 /*
@@ -140,6 +177,25 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
+  /* App feel on phones: a long press does not select text or open the iOS callout. */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Typing, selecting and pasting still work in every field. */
+input,
+textarea,
+select,
+[contenteditable="true"] {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* Images and icons cannot be dragged out of the page. */
+img,
+svg {
+  -webkit-user-drag: none;
 }
 
 /* Form controls: no browser styling, and colours from our tokens. Utilities (in a later layer)
@@ -198,6 +254,12 @@ select:autofill {
   opacity: 1;
 }
 
+/* The item a search result pointed at is highlighted for a moment when the menu opens on it. */
+[id^="item-"][data-flash] {
+  background-color: var(--color-blush);
+  border-radius: var(--radius-field);
+}
+
 /* Motion is functional only, and off for people who ask for less. */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -211,34 +273,33 @@ select:autofill {
 }
 
 /*
-  Printing the bag slip (Cafe portal). Only the dialog marked data-print-area is
-  printed: everything else on the page, and the dialog's own buttons, are hidden.
-  Colours stay the ink and paper tokens.
+  Printing the kitchen slip (Cafe portal, v1.0.0 Phase C1). The slip is put into <body> inside [data-print-root],
+  which is hidden on screen. On paper only that container prints: 80 mm thermal paper, 72 mm printable, one colour
+  (espresso, which a thermal printer prints black), no backgrounds.
 */
+[data-print-root] {
+  display: none;
+}
 @media print {
   @page {
-    margin: 12mm;
+    size: 80mm 297mm;
+    margin: 4mm;
   }
-  body > *:not([data-print-area]) {
+  html,
+  body {
+    background: none !important;
+  }
+  body > *:not([data-print-root]) {
     display: none !important;
   }
-  [data-print-area] {
-    position: static !important;
+  [data-print-root] {
     display: block !important;
-    padding: 0 !important;
+    width: 72mm;
   }
-  [data-print-area] > div:first-child {
-    display: none !important;
-  }
-  [data-print-area] [role="dialog"] {
-    max-height: none !important;
-    max-width: none !important;
-    overflow: visible !important;
-    border-radius: 0 !important;
-    background: transparent !important;
+  [data-print-root] * {
+    background: none !important;
     box-shadow: none !important;
-    padding: 0 !important;
-    animation: none !important;
+    color: var(--color-espresso) !important;
   }
   .no-print {
     display: none !important;

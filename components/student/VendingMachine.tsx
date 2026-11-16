@@ -6,10 +6,20 @@ import { Money } from "@/components/ui/Money";
 import { itemStatus } from "@/lib/menu-rules";
 import { formatRupees } from "@/lib/format";
 import { useCart } from "./CartProvider";
+import { menuSections } from "@/lib/menu-sections";
+import { CategoryTabs } from "./CategoryTabs";
+import { ClosedSource } from "./SourceStatus";
 import { useMenuState } from "./menu-state";
 
 const SHELVES = ["A", "B", "C"] as const;
 const ITEMS = itemsBySource("vending");
+const TABS = menuSections(ITEMS, () => false).map(({ id, label }) => ({ id, label }));
+/** The shelf each category starts on, so its tab scrolls there (Drinks: shelf A, Snacks: shelf C). */
+const SHELF_TAB: Record<string, string> = {};
+for (const tab of TABS) {
+  const shelf = SHELVES.find((s) => ITEMS.some((item) => item.slot?.startsWith(s) && item.category === tab.label));
+  if (shelf) SHELF_TAB[shelf] = tab.id;
+}
 
 function Cell({ item }: { item: MenuItem }) {
   const cart = useCart();
@@ -65,9 +75,17 @@ export function VendingMachine() {
   return (
     <div className="flex flex-col gap-4">
       <p className="text-body text-mocha">{COPY.student.menu.vendingLine}</p>
+      <ClosedSource sourceId="vending" />
+      <CategoryTabs sections={TABS} />
       <div className="flex flex-col gap-4 rounded-card bg-parchment p-3">
         {SHELVES.map((shelf) => (
-          <section key={shelf} aria-label={`Shelf ${shelf}`} className="flex flex-col gap-2">
+          <section
+            key={shelf}
+            aria-label={`Shelf ${shelf}`}
+            id={SHELF_TAB[shelf] ? `section-${SHELF_TAB[shelf]}` : undefined}
+            style={{ scrollMarginTop: "var(--sticky-offset, 10rem)" }}
+            className="flex flex-col gap-2"
+          >
             <h2 className="px-1 font-display text-secondary font-bold text-maroon">Shelf {shelf}</h2>
             <div className="grid grid-cols-3 gap-2">
               {ITEMS.filter((item) => item.slot?.startsWith(shelf)).map((item) => (

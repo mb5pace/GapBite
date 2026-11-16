@@ -64,6 +64,16 @@ export function istMinutesOfDay(ms: number): number {
   return hour * 60 + minute;
 }
 
+/** 0 (Sunday) to 6 (Saturday) on the IST day that contains `ms`. */
+export function istWeekday(ms: number): number {
+  return new Date(ms + IST_OFFSET_MIN * 60_000).getUTCDay();
+}
+
+/** "2026-11-16": the IST calendar date that contains `ms`. */
+export function istDateKey(ms: number): string {
+  return new Date(ms + IST_OFFSET_MIN * 60_000).toISOString().slice(0, 10);
+}
+
 /** Epoch ms of IST midnight on the IST day that contains `ms`. */
 export function istMidnight(ms: number): number {
   const parts = dateParts.formatToParts(new Date(ms));

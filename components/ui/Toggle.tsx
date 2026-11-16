@@ -12,12 +12,15 @@ export function Toggle({
   onChange,
   label,
   disabled = false,
+  size = "md",
   className = "",
   ...rest
 }: {
   checked: boolean;
   onChange: (next: boolean) => void;
   label: string;
+  /** desk: a 48 px tap area, for the Cafe desk. */
+  size?: "md" | "desk";
 } & Omit<ComponentProps<"button">, "onChange" | "role" | "aria-checked" | "aria-label">) {
   return (
     <button
@@ -28,7 +31,7 @@ export function Toggle({
       disabled={disabled}
       onClick={() => onChange(!checked)}
       className={[
-        "group inline-flex h-11 w-16 shrink-0 items-center justify-center rounded-pill",
+        `group inline-flex ${size === "desk" ? "h-12" : "h-11"} w-16 shrink-0 items-center justify-center rounded-pill`,
         "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon",
         "disabled:cursor-not-allowed",
         className,

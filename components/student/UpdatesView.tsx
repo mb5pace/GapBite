@@ -29,7 +29,7 @@ function Row({ update, now, today }: { update: UpdateView; now: number; today: b
   const inner = (
     <>
       <span className="flex size-11 shrink-0 items-center justify-center rounded-pill bg-sand text-maroon" aria-hidden="true">
-        <Icon weight="regular" size={22} />
+        <Icon weight="regular" size={24} />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-body font-bold text-espresso">{update.title}</span>

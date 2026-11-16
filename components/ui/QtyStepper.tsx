@@ -19,9 +19,9 @@ export function QtyStepper({
   const button =
     "flex size-11 items-center justify-center rounded-pill transition-transform duration-150 ease-out active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon";
   return (
-    <span className="inline-flex items-center gap-1 rounded-pill bg-sand p-0.5">
+    <span className="inline-flex items-center gap-1 rounded-pill bg-sand">
       <button type="button" aria-label={`Remove one ${name}`} onClick={onDec} className={`${button} bg-cream text-espresso`}>
-        <Minus weight="bold" size={18} aria-hidden="true" />
+        <Minus weight="bold" size={20} aria-hidden="true" />
       </button>
       <span className="min-w-8 text-center font-display text-section font-bold tabular-nums text-espresso" aria-live="polite">
         <span className="sr-only">Quantity </span>
@@ -34,7 +34,7 @@ export function QtyStepper({
         disabled={incDisabled}
         className={`${button} bg-maroon text-cream disabled:bg-sand disabled:text-taupe disabled:active:scale-100`}
       >
-        <Plus weight="bold" size={18} aria-hidden="true" />
+        <Plus weight="bold" size={20} aria-hidden="true" />
       </button>
     </span>
   );
