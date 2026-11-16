@@ -1,15 +1,13 @@
 "use client";
 
 import { Printer } from "@phosphor-icons/react";
-import { useState, type FormEvent, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { CAFE_COPY } from "@/data/cafe-copy";
 import { getBuilding } from "@/data/locations";
 import { getSource } from "@/data/menu";
-import { CodeBoxes } from "@/components/ui/CodeBoxes";
 import { IconButton } from "@/components/ui/IconButton";
 import { PillButton } from "@/components/ui/PillButton";
 import { SOURCE_BG } from "@/components/student/sourceStyle";
-import { CODE_DIGITS } from "@/lib/config";
 import { isDue, isUnclaimed } from "@/lib/late-rules";
 import type { CafeCard } from "@/lib/order-types";
 import { ticketLook, type TicketOutline } from "@/lib/ticket-age";
@@ -24,8 +22,8 @@ export interface CardActions {
   slip: () => void;
   staff: () => void;
   print: () => void;
-  /** Resolves true when the code was right. */
-  collect: (code: string) => Promise<boolean>;
+  /** Opens Scan buyer QR for this order (camera, or the buyer's 4 digits typed). */
+  collect: () => void;
 }
 
 /** No side stripes: the outline goes all the way round (UI_UX_BIBLE.md "POS tickets"). */
@@ -47,31 +45,6 @@ function SecondaryAction({ children, onClick, disabled, label }: { children: Rea
     >
       {children}
     </button>
-  );
-}
-
-/** Collect on a Ready pickup: the buyer's 4 digits, typed on the ticket. */
-function CollectForm({ id, busy, onCollect, onCancel }: { id: string; busy: boolean; onCollect: (code: string) => Promise<boolean>; onCancel: () => void }) {
-  const [code, setCode] = useState("");
-
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    if (code.length !== CODE_DIGITS) return;
-    const right = await onCollect(code);
-    if (!right) setCode("");
-  }
-
-  return (
-    <form onSubmit={submit} className="flex flex-col gap-2">
-      <p className="text-secondary text-mocha">{CAFE_COPY.actions.codeHint}</p>
-      <CodeBoxes value={code} onChange={setCode} label={`${CAFE_COPY.actions.collectLabel} for ${id}`} size="sm" />
-      <PillButton type="submit" full size="ticket" disabled={busy || code.length !== CODE_DIGITS} aria-label={`${CAFE_COPY.actions.collect} ${id}`}>
-        {CAFE_COPY.ticket.confirmCode}
-      </PillButton>
-      <SecondaryAction onClick={onCancel} disabled={busy} label={`${CAFE_COPY.ticket.cancelCode} ${id}`}>
-        {CAFE_COPY.ticket.cancelCode}
-      </SecondaryAction>
-    </form>
   );
 }
 
@@ -103,7 +76,6 @@ export function OrderCard({
   const due = isDue(card, now);
   const unclaimed = isUnclaimed(card, now);
   const label = (text: string) => `${text} ${card.id}`;
-  const [collecting, setCollecting] = useState(false);
 
   let primary: ReactNode = null;
   let secondary: ReactNode = null;
@@ -151,11 +123,9 @@ export function OrderCard({
         );
       } else if (vending) {
         primary = <p className="rounded-pill bg-sand px-4 py-3 text-center text-body font-semibold text-espresso">{copy.atKiosk}</p>;
-      } else if (collecting) {
-        primary = <CollectForm id={card.id} busy={busy} onCollect={actions.collect} onCancel={() => setCollecting(false)} />;
       } else {
         primary = (
-          <PillButton full size="ticket" disabled={busy} onClick={() => setCollecting(true)} aria-label={label(CAFE_COPY.actions.collect)}>
+          <PillButton full size="ticket" disabled={busy} onClick={actions.collect} aria-label={label(CAFE_COPY.actions.collect)}>
             {CAFE_COPY.actions.collect}
           </PillButton>
         );

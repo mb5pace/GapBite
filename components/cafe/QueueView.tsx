@@ -22,7 +22,7 @@ const COLUMNS: QueueColumnId[] = ["new", "preparing", "ready", "out"];
  */
 export function QueueView() {
   const queue = useQueue();
-  const { filter } = useDesk();
+  const { filter, openScan } = useDesk();
   const [busyId, setBusyId] = useState<string | null>(null);
   /** The words, and the status the order was in when it failed. The error goes when the order moves. */
   const [errors, setErrors] = useState<Record<string, { text: string; status: string }>>({});
@@ -123,7 +123,7 @@ export function QueueView() {
                       slip: () => setSlipId(card.id),
                       staff: () => setStaffId(card.id),
                       print: () => setSlipId(card.id),
-                      collect: async (code) => (await run(card.id, { action: "collect", code })) !== null,
+                      collect: () => openScan({ orderId: card.id }),
                     }}
                   />
                 ))

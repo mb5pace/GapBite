@@ -1,11 +1,12 @@
 "use client";
 
-import { ArrowsOut, Backspace } from "@phosphor-icons/react";
+import { ArrowsOut, Backspace, Scan } from "@phosphor-icons/react";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CAFE_COPY } from "@/data/cafe-copy";
 import { VENDING_SLOTS } from "@/data/menu";
 import { CodeBoxes } from "@/components/ui/CodeBoxes";
+import { QrScanner } from "@/components/runner/QrScanner";
 import { CODE_DIGITS, KIOSK_RESET_MS, KIOSK_SLOT_STEP_MS } from "@/lib/config";
 import { postJson } from "@/lib/http";
 import type { KioskResult } from "@/lib/cafe";
@@ -32,6 +33,12 @@ const KEY_CLASS =
   "transition-transform duration-150 ease-out active:scale-[0.97] disabled:bg-blush " +
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream";
 
+/** The wide cream buttons under the keypad: Scan QR, Use the keypad. 56 px tall. */
+const WIDE_KEY_CLASS =
+  "inline-flex h-14 items-center justify-center gap-3 rounded-pill bg-cream px-6 font-display text-body font-bold text-maroon " +
+  "transition-transform duration-150 ease-out active:scale-[0.97] disabled:bg-blush " +
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream";
+
 /**
  * The kiosk (docs/SCREENS.md "Kiosk"): a full-screen machine face for the laptop beside the
  * vending machine. Type the 4-digit code, watch each slot light up as it is released, then
@@ -41,17 +48,25 @@ export function KioskView() {
   const copy = CAFE_COPY.kiosk;
   const [code, setCode] = useState("");
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
-  const typing = phase.kind === "idle" || phase.kind === "error";
+  /** Keypad, or the camera reading the buyer's collect QR (v1.0.0 Phase C1). */
+  const [camera, setCamera] = useState(false);
+  const typing = (phase.kind === "idle" || phase.kind === "error") && !camera;
+  // The camera reports the same QR many times a second: one request at a time.
+  const sending = useRef(false);
 
-  const submit = useCallback(async (digits: string) => {
+  const submit = useCallback(async (body: { code: string } | { qr: string }) => {
+    if (sending.current) return;
+    sending.current = true;
     setPhase({ kind: "checking" });
-    const res = await postJson<KioskResult>("/api/cafe/kiosk", { code: digits });
+    const res = await postJson<KioskResult>("/api/cafe/kiosk", body);
     if (res.ok && res.data) {
+      setCamera(false);
       setPhase({ kind: "dispensing", slots: res.data.slots, index: 0 });
     } else {
       setPhase({ kind: "error", message: res.error ?? CAFE_COPY.errors.network });
       setCode("");
     }
+    sending.current = false;
   }, []);
 
   const press = useCallback(
@@ -60,7 +75,7 @@ export function KioskView() {
       const next = (phase.kind === "error" ? digit : code + digit).slice(0, CODE_DIGITS);
       setCode(next);
       setPhase({ kind: "idle" });
-      if (next.length === CODE_DIGITS) void submit(next);
+      if (next.length === CODE_DIGITS) void submit({ code: next });
     },
     [typing, phase.kind, code, submit],
   );
@@ -175,7 +190,23 @@ export function KioskView() {
               {copy.thanks}
             </p>
           ) : null}
-          {typingView ? (
+          {typingView && camera ? (
+            <div className="flex w-full max-w-sm flex-col items-center gap-4">
+              <div className="w-full">
+                <QrScanner onDark hint={copy.scanHint} onText={(text) => void submit({ qr: text })} onUnavailable={() => setCamera(false)} />
+              </div>
+              <p
+                role="alert"
+                className={`min-h-11 rounded-pill bg-cream px-5 py-2 text-body font-medium text-brick ${phase.kind === "error" ? "" : "invisible"}`}
+              >
+                {phase.kind === "error" ? phase.message : "\u00a0"}
+              </p>
+              <button type="button" onClick={() => { setCamera(false); setPhase({ kind: "idle" }); }} className={WIDE_KEY_CLASS}>
+                {copy.useKeypad}
+              </button>
+            </div>
+          ) : null}
+          {typingView && !camera ? (
             <>
               <p className="text-center text-body">{copy.hint}</p>
               <CodeBoxes value={code} label="Your code" invalid={phase.kind === "error"} />
@@ -201,6 +232,15 @@ export function KioskView() {
                   <Backspace weight="regular" size={28} aria-hidden="true" />
                 </button>
               </div>
+              <button
+                type="button"
+                onClick={() => { setCamera(true); setCode(""); setPhase({ kind: "idle" }); }}
+                disabled={phase.kind === "checking"}
+                className={WIDE_KEY_CLASS}
+              >
+                <Scan weight="regular" size={24} aria-hidden="true" />
+                {copy.scanQr}
+              </button>
             </>
           ) : null}
         </div>

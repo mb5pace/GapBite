@@ -27,7 +27,19 @@ const Scanner = dynamic(
  * Phones are asked for the rear camera. A laptop has none, and the browser then says "overconstrained":
  * that is not a failure, so it asks again for whichever camera there is.
  */
-export function QrScanner({ onText, onUnavailable }: { onText: (text: string) => void; onUnavailable: () => void }) {
+export function QrScanner({
+  onText,
+  onUnavailable,
+  hint = RUN_COPY.scanHint,
+  onDark = false,
+}: {
+  onText: (text: string) => void;
+  onUnavailable: () => void;
+  /** The line under the camera. The runner's default talks about the bag slip. */
+  hint?: string;
+  /** On the kiosk's maroon screen the line is cream. */
+  onDark?: boolean;
+}) {
   const [facing, setFacing] = useState<"rear" | "any">("rear");
   return (
     <div className="flex flex-col gap-3">
@@ -56,7 +68,7 @@ export function QrScanner({ onText, onUnavailable }: { onText: (text: string) =>
         />
         <span className="pointer-events-none absolute inset-8 rounded-card ring-2 ring-cream" aria-hidden="true" />
       </div>
-      <p className="text-center text-secondary text-mocha">{RUN_COPY.scanHint}</p>
+      <p className={`text-center text-secondary ${onDark ? "text-cream" : "text-mocha"}`}>{hint}</p>
     </div>
   );
 }

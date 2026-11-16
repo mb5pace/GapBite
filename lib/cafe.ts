@@ -21,6 +21,7 @@ import {
 } from "@/data/order-copy";
 import { AppError } from "./api";
 import { CAFE_ORDERS_MAX, KIOSK_RATE_LIMIT, SLIP_QR_PREFIX, UPDATES_KEEP } from "./config";
+import { parseCollectQr } from "./order-ref";
 import { activeKey, doneKey, getOrder, liveKey, orderKey, refundOrder, runsByKey, runsLiveKey } from "./orders";
 import { estimatePromisedAt } from "./order-rules";
 import { listAlerts } from "./alerts";
@@ -241,6 +242,81 @@ export async function collectOrder(id: string, code: string, now: number): Promi
   return advance(order, { expected: ["READY"], steps: [{ status: "COLLECTED" }], updates: [collectedUpdate()] }, now);
 }
 
+// ---------------------------------------------------------------------------
+// Scan buyer QR (v1.0.0 Phase C1, docs/FLOWS.md "Collect QR")
+// ---------------------------------------------------------------------------
+
+/** What the desk sends: the scanned QR text, or the 4 digits typed for one order, or the 4 digits alone. */
+export type ScanCollectInput = { qr: string } | { orderId: string; code: string } | { code: string };
+
+const deskWrongKey = () => key("collect", "wrong");
+
+/** Wrong codes at the desk share one counter, with the kiosk's limit (KIOSK_RATE_LIMIT): a few, then a minute's pause. */
+async function deskLocked(): Promise<boolean> {
+  return Number((await getRedis().get<number>(deskWrongKey())) ?? 0) >= KIOSK_RATE_LIMIT.maxWrongTries;
+}
+
+async function countDeskWrong(): Promise<void> {
+  const redis = getRedis();
+  // The expiry is set first, so a counter can never be left without one.
+  await redis.set(deskWrongKey(), 0, { nx: true, ex: KIOSK_RATE_LIMIT.windowSec });
+  await redis.incr(deskWrongKey());
+}
+
+/** The refusal for an order that exists, has the right code and is a counter pickup, but is not READY. */
+function notCollectable(status: OrderStatus): AppError {
+  if (status === "COLLECTED") return new AppError(409, CAFE_COPY.scan.alreadyCollected);
+  if (status === "PLACED" || status === "ACCEPTED" || status === "PREPARING") return new AppError(409, CAFE_COPY.scan.notReady);
+  return new AppError(409, CAFE_COPY.scan.closed);
+}
+
+/**
+ * Scan buyer QR at the counter: the QR says QX:COLLECT:<orderId>:<code>, or the desk types the code. Only a cafe pickup
+ * (never vending, never delivery) in READY with the right code becomes COLLECTED, in the same script as Collect, with
+ * the buyer's "Collected. Enjoy!" Update. A wrong code changes nothing and counts towards the desk's pause. The code
+ * alone matches the oldest READY counter pickup with that code (as the kiosk does).
+ */
+export async function scanCollect(input: ScanCollectInput, now: number): Promise<Order> {
+  if (await deskLocked()) throw new AppError(429, CAFE_COPY.scan.locked);
+
+  if (!("orderId" in input) && !("qr" in input)) {
+    const { orders } = await listQueue(now);
+    const ids = orders.filter((card) => card.mode === "pickup" && card.sourceId !== "vending" && card.status === "READY").map((card) => card.id);
+    for (const id of ids) {
+      const order = await getOrder(id);
+      if (!order || order.code !== input.code) continue;
+      const done = await tryAdvance(order, { expected: ["READY"], steps: [{ status: "COLLECTED" }], updates: [collectedUpdate()] }, now);
+      if (done) return done;
+    }
+    await countDeskWrong();
+    throw new AppError(400, CAFE_COPY.scan.wrongCode);
+  }
+
+  let orderId: string;
+  let code: string;
+  if ("qr" in input) {
+    const parsed = parseCollectQr(input.qr);
+    if (!parsed) throw new AppError(400, CAFE_COPY.scan.badQr);
+    ({ orderId, code } = parsed);
+  } else {
+    ({ orderId, code } = input);
+  }
+
+  const order = await getOrder(orderId.trim().toUpperCase());
+  if (!order) throw new AppError(404, CAFE_COPY.scan.notFound);
+  if (order.sourceId === "vending") throw new AppError(400, CAFE_COPY.scan.atKiosk);
+  if (order.mode !== "pickup") throw new AppError(400, CAFE_COPY.scan.notPickup);
+  if (code !== order.code) {
+    await countDeskWrong();
+    throw new AppError(400, CAFE_COPY.scan.wrongCode);
+  }
+  if (order.status !== "READY") throw notCollectable(order.status);
+  const done = await tryAdvance(order, { expected: ["READY"], steps: [{ status: "COLLECTED" }], updates: [collectedUpdate()] }, now);
+  if (done) return done;
+  // Someone collected it a moment ago: say what it is now.
+  throw notCollectable((await getOrder(order.id))?.status ?? "COLLECTED");
+}
+
 /** Counter staff hand a Ready delivery bag to an existing staff member. Same result as a staff scan. */
 export async function sendWithStaff(id: string, staffId: string, now: number): Promise<Order> {
   const order = await load(id);
@@ -330,8 +406,43 @@ export async function kioskCollect(code: string, now: number): Promise<KioskResu
     };
   }
 
+  await countKioskWrong();
+  throw new AppError(404, CAFE_COPY.kiosk.notFound);
+}
+
+async function countKioskWrong(): Promise<void> {
+  const redis = getRedis();
   // The expiry is set first, so a counter can never be left without one.
   await redis.set(kioskWrongKey(), 0, { nx: true, ex: KIOSK_RATE_LIMIT.windowSec });
   await redis.incr(kioskWrongKey());
-  throw new AppError(404, CAFE_COPY.kiosk.notFound);
+}
+
+/**
+ * The kiosk's Scan QR (v1.0.0 Phase C1): the buyer holds up their order page, QX:COLLECT:<orderId>:<code>. Only a
+ * vending pickup in READY with the right code is released. A counter pickup is sent to its counter. Same lock as typing.
+ */
+export async function kioskCollectQr(qr: string, now: number): Promise<KioskResult> {
+  const redis = getRedis();
+  const wrong = Number((await redis.get<number>(kioskWrongKey())) ?? 0);
+  if (wrong >= KIOSK_RATE_LIMIT.maxWrongTries) throw new AppError(429, CAFE_COPY.kiosk.locked);
+  const parsed = parseCollectQr(qr);
+  if (!parsed) throw new AppError(400, CAFE_COPY.kiosk.badQr);
+  const order = await getOrder(parsed.orderId);
+  if (!order || order.mode !== "pickup") {
+    await countKioskWrong();
+    throw new AppError(404, CAFE_COPY.kiosk.notFound);
+  }
+  if (order.sourceId !== "vending") throw new AppError(400, CAFE_COPY.kiosk.atCounter(getSource(order.sourceId).name));
+  if (order.code !== parsed.code) {
+    await countKioskWrong();
+    throw new AppError(404, CAFE_COPY.kiosk.notFound);
+  }
+  if (order.status === "COLLECTED") throw new AppError(409, CAFE_COPY.kiosk.alreadyCollected);
+  if (order.status !== "READY") throw new AppError(409, order.status === "PLACED" ? CAFE_COPY.kiosk.notReady : CAFE_COPY.kiosk.notFound);
+  const done = await tryAdvance(order, { expected: ["READY"], steps: [{ status: "COLLECTED" }], updates: [collectedUpdate()] }, now);
+  if (!done) throw new AppError(409, CAFE_COPY.kiosk.alreadyCollected);
+  return {
+    orderId: done.id,
+    slots: done.items.map((line) => ({ slot: getItem(line.itemId)?.slot ?? "", name: line.name, qty: line.qty })),
+  };
 }

@@ -272,6 +272,8 @@ export const INPUT_MAX = {
   codeIndex: 99,
   /** Different items in one order (the 10-unit limit is MAX_UNITS_PER_ORDER). */
   orderLines: 30,
+  /** The text a scanned QR gives (QX:COLLECT:QX-4821:0397 is 25 characters; anything far longer is not ours). */
+  qr: 64,
 } as const;
 /** The shortest request token we accept. */
 export const REQUEST_ID_MIN = 8;
