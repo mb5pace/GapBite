@@ -3,16 +3,16 @@
 import { Timer } from "@phosphor-icons/react";
 import { COPY } from "@/data/copy";
 import type { MenuItem } from "@/data/menu";
-import { ItemTile } from "@/components/ui/ItemTile";
 import { Money } from "@/components/ui/Money";
 import { VegMark } from "@/components/ui/VegMark";
 import { useCart } from "./CartProvider";
 import { ItemAddControl } from "./ItemAddControl";
+import { ItemImage } from "./ItemImage";
 import { itemStateText } from "./itemState";
 
 /**
  * One item on a cafe's menu page. Left: the veg mark, name, a one-line description, the price and a small prep badge.
- * Right: a 96 px picture (the item's photo if there is one, else its initials) with an outlined Add button overlapping its
+ * Right: a 104 px photo frame (ItemImage: a hotlinked photo, else its initials) with an outlined Add button overlapping its
  * bottom edge. In the Unavailable section the text is taupe, the reason sits in a chip and Add is off.
  */
 export function ItemCard({ item, unavailable = false }: { item: MenuItem; unavailable?: boolean }) {
@@ -37,8 +37,8 @@ export function ItemCard({ item, unavailable = false }: { item: MenuItem; unavai
           {reason ? <span className="rounded-pill bg-sand px-3 py-1 text-caption font-semibold text-espresso">{reason}</span> : null}
         </div>
       </div>
-      <div className="relative w-24 shrink-0 self-start pb-6">
-        <ItemTile itemId={item.id} name={item.name} sourceId={item.sourceId} size="xl" />
+      <div className="relative w-26 shrink-0 self-start pb-6">
+        <ItemImage item={item} unavailable={unavailable} />
         <div className="absolute inset-x-0 bottom-0 flex justify-center">
           <ItemAddControl item={item} outlined />
         </div>
