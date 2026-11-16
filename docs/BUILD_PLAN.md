@@ -140,6 +140,7 @@ Raised in v1.0.0 Phase B2 (the brief was silent, simplest behaviour kept until a
 - **Badge words on pickup cards.** Ready reads "Ready to collect" (the existing word); Placed and Accepted are amber like Preparing.
 - **Share feedback and Order again** are on Past cards only. An order still in progress has nothing to rate yet and is already on its way.
 - **Order again** opens the cart once something is added, so the student sees what went in. "Keep my cart" on the replace question leaves everything as it was. Quantities are capped by the usual cart rules (10 units, vending stock).
+- **No promised time on Orders cards.** The brief's card has no line for it, so an active card shows when it was ordered; the promised time and countdown are on Order Detail and the Home progress card. Cancelled now reads brick (it was taupe), as the brief asks.
 - **Orders search** matches dish names, the cafe name and the order ID. My runs is hidden while a search is typed (the search is about your own orders).
 - **Ready list leaves out the order ID** as well as the buyer and the code, so a typed ID cannot be taken from the list without going to the counter. "Minutes since ready" is counted from the server's time when the cafe marked it ready. Staff never see the top-up note.
 - **Home-screen icon.** The "Q" is drawn from a ring and a tail (no font file needed at build time), cream on maroon; the maskable icon keeps the mark inside the safe circle.
