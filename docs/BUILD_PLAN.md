@@ -126,7 +126,7 @@ Three sessions, in order. Everything is built on the `dev` branch and tested on 
   - Already clean, no change needed: one filled primary per screen (the cart bar counts as the screen's action on menus), no cards inside cards, every tap target at least 44 px, no banned pattern from bible section 9, page headers the same on every sub-page (Back, title, Scan, wallet chip).
 
 ### Phase C: Cafe portal as a kitchen display, demo tools, release (later session)
-- [ ] **Cafe portal redesigned as a POS / kitchen display.** Fixed left sidebar (Queue, Vending, Hours and items, Today); top bar with live status counts, per-source open / paused switches and the clock; tickets styled as kitchen order slips with large item lines and big action buttons; ticket colour by age (normal, amber, red); "Scan buyer QR" for pickups; printable kitchen slip; large touch targets.
+- [x] **Cafe portal redesigned as a POS / kitchen display.** Fixed left sidebar (Queue, Vending, Hours and items, Today); top bar with live status counts, per-source open / paused switches and the clock; tickets styled as kitchen order slips with large item lines and big action buttons; ticket colour by age (normal, amber, red); "Scan buyer QR" for pickups; printable kitchen slip; large touch targets.
 - [ ] **Phase 10 demo tools.** Seed, reset (only the current environment's key prefix), and a late-test order.
 - [ ] **Final quality pass** and a real two-phone plus laptop test.
 - [ ] **DEMO_SCRIPT.md** updated.
@@ -134,6 +134,17 @@ Three sessions, in order. Everything is built on the `dev` branch and tested on 
 
 ## Open questions
 (Add questions here when a doc is silent. Keep the simplest behaviour until answered.)
+
+Raised in v1.0.0 Phase C1 (the brief was silent or unclear, simplest behaviour kept until answered):
+- **Amber and brick on a delivery ticket.** The brief puts both "at the promised time". Amber is taken as "due soon": from `DUE_SOON_MIN` (2) minutes before the promised time; brick from the promised time until grace ends (then the sweep settles it). Pickup tickets get no time outline, because a pickup never fails by itself (the same rule as "Due now"). A Ready delivery with no runner for 3 minutes keeps its amber outline. Please confirm the 2 minutes.
+- **Mark ready on an Accepted ticket** sends Start preparing and then Mark ready (the existing two steps), so the buyer still gets both Updates. If someone else already started it, it goes straight on to ready.
+- **Scan buyer QR with the code alone** (typed from the top bar, with no ticket chosen) collects the oldest Ready counter pickup with that code, as the kiosk does. From a ticket's Collect it is that order only.
+- **Wrong codes at the desk** share one counter for the whole desk with the kiosk's numbers (5 wrong codes, then a minute's pause, even for a right code), under their own key. The old 4-digit Collect action on `/api/cafe/orders/[id]` is still there but the desk no longer uses it; the no-show Collect on the alert bar is unchanged.
+- **The source filter** is shown on the Queue only (it filters tickets) and also narrows the top bar's counts. It is kept while moving between desk pages.
+- **Top bar switches** use short names (Truly, Bistro, Delice, Greens, Vending) with the place's colour dot; the full name is in the tooltip and read out by screen readers.
+- **The 72 px rail** hides the version line and shows the sound hint as a small sun dot on the sound button.
+- **Kitchen slip:** the PICKUP word stays in capitals (as in FLOWS); the slip has no buyer name or prices. The print page is 80 mm by 297 mm with 4 mm margins (a roll printer cuts where the slip ends). Pickup slips no longer carry a QR.
+- **Today tiles** are the brief's five; the other totals (in progress, missed deliveries, cancelled or rejected, refunds, delivery fees kept) stay in a table beside revenue by source.
 
 Raised in v1.0.0 Phase B2 (the brief was silent, simplest behaviour kept until answered):
 - **QR lifetime.** The collect QR (and the "Show this screen" strip) shows while a pickup is Placed, Accepted, Preparing or Ready. Once it is collected, cancelled, rejected or failed, the server stops sending it and the card keeps only the ID, badge and cafe. A no-show only happens to deliveries, which never have a QR, so its counter collection still uses the 4 digits.

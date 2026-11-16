@@ -95,7 +95,8 @@ export function QueueView() {
       {notice ? <Banner>{notice}</Banner> : null}
       <AlertStrip />
 
-      <div className="grid min-h-0 flex-1 grid-cols-4 gap-3" aria-busy={queue.loading}>
+      {/* Four columns side by side from 1024 px; on a portrait tablet two by two, each still scrolling on its own. */}
+      <div className="grid min-h-0 flex-1 grid-cols-2 grid-rows-2 gap-3 lg:grid-cols-4 lg:grid-rows-1" aria-busy={queue.loading}>
         {COLUMNS.map((column) => {
           const cards = visible.filter((o) => columnOf(o.status) === column);
           return (

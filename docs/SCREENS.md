@@ -97,34 +97,53 @@ States: **Scanning** (camera view + "Type order ID instead" link) → **Preview*
 
 ## Cafe portal (laptop, 1280 px) `/cafe`
 
-Header: "QuickX · UC Cafe Desk", the pages (**Queue**, **Vending**, **Hours and items**, **Today**), sound toggle, clock, Logout. (Phase C replaces this header with a sidebar.)
+The Cafe desk is a **POS / kitchen display** (v1.0.0 Phase C1). Laptop-first at 1280 px, usable at 1024 px. Every touch target is at least 48 px.
+
+**Sidebar** (fixed, `parchment`, 220 px wide from 1280 px, a 72 px icon rail from 1024 to 1279 px): the QuickX mark and "UC Cafe Desk" at the top; the pages as 48 px rows with a Phosphor icon and label (the open one filled maroon with cream text): **Queue** (with a sun count of new orders), **Vending**, **Hours and items**, **Today** and **Kiosk** (opens `/cafe/kiosk` full screen). At the bottom: the sound switch with "Click once to allow sound." until the browser allows it (on the rail, a small sun dot), **Log out**, and the version line (wide sidebar only).
+
+**Top bar** (`parchment`), two rows. First: the page title, and one compact **Open / Paused switch per place**, each with the place's colour dot and short name (Truly, Bistro, Delice, Greens, Vending) and "Paused" in brick while paused. They are the same switches as Hours and items and take effect at once. Second: live **count chips** for New, Preparing, Ready, Out for delivery and Alerts (Alerts turns brick when there is one); each is a link to that column (or the alert bar) on the Queue. Then a large clock (HH:MM, the server's time) and the primary **Scan buyer QR** button.
+
+**Source filter** (on the Queue, under the top bar): a segmented control, All, Truly Indian, Global Bistro, Cafe Delice, Greens and Grains, Vending, each with how many of its orders are on the queue. It also narrows the top bar's counts.
 
 ### Queue (default)
-Four columns: **New**, **Preparing**, **Ready**, **Out for delivery**. Cards show order ID, source, items with quantities, mode badge (Pickup / building short name), "when", promised time with live countdown, age. Amber border when due, or when a Ready delivery order has had no runner for 3 minutes ("No runner yet, send with staff?"). Red and amber alert cards sit pinned above the columns (see Alerts). Card buttons by column: New → Accept / Reject (reason picker); Preparing → Mark ready; Ready (delivery) → Show bag slip, Send with staff; Ready (pickup) → Collect (4-digit input); Out for delivery → holder name and kind, countdown. 
+Four columns, **New**, **Preparing**, **Ready**, **Out for delivery**, filling the height of the window, each scrolling on its own, with its ticket count in the header (on a portrait tablet, under 1024 px, two by two). Alerts sit above them as one brick bar (see Alerts).
 
-### Alerts (pinned above the four columns)
-Each stays until a staff member acts on it.
-- **Red, failed:** "QX-4821 failed late: <why>. ₹X refunded." with **Seen**.
-- **Red, staff returning:** "Staff returning QX-4821 to <source>" with **Returned** (the bag is back at the counter).
-- **Amber, no-show:** "Buyer did not collect QX-4821, keep at counter", the hold time (`PICKUP_STALE_MIN`) with a countdown and the 4-digit **Collect** input for the buyer's code. When the hold ends the card says so and shows **Seen**.
+Each order is a **kitchen ticket** on cream:
+- A header strip in the place's colour with cream text: the order ID large (24 px, 800) and the time it was placed ("18:21"); under it the place and its age, live ("4 min", "just now").
+- A mode badge: "Pickup", or the building and drop point ("GICT · Ground floor lobby"). "Accepted" while it waits for Start preparing; a brick "Waiting" badge on a New ticket left too long.
+- The item lines large (18 px, 600), "2 × Cold Coffee", with thin dotted lines between them.
+- When (ASAP or "Break 11:50"), the promised time with a live countdown ("Due now" once it is reached), and on Out for delivery who carries it ("Aarav · Runner buddy") and "Runner at GICT" once they tapped I'm here.
+- A printer button (prints the kitchen slip at once).
+- One big action (56 px, full width), and sometimes a smaller one under it: **Accept** on New (vending: **Accept and ready**), with **Reject** small (reason picker); **Mark ready** on Preparing, with **Start preparing** small while it is only Accepted (Mark ready on an Accepted ticket starts it first); on a Ready delivery **Show slip**, with **Send with staff** small; on a Ready counter pickup **Collect** (opens Scan buyer QR for that order, with the 4-digit fallback); a Ready vending pickup says "Collect at the kiosk".
+- **Age outlines**, all the way round, never a stripe: a New ticket gets a 2 px amber outline after `NEW_AMBER_MIN` (2) minutes and a 3 px brick outline with "Waiting" after `NEW_RED_MIN` (5); a delivery gets amber from `DUE_SOON_MIN` (2) minutes before its promised time and brick from the promised time until grace ends; a Ready delivery with no runner for 3 minutes keeps its amber "No runner yet, send with staff?". Pickups get no time outline (they never fail by themselves).
+- A new order is highlighted in blush for 5 seconds with a soft chime (unless the sound is off).
 
-### Bag slip (modal)
-Printable layout: big QR, order ID, source, items, building + drop point or PICKUP, promised time. "Print" uses the browser print dialog with a print stylesheet.
+### Scan buyer QR (dialog)
+Opened from the top bar (any counter pickup) or from a pickup ticket's Collect (that order). Left, the camera (`QrScanner`) reading the buyer's QR, `QX:COLLECT:<orderId>:<code>`; right, **Type the code instead** with the four boxes and **Collect** (from the top bar the code alone collects the oldest Ready counter pickup with it). The answer is shown big: a green tick, "Collected", the order ID and its items; or one refusal: "Wrong code", "Not ready yet", "Already collected", "Collect this at the vending kiosk", "Order not found" (and "Too many wrong codes. Try again in a minute." after 5 wrong codes). **Scan the next one** and **Close**. Without a camera it says so and the code field is all there is.
+
+### Alerts (one bar above the four columns)
+One brick bar with cream text, a row per alert, each with its action. Each stays until a staff member acts on it.
+- **Failed:** "Failed late · QX-4821 failed late: <why>. ₹X refunded." with **Seen**.
+- **Staff returning:** "Staff returning QX-4821 to <source>" with **Returned** (the bag is back at the counter).
+- **No-show:** "Buyer did not collect QX-4821, keep at counter", the hold time (`PICKUP_STALE_MIN`) with a countdown and the 4-digit **Collect** input for the buyer's code. When the hold ends the row says so and shows **Seen**.
+
+### Kitchen slip (Show slip, and the printer button)
+One layout on screen and on paper: "QuickX · UC", the order ID large, the place, "Placed 12:21", "Deliver to GICT · Ground floor lobby" or "PICKUP", the item lines with large quantities, when and "Promised by 12:39", and for a delivery the bag QR (`QX:ORDER:<id>`) with "Runners scan this to take the bag." A pickup slip has no QR. No slip ever shows the buyer's code. **Print** (and every ticket's printer button) uses the browser's print dialog with a print stylesheet for 80 mm thermal paper: 72 mm printable, one colour, no backgrounds, only the slip.
 
 ### Vending
-Two parts: **Stock** table (slot, item, stock, +/− buttons, "Refill all") and **Kiosk** button that opens `/cafe/kiosk`.
+The stock as the machine's slot grid, a row per shelf (A, B, C): each slot shows its code large, the item and price, "7 left" or "Sold out", and 48 px − and + buttons. **Refill all** and **Open the kiosk** at the top.
 
 ### Kiosk `/cafe/kiosk`
-Full-screen machine face for the laptop beside the vending machine: "Enter your QuickX code" with a numeric keypad, then a dispensing state that highlights each slot being released, then "Collect below". Wrong code: "Code not found or already used."
+Full-screen machine face for the laptop beside the vending machine (the one dark screen): "Enter your QuickX code" with a numeric keypad, then a dispensing state that highlights each slot being released, then "Collect below". Wrong code: "Code not found or already used." **Scan QR** next to the keypad opens the camera for the buyer's collect QR (vending pickups only; a counter pickup is told "Collect this at the Cafe Delice counter."), with **Use the keypad** to go back.
 
 ### Hours and items `/cafe/hours`
-One page for when each place takes orders and which items can be ordered. A save confirms in words at the top ("Truly Indian: hours saved.") and reaches students on their next poll, a few seconds. Orders already placed are never touched. (The old `/cafe/menu` address redirects here.) If Admin has switched the whole service off, a warning at the top says so.
+In the POS shell the place cards sit two by two from 1280 px. One page for when each place takes orders and which items can be ordered. A save confirms in words at the top ("Truly Indian: hours saved.") and reaches students on their next poll, a few seconds. Orders already placed are never touched. (The old `/cafe/menu` address redirects here.) If Admin has switched the whole service off, a warning at the top says so.
 1. **Places.** One card per place (all five, including the vending machine): what students see right now ("Right now: Open now"), a **Taking orders / Paused** switch (applies at once, confirms in words), **Opens** and **Closes** times, **Open days** as Mon to Sun toggles, and **Save hours**. Times are on 5-minute steps and closing must be after opening; at least one day must stay on. A wrong value is refused with a sentence and nothing is sent. "Not saved yet" shows while a card has edits.
 2. **Holidays.** Add a date and a short note ("Diwali"); the list is sorted earliest first, shows the date in words, and each row has Remove. On a holiday every place is closed.
 3. **Items.** Chips pick the place. Each item row shows its price, its current window ("Breakfast, until 11:00 · Default", "No time limit · Default", "… · Changed"), **Available from** and **Available until** times (leave one or both empty for no limit), **Save times**, **Back to default** (when it differs from the default) and the **Available today** switch (moved here from the old Menu page). Until must be after from. Clearing both times on an item that has a default window means "no limit"; Back to default restores the default.
 
 ### Today
-Totals: orders, delivered, collected, failed, revenue by source, fees kept, refunds. Plain table, no charts needed.
+Five large number tiles on top: orders placed, delivered, collected, failed late, revenue. Then **Revenue by source** (finished orders and revenue per place, with the total) and **Everything else today** (in progress, missed deliveries, cancelled or rejected, refunds, delivery fees kept) side by side. No charts.
 
 ---
 

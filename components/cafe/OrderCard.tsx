@@ -142,7 +142,7 @@ export function OrderCard({
       data-unclaimed={unclaimed ? "" : undefined}
       data-outline={look.outline === "none" ? undefined : look.outline}
       data-ticket={card.id}
-      className={`flex shrink-0 flex-col overflow-hidden rounded-card transition-colors duration-200 ${fresh ? "bg-blush" : "bg-cream"} ${OUTLINE[look.outline]}`}
+      className={`flex shrink-0 flex-col overflow-hidden rounded-card transition-[background-color] duration-200 ${fresh ? "bg-blush" : "bg-cream"} ${OUTLINE[look.outline]}`}
     >
       <header className={`flex flex-col gap-1 px-4 py-3 text-cream ${SOURCE_BG[card.sourceId]}`}>
         <div className="flex items-baseline justify-between gap-3">

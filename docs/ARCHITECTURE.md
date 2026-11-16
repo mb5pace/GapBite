@@ -53,7 +53,7 @@ app/
     account/[section]/page.tsx  wallet | profile | preferences | notifications | history | refunds | terms | feedback | support
   cafe/
     layout.tsx                  cafe session check only, so the kiosk can be full screen
-    (desk)/layout.tsx           header (pages, server clock, sound switch, Logout) + the one queue poll
+    (desk)/layout.tsx           the POS shell (sidebar, top bar, source filter on the Queue) + the one queue poll
     (desk)/page.tsx             queue
     (desk)/vending/page.tsx
     (desk)/hours/page.tsx       Hours and items: opening hours, open days, Taking orders / Paused, holidays, item windows, Available today
@@ -94,13 +94,14 @@ app/
     history/route.ts            GET your finished orders and finished runs (no codes)
     refunds/route.ts            GET every refund with its reason, and the total
     cafe/queue/route.ts         GET (runs sweepLate first). Cards have no code, buyer or prices
-    cafe/orders/[id]/route.ts   GET bag slip (with QR path); POST action: accept|reject|start|ready|staff|collect
+    cafe/orders/[id]/route.ts   GET the kitchen slip (placed time, building and drop point, and the bag QR path for a delivery only; never the code); POST action: accept|reject|start|ready|staff|collect
+    cafe/collect/route.ts       POST { qr } | { orderId, code } | { code } -> Scan buyer QR: a READY counter pickup with the right code becomes COLLECTED. Cafe session only; wrong codes pause the desk (KIOSK_RATE_LIMIT)
     cafe/staff/route.ts         GET existing staff IDs, for Send with staff
     cafe/alerts/route.ts        POST seen | returned | collect (+ 4-digit code) on one alert card
     cafe/stock/route.ts         GET; POST adjust one slot or refill all
     cafe/availability/route.ts  GET; POST switch one item on or off (qx:unavailable)
     cafe/hours/route.ts         GET hours and the service switch (read only); PUT one change: source (open, close, days) | paused | item (window) | item-reset | holiday-add | holiday-remove. Cafe session
-    cafe/kiosk/route.ts         POST code -> the slots to release; locks for a minute after 5 wrong codes
+    cafe/kiosk/route.ts         POST { code } or { qr } (the buyer's collect QR) -> the slots to release; locks for a minute after 5 wrong codes
     cafe/today/route.ts
     admin/codes/route.ts        GET, POST generate|revoke|end
     admin/staff/route.ts
@@ -137,7 +138,8 @@ lib/
   ready-bags.ts   the Ready to deliver list from the active orders: filter, zone and building order, the earning line, nothing about the buyer (pure)
   app-icon.tsx    the QuickX home-screen icon (a cream Q on maroon) as an ImageResponse, for the manifest icons and apple-icon
   admin-live.ts   Admin › Live orders: the list and Reveal code
-  cafe.ts         what the cafe desk does: queue, accept, reject, start, ready, collect by code, send with staff, bag slip, kiosk (one Lua script moves an order and tells the buyer)
+  cafe.ts         what the cafe desk does: queue, accept, reject, start, ready, collect by code, scan collect (QR or code), send with staff, kitchen slip, kiosk by code or QR (one Lua script moves an order and tells the buyer)
+  ticket-age.ts   a kitchen ticket's outline (amber, brick) and "Waiting" badge from its age and promised time: NEW_AMBER_MIN, NEW_RED_MIN, DUE_SOON_MIN (pure)
   cafe-today.ts   Today totals from the order records
   qr.ts           the QR module path for a bag slip and for the buyer's collect QR (no colours: the browser fills it with the text colour)
   chime.ts        the new-order sound, made with the Web Audio API (browser only)
@@ -164,13 +166,13 @@ lib/
 data/
   menu.ts  hours.ts (default opening hours, open days, breakfast windows, holidays)  locations.ts  breaks.ts  copy.ts (shared UI strings)  order-copy.ts (order words, headlines, Update texts)  cafe-copy.ts (Cafe portal and kiosk words, reject reasons)  account-copy.ts (Account words)  discover-copy.ts (Discover pages and the FAQ; every number in it is read from lib/config.ts)
 components/
-  ui/             PillButton (+ PillLink), IconButton, QrCode (server-made QR on cream), Chip, Card, ArchCard, ItemTile, SourceGlyph, Stepper, Sheet (bottom sheet, or centred dialog on the laptop portals), Input, Textarea, CodeBoxes, Banner, Badge, EmptyState, Countdown, Money, LogoutButton, Toggle, PortalNav, NavRow (link or button row), Accordion, FaceRating, VersionLine, LoadingView (cooking pot and steam), useHydrated
+  ui/             PillButton (+ PillLink; sizes lg, md, ticket and desk), IconButton, QrCode (server-made QR on cream), QuickXMark, Chip, Card, ArchCard, ItemTile, SourceGlyph, Stepper, Sheet (bottom sheet, or centred dialog on the laptop portals), Input, Textarea, CodeBoxes, Banner, Badge, EmptyState, Countdown, Money, LogoutButton, Toggle, PortalNav, NavRow (link or button row), Accordion, FaceRating, VersionLine, LoadingView (cooking pot and steam), useHydrated
   kit/            KitGallery, the admin-only /kit page
   account/        AccountView (profile card + rows), LogoutRow (confirm sheet), ProfileView, PreferencesView, NotificationsView, HistoryView, RefundsView, TermsView, SupportView, FeedbackForm (also used by Discover)
   discover/       DiscoverList, DiscoverPages (Introduction, Help, Smart Vending, FAQ)
   student/        Header, BottomBar, WalletChip, SessionChip (Phase 2); SourceTile (with its live status), SourceStatus (badge and the closed-place sheet), StatusLine (status words, dot, estimate), ClosedNotice, ServiceBanner, SearchResults and ItemAddControl (Home search rows), OrderProgress (the four-segment line) and ActiveOrderStrip, CategoryTabs (sticky tabs with scroll-spy), ItemCard (menu item card), CartBar; OrderListCard (Orders tab receipt card), CartProvider (Order again and its replace-cart sheet)
   runner/         RunnerProvider (the one sheet for the student app), RunnerSheet (scan, preview, accept, handover), QrScanner (camera, decoder served from /scanner), ScanButton (with the ready count badge), ReadyList and useReadyBags (the read-only Ready to deliver list, polled every 10 s while visible)
-  cafe/           QueueProvider (one poll, new-order highlight and chime, server clock), CafeHeader, QueueView, OrderCard, RejectDialog, StaffDialog, BagSlipDialog, VendingStockView, HoursView (PlaceHoursCard, HolidaysSection, ItemsSection, PillField), TodayView, KioskView (AlertCard waits for Phase 8)
+  cafe/           QueueProvider (one poll, new-order highlight and chime, server clock), DeskProvider (source filter, Scan buyer QR target, slip to print), CafeShell (DeskSidebar, DeskTopBar with the pause switches and counts, SourceFilterBar), QueueView, OrderCard (the kitchen ticket), AlertStrip (the brick alert bar), ScanCollectDialog, KitchenSlip, BagSlipDialog (Show slip), PrintSlipRoot (80 mm printing), RejectDialog, StaffDialog, VendingStockView (slot grid), HoursView (PlaceHoursCard, HolidaysSection, ItemsSection, PillField), TodayView (number tiles), KioskView (keypad and Scan QR)
   admin/          CodesPanel, CodeTable, PermanentCodes, ShowCode, StaffPanel, UsersPanel, LiveOrdersPanel, ServicePanel, CopyButton, AdminNav
 public/
   illustrations/  (see bible)
