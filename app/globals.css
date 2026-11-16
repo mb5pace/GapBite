@@ -35,9 +35,9 @@
 
   /* Source colours, only for cafe tiles and menu headers (UI_UX_BIBLE.md "Source colours"). Cream text on each is
      at least 4.5:1. Three equal a surface or ink token above, and are named here so a source can change on its own. */
-  --color-src-truly-indian: #4b2220;
+  --color-src-truly-indian: #625955;
   --color-src-global-bistro: #6d4142;
-  --color-src-cafe-delice: #8f6a3e;
+  --color-src-cafe-delice: #94692a;
   --color-src-greens-grains: #4f5e2a;
   --color-src-vending: #371110;
 

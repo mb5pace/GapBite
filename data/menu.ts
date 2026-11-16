@@ -20,6 +20,8 @@ export interface Source {
   name: string;
   tagline: string;
   kind: "cafe" | "vending";
+  /** The two words of its wordmark on Home: a small spaced word above a larger one. Our own lettering, not a logo. */
+  wordmark: { top: string; bottom: string };
 }
 
 export interface MenuItem {
@@ -48,30 +50,35 @@ export const SOURCES: readonly Source[] = [
     name: "Truly Indian",
     tagline: "Home-style Gujarati and North Indian",
     kind: "cafe",
+    wordmark: { top: "Truly", bottom: "Indian" },
   },
   {
     id: "global-bistro",
     name: "Global Bistro",
     tagline: "Biryani, Indo-Chinese, pasta, burgers",
     kind: "cafe",
+    wordmark: { top: "Global", bottom: "Bistro" },
   },
   {
     id: "cafe-delice",
     name: "Cafe Delice",
     tagline: "Coffee, sandwiches, pancakes, juices",
     kind: "cafe",
+    wordmark: { top: "Café", bottom: "Delice" },
   },
   {
     id: "greens-grains",
     name: "Greens and Grains",
     tagline: "Bowls, salads, smoothies, light snacks",
     kind: "cafe",
+    wordmark: { top: "Greens &", bottom: "Grains" },
   },
   {
     id: "vending",
     name: "UC Vending Machine",
     tagline: "Paper Boat, cold drinks and chips",
     kind: "vending",
+    wordmark: { top: "UC", bottom: "Vending" },
   },
 ];
 

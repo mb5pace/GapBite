@@ -32,9 +32,9 @@ One colour for each place, used as the background of its tile on Home, of the he
 
 | Token | Hex | Place | `cream` on it |
 |---|---|---|---|
-| `src-truly-indian` | `#4B2220` | Truly Indian (same as `maroon`) | 13.1:1 |
+| `src-truly-indian` | `#625955` | Truly Indian (warm grey) | 6.6:1 |
 | `src-global-bistro` | `#6D4142` | Global Bistro (same as `mocha`) | 8.2:1 |
-| `src-cafe-delice` | `#8F6A3E` | Cafe Delice | 4.7:1 |
+| `src-cafe-delice` | `#94692A` | Cafe Delice (warm gold) | 4.7:1 |
 | `src-greens-grains` | `#4F5E2A` | Greens and Grains | 6.8:1 |
 | `src-vending` | `#371110` | UC Vending Machine (same as `espresso`) | 16.2:1 |
 
