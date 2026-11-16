@@ -3,8 +3,19 @@ import { grandstander, plusJakartaSans } from "./fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  // Makes the link-preview image URL absolute (app/opengraph-image.tsx), as WhatsApp and others need.
+  metadataBase: new URL("https://quickx-gapbite.vercel.app"),
   title: "QuickX",
   description: "Food from UC, in your break.",
+  openGraph: {
+    type: "website",
+    siteName: "QuickX",
+    title: "QuickX",
+    description: "Food from UC, in your break.",
+    url: "/",
+    locale: "en_IN",
+  },
+  twitter: { card: "summary_large_image", title: "QuickX", description: "Food from UC, in your break." },
   // Added to an iPhone's home screen it opens full screen, with the status bar over the cream page and the short name.
   appleWebApp: { capable: true, title: "QuickX", statusBarStyle: "default" },
 };
