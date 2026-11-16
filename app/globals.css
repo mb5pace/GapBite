@@ -177,6 +177,25 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
+  /* App feel on phones: a long press does not select text or open the iOS callout. */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Typing, selecting and pasting still work in every field. */
+input,
+textarea,
+select,
+[contenteditable="true"] {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* Images and icons cannot be dragged out of the page. */
+img,
+svg {
+  -webkit-user-drag: none;
 }
 
 /* Form controls: no browser styling, and colours from our tokens. Utilities (in a later layer)
