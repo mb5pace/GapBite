@@ -2,7 +2,7 @@
 
 Everything that changes in QuickX is written here, newest first. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the version numbers follow `docs/RELEASING.md`. Entries say what a student, the cafe desk or the team can now do, not which files changed.
 
-## [Unreleased]
+## [1.0.0] - 2026-11-16
 
 ### Added
 - **Admin › Demo.** Seed the demo students, staff and two past orders (running it twice changes nothing), make a late-test order that fails on stage, and reset this environment's data only (type RESET; codes kept, staff and hours kept unless ticked).
@@ -108,6 +108,7 @@ First tagged version. It covers everything built in Phases 0 to 8: ordering from
 ### Changed
 - The colours look the same on every phone and laptop, including phones set to dark mode or "darken websites".
 
-[Unreleased]: https://github.com/mb5pace/GapBite/compare/v0.9.0...dev
+[Unreleased]: https://github.com/mb5pace/GapBite/compare/v1.0.0...dev
+[1.0.0]: https://github.com/mb5pace/GapBite/compare/v0.9.0...v1.0.0
 [0.9.0]: https://github.com/mb5pace/GapBite/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/mb5pace/GapBite/releases/tag/v0.8.0
