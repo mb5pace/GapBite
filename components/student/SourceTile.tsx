@@ -1,36 +1,35 @@
 "use client";
 
-import { Coffee, CookingPot, Hamburger, Leaf, Storefront, type Icon } from "@phosphor-icons/react";
 import Link from "next/link";
-import type { Source, SourceId } from "@/data/menu";
+import type { Source } from "@/data/menu";
+import { CafeWordmark } from "./CafeWordmark";
 import { SOURCE_BG } from "./sourceStyle";
 import { StatusLine } from "./StatusLine";
-
-/** Each place's own icon (its source colour is in sourceStyle.ts). */
-const ICON: Record<SourceId, Icon> = {
-  "truly-indian": CookingPot,
-  "global-bistro": Hamburger,
-  "cafe-delice": Coffee,
-  "greens-grains": Leaf,
-  vending: Storefront,
-};
+import { VendingArt } from "./VendingArt";
 
 /**
- * A place on Home: a square tile in its source colour with a small icon and its name set in cream as a wordmark
- * (our own lettering, not anyone's logo), then the name and one status line underneath. Vending spans the full width
- * at the bottom, so its tile is twice as wide as it is tall.
+ * A place on Home: a 4:3 tile in its source colour with its bracket-framed wordmark (our own lettering, not anyone's
+ * logo), then the name and one status line underneath. Vending spans the full width
+ * at the bottom with its name on the left and a drawn vending scene on the right.
  */
 export function SourceTile({ source, wide = false }: { source: Source; wide?: boolean }) {
-  const PlaceIcon = ICON[source.id];
   return (
     <Link
       href={`/s/${source.id}`}
       className={`flex flex-col gap-2 transition-transform duration-150 ease-out active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-maroon ${wide ? "col-span-full" : ""}`}
     >
-      <span className={`flex flex-col justify-between rounded-tile p-4 text-cream ${wide ? "aspect-[8/3] @min-[600px]:aspect-[4/1] @min-[880px]:aspect-[16/3]" : "aspect-[4/3]"} ${SOURCE_BG[source.id]}`} aria-hidden="true">
-        <PlaceIcon weight="regular" size={24} />
-        <span className="font-display text-title font-extrabold leading-none">{source.name}</span>
-      </span>
+      {wide ? (
+        <span className={`@container flex min-h-40 items-center gap-2 rounded-tile p-4 text-cream ${SOURCE_BG[source.id]}`} aria-hidden="true">
+          <span className="flex w-full flex-row items-center gap-2 @max-[300px]:flex-col @max-[300px]:items-start">
+            <span className="min-w-0 flex-1 font-display text-title font-extrabold leading-tight">{source.name}</span>
+            <VendingArt className="h-32 w-auto shrink-0 @max-[300px]:self-end" />
+          </span>
+        </span>
+      ) : (
+        <span className={`@container flex aspect-[4/3] items-center justify-center rounded-tile p-4 ${SOURCE_BG[source.id]}`} aria-hidden="true">
+          <CafeWordmark top={source.wordmark.top} bottom={source.wordmark.bottom} />
+        </span>
+      )}
       <span className="flex flex-col gap-1 px-1">
         <span className="text-body font-semibold text-espresso">{source.name}</span>
         <StatusLine sourceId={source.id} />

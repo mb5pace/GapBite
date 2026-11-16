@@ -64,7 +64,7 @@ export const SOURCES: readonly Source[] = [
     name: "Cafe Delice",
     tagline: "Coffee, sandwiches, pancakes, juices",
     kind: "cafe",
-    wordmark: { top: "Café", bottom: "Delice" },
+    wordmark: { top: "Cafe", bottom: "Delice" },
   },
   {
     id: "greens-grains",
