@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { CAFE_COPY } from "@/data/cafe-copy";
 import { DeskSidebar } from "./DeskSidebar";
 import { DeskTopBar } from "./DeskTopBar";
+import { PrintSlipRoot } from "./PrintSlipRoot";
 import { ScanCollectDialog } from "./ScanCollectDialog";
 import { useQueue } from "./QueueProvider";
 import { SourceFilterBar } from "./SourceFilterBar";
@@ -31,6 +32,7 @@ export function CafeShell({ children }: { children: ReactNode }) {
       </p>
       {stale ? <p className="sr-only" role="alert">{CAFE_COPY.queueError}</p> : null}
       <ScanCollectDialog />
+      <PrintSlipRoot />
     </div>
   );
 }

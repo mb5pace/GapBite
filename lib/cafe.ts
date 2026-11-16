@@ -343,28 +343,39 @@ export async function sendWithStaff(id: string, staffId: string, now: number): P
 // Bag slip
 // ---------------------------------------------------------------------------
 
+/**
+ * The kitchen slip (v1.0.0 Phase C1): printed on 80 mm paper and shown in the Show slip dialog. What is in the bag,
+ * where it goes and when. A delivery slip carries the bag QR (QX:ORDER:<id>) that a runner scans. A pickup slip has no
+ * QR. No slip ever carries the buyer's 4-digit code, their name or prices.
+ */
 export interface BagSlip {
   id: string;
   sourceName: string;
   items: { name: string; qty: number }[];
   mode: "pickup" | "delivery";
-  /** "GICT, ground floor lobby" for delivery. Empty for pickup. */
-  destination: string;
+  /** When the order was placed. */
+  placedAt: number;
+  /** "asap" or the break slot. */
+  when: string;
+  /** Delivery only: the building's short name and drop point. */
+  building?: { short: string; dropPoint: string };
   promisedAt?: number;
-  qr: QrPath;
+  /** Delivery only: the bag QR. */
+  qr?: QrPath;
 }
 
 export async function getBagSlip(id: string): Promise<BagSlip> {
   const order = await load(id);
-  const building = order.buildingId ? getBuilding(order.buildingId) : null;
+  const building = order.mode === "delivery" && order.buildingId ? getBuilding(order.buildingId) : null;
   return {
     id: order.id,
     sourceName: getSource(order.sourceId).name,
     items: order.items.map((line) => ({ name: line.name, qty: line.qty })),
     mode: order.mode,
-    destination: building ? `${building.short}, ${building.dropPoint.toLowerCase()}` : "",
+    placedAt: order.createdAt,
+    when: order.when,
+    ...(building ? { building: { short: building.short, dropPoint: building.dropPoint }, qr: qrPath(`${SLIP_QR_PREFIX}${order.id}`) } : {}),
     promisedAt: order.promisedAt,
-    qr: qrPath(`${SLIP_QR_PREFIX}${order.id}`),
   };
 }
 

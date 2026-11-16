@@ -254,34 +254,33 @@ select:autofill {
 }
 
 /*
-  Printing the bag slip (Cafe portal). Only the dialog marked data-print-area is
-  printed: everything else on the page, and the dialog's own buttons, are hidden.
-  Colours stay the ink and paper tokens.
+  Printing the kitchen slip (Cafe portal, v1.0.0 Phase C1). The slip is put into <body> inside [data-print-root],
+  which is hidden on screen. On paper only that container prints: 80 mm thermal paper, 72 mm printable, one colour
+  (espresso, which a thermal printer prints black), no backgrounds.
 */
+[data-print-root] {
+  display: none;
+}
 @media print {
   @page {
-    margin: 12mm;
+    size: 80mm 297mm;
+    margin: 4mm;
   }
-  body > *:not([data-print-area]) {
+  html,
+  body {
+    background: none !important;
+  }
+  body > *:not([data-print-root]) {
     display: none !important;
   }
-  [data-print-area] {
-    position: static !important;
+  [data-print-root] {
     display: block !important;
-    padding: 0 !important;
+    width: 72mm;
   }
-  [data-print-area] > div:first-child {
-    display: none !important;
-  }
-  [data-print-area] [role="dialog"] {
-    max-height: none !important;
-    max-width: none !important;
-    overflow: visible !important;
-    border-radius: 0 !important;
-    background: transparent !important;
+  [data-print-root] * {
+    background: none !important;
     box-shadow: none !important;
-    padding: 0 !important;
-    animation: none !important;
+    color: var(--color-espresso) !important;
   }
   .no-print {
     display: none !important;

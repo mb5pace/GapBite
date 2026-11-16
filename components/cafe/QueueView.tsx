@@ -22,7 +22,7 @@ const COLUMNS: QueueColumnId[] = ["new", "preparing", "ready", "out"];
  */
 export function QueueView() {
   const queue = useQueue();
-  const { filter, openScan } = useDesk();
+  const { filter, openScan, printSlip } = useDesk();
   const [busyId, setBusyId] = useState<string | null>(null);
   /** The words, and the status the order was in when it failed. The error goes when the order moves. */
   const [errors, setErrors] = useState<Record<string, { text: string; status: string }>>({});
@@ -60,10 +60,21 @@ export function QueueView() {
     return null;
   }
 
-  /** Mark ready. An order still only Accepted is started first, so the buyer hears both steps, as before. */
+  /**
+   * Mark ready. An order still only Accepted is started first, so the buyer hears both steps, as before. If someone
+   * else already started it (409), that is fine: it goes straight on to ready.
+   */
   async function markReady(id: string) {
     const status = queue.orders.find((o) => o.id === id)?.status;
-    if (status === "ACCEPTED" && !(await run(id, { action: "start" }))) return;
+    if (status === "ACCEPTED") {
+      setBusyId(id);
+      const started = await postJson<{ order: CafeCard }>(`/api/cafe/orders/${id}`, { action: "start" });
+      setBusyId(null);
+      if (!started.ok && started.status !== 409) {
+        setErrors((e) => ({ ...e, [id]: { text: started.error ?? CAFE_COPY.errors.network, status: "ACCEPTED" } }));
+        return;
+      }
+    }
     const done = await run(id, { action: "ready" });
     if (done) setSlipId(id); // the slip appears when an order is Ready
   }
@@ -122,7 +133,7 @@ export function QueueView() {
                       ready: () => void markReady(card.id),
                       slip: () => setSlipId(card.id),
                       staff: () => setStaffId(card.id),
-                      print: () => setSlipId(card.id),
+                      print: () => printSlip(card.id),
                       collect: () => openScan({ orderId: card.id }),
                     }}
                   />

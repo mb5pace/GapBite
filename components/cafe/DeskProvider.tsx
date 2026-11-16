@@ -18,8 +18,8 @@ interface DeskState {
   scan: ScanTarget | null;
   openScan: (target?: ScanTarget) => void;
   closeScan: () => void;
-  /** The order whose kitchen slip is being printed, or null. */
-  printing: string | null;
+  /** The kitchen slip being printed, or null. `n` changes on every request, so the same slip can be printed twice. */
+  printing: { orderId: string; n: number } | null;
   printSlip: (orderId: string) => void;
   donePrinting: () => void;
 }
@@ -33,11 +33,11 @@ const DeskContext = createContext<DeskState | null>(null);
 export function DeskProvider({ children }: { children: ReactNode }) {
   const [filter, setFilter] = useState<SourceFilter>("all");
   const [scan, setScan] = useState<ScanTarget | null>(null);
-  const [printing, setPrinting] = useState<string | null>(null);
+  const [printing, setPrinting] = useState<{ orderId: string; n: number } | null>(null);
 
   const openScan = useCallback((target: ScanTarget = {}) => setScan(target), []);
   const closeScan = useCallback(() => setScan(null), []);
-  const printSlip = useCallback((orderId: string) => setPrinting(orderId), []);
+  const printSlip = useCallback((orderId: string) => setPrinting((current) => ({ orderId, n: (current?.n ?? 0) + 1 })), []);
   const donePrinting = useCallback(() => setPrinting(null), []);
 
   const value = useMemo(

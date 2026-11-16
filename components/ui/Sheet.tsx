@@ -22,7 +22,6 @@ export function Sheet({
   children,
   placement = "bottom",
   wide = false,
-  printArea = false,
 }: {
   open: boolean;
   onClose: () => void;
@@ -32,8 +31,6 @@ export function Sheet({
   placement?: "bottom" | "center";
   /** center only: a wider dialog (the bag slip lays out in two columns). */
   wide?: boolean;
-  /** When the browser prints, only this dialog is printed (the bag slip). */
-  printArea?: boolean;
 }) {
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -127,7 +124,6 @@ export function Sheet({
   return createPortal(
     <div
       className={`fixed inset-0 z-50 flex justify-center ${center ? "items-center p-6" : "items-end"}`}
-      data-print-area={printArea ? "" : undefined}
     >
       <div className="absolute inset-0 animate-scrim-in bg-scrim" onClick={onClose} aria-hidden="true" />
       <div

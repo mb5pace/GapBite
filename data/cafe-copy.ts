@@ -160,6 +160,11 @@ export const CAFE_COPY = {
     destination: "Deliver to",
     pickupAt: "Pickup at",
     promised: "Promised by",
+    brand: "QuickX · UC",
+    placed: (time: string) => `Placed ${time}`,
+    when: "When",
+    runnersScan: "Runners scan this to take the bag.",
+    printFailed: "Could not load that slip to print. Try again.",
   },
   stock: {
     title: "Vending machine",
